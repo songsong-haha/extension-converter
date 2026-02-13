@@ -1,21 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/trust-error-ux-flow-phase-8",
-  "description": "Auto-seeded from backlog: 신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 (Phase 8)",
+  "branchName": "agent/growth/full-i18n-rollout-ko-en-phase-9",
+  "description": "Auto-seeded from backlog: KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 9)",
   "userStories": [
     {
       "id": "US-001",
-      "title": "신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 (Phase 8)",
-      "description": "Implement backlog ticket `trust-error-ux-flow-phase-8` with measurable impact on upload_to_conversion_completed rate.",
+      "title": "KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 9)",
+      "description": "Implement backlog ticket `full-i18n-rollout-ko-en-phase-9` with measurable impact on non-ko conversion_completed rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `trust-error-ux-flow-phase-8` is implemented.",
+        "Backlog ticket `full-i18n-rollout-ko-en-phase-9` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "seeded_from_backlog=true; metric=upload_to_conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
+      "notes": "seeded_from_backlog=true; metric=non-ko conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }
