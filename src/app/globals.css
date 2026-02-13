@@ -18,6 +18,9 @@
   --accent-500: #0ea5e9;
   --success-400: #4ade80;
   --success-500: #22c55e;
+  --danger-300: #fca5a5;
+  --danger-400: #f87171;
+  --danger-500: #ef4444;
 
   /* Light surfaces */
   --surface-0: #f5f7ff;
@@ -36,6 +39,10 @@
   --glass-hover: rgba(255, 255, 255, 0.88);
   --glass-border-strong: rgba(71, 85, 146, 0.32);
   --overlay-strong: rgba(15, 23, 42, 0.62);
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: rgba(239, 68, 68, 0.24);
+  --danger-text-primary: #7f1d1d;
+  --danger-text-secondary: #991b1b;
 
   --bg-grad-1: #f5f7ff;
   --bg-grad-2: #ece7ff;
@@ -75,6 +82,10 @@
   --glass-hover: rgba(255, 255, 255, 0.08);
   --glass-border-strong: rgba(255, 255, 255, 0.12);
   --overlay-strong: rgba(2, 6, 23, 0.72);
+  --danger-bg: rgba(248, 113, 113, 0.16);
+  --danger-border: rgba(252, 165, 165, 0.28);
+  --danger-text-primary: #fee2e2;
+  --danger-text-secondary: #fecaca;
 
   --bg-grad-1: #0a0a0f;
   --bg-grad-2: #0f0a1f;
@@ -106,6 +117,10 @@
     --glass-hover: rgba(255, 255, 255, 0.08);
     --glass-border-strong: rgba(255, 255, 255, 0.12);
     --overlay-strong: rgba(2, 6, 23, 0.72);
+    --danger-bg: rgba(248, 113, 113, 0.16);
+    --danger-border: rgba(252, 165, 165, 0.28);
+    --danger-text-primary: #fee2e2;
+    --danger-text-secondary: #fecaca;
 
     --bg-grad-1: #0a0a0f;
     --bg-grad-2: #0f0a1f;
