@@ -28,12 +28,14 @@ const ARCHIVE_DIR = path.join(LOOP_DIR, "archive");
 const LAST_BRANCH_FILE = path.join(LOOP_DIR, ".last-branch");
 const BACKLOG_ENSURE_SCRIPT = path.join(REPO_ROOT, "scripts/worktree/ensure-backlog-item.mjs");
 const PRD_SEED_SCRIPT = path.join(REPO_ROOT, "scripts/worktree/seed-prd-from-backlog.mjs");
+const TASK_RESET_SCRIPT = path.join(REPO_ROOT, "scripts/worktree/reset-task-branches.mjs");
 const HEARTBEAT_FILE = path.join(LOOP_DIR, "heartbeat.json");
 const LOCK_DIR = path.join(LOOP_DIR, ".runner.lock");
 const LOCK_PID_FILE = path.join(LOCK_DIR, "pid");
 const HEARTBEAT_INTERVAL_SECONDS = Number(process.env.LOOP_HEARTBEAT_INTERVAL_SECONDS || 10);
 const CODEX_STALL_TIMEOUT_SECONDS = Number(process.env.LOOP_CODEX_STALL_TIMEOUT_SECONDS || 1800);
 const CODEX_KILL_GRACE_MS = Number(process.env.LOOP_CODEX_KILL_GRACE_MS || 5000);
+const RESET_AFTER_AUTOPROMOTE_FAILURES = Number(process.env.LOOP_RESET_AFTER_AUTOPROMOTE_FAILURES || 3);
 
 const EXIT_OK = 0;
 const EXIT_COMPLETE = 10;
@@ -188,6 +190,12 @@ function getPrdBranchName() {
   return typeof prd?.branchName === "string" ? prd.branchName : "";
 }
 
+function getCurrentTaskSlug() {
+  const branch = getPrdBranchName();
+  const match = branch.match(/^agent\/growth\/(.+)$/);
+  return match ? match[1] : "";
+}
+
 function markPrdStoriesPassed() {
   const prd = readJsonSafe(PRD_FILE, {});
   if (!Array.isArray(prd?.userStories) || prd.userStories.length === 0) return;
@@ -212,6 +220,28 @@ function markPrdStoriesPassed() {
     userStories: updatedStories,
   });
   log("loop", "info", "marked PRD stories as passed after completion");
+}
+
+function markPrdStoriesPendingAfterReset() {
+  const prd = readJsonSafe(PRD_FILE, {});
+  if (!Array.isArray(prd?.userStories) || prd.userStories.length === 0) return;
+
+  const updatedStories = prd.userStories.map((story) => {
+    if (!story || typeof story !== "object") return story;
+    return {
+      ...story,
+      passes: false,
+      notes: story.notes
+        ? `${story.notes}; reset_from_main_at=${nowUtc()}`
+        : `reset_from_main_at=${nowUtc()}`,
+    };
+  });
+
+  writeJson(PRD_FILE, {
+    ...prd,
+    userStories: updatedStories,
+  });
+  log("loop", "info", "marked PRD stories as pending after task reset");
 }
 
 function archiveIfBranchChanged() {
@@ -385,6 +415,25 @@ async function maybeAutoPromote(opts) {
   return EXIT_OK;
 }
 
+async function resetTaskBranchesForRetry(taskSlug) {
+  if (!taskSlug) return false;
+  if (!fs.existsSync(TASK_RESET_SCRIPT)) {
+    log("loop", "error", `missing task reset script: ${TASK_RESET_SCRIPT}`);
+    return false;
+  }
+
+  log("loop", "warn", `auto-promote failed repeatedly; resetting task branches for retry: ${taskSlug}`);
+  const { code } = await runProcess("node", [TASK_RESET_SCRIPT, taskSlug], { cwd: REPO_ROOT, stdio: "inherit" });
+  if (code !== 0) {
+    log("loop", "error", `task branch reset failed for ${taskSlug}`);
+    return false;
+  }
+
+  markPrdStoriesPendingAfterReset();
+  log("loop", "info", `task branch reset completed for ${taskSlug}`);
+  return true;
+}
+
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
 
@@ -428,6 +477,20 @@ async function main() {
       if (promoteResult === EXIT_RETRYABLE_FAILURE) {
         failureStreak += 1;
         writeHeartbeat("retrying", i, failureStreak, "auto-promote-failed");
+        if (
+          Number.isInteger(RESET_AFTER_AUTOPROMOTE_FAILURES) &&
+          RESET_AFTER_AUTOPROMOTE_FAILURES > 0 &&
+          failureStreak >= RESET_AFTER_AUTOPROMOTE_FAILURES
+        ) {
+          const taskSlug = getCurrentTaskSlug();
+          const resetOk = await resetTaskBranchesForRetry(taskSlug);
+          if (resetOk) {
+            failureStreak = 0;
+            writeHeartbeat("running", i, failureStreak, "task-reset-complete");
+            await sleep(Math.max(1, opts.sleepSeconds) * 1000);
+            continue;
+          }
+        }
         const delay = computeFailureBackoff(failureStreak, opts);
         log("loop", "warn", `auto-promote failure streak=${failureStreak}; sleeping ${delay}s`);
         await sleep(delay * 1000);

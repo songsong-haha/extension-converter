@@ -31,8 +31,21 @@ for (const b of allCoreBranches) {
   if (!branchExists(b)) fail(`Error: mandatory core-team branch not found: ${b}`);
 }
 
+function pushCoreBranch(branch) {
+  // Prefer fast-forward push. If remote moved, reconcile with force-with-lease to avoid endless retry loops.
+  let result = git(["push", "origin", branch], { stdio: "inherit" });
+  if (result.status === 0) return true;
+
+  console.log(`[auto-promote] normal push failed for ${branch}; retrying with --force-with-lease`);
+  result = git(["push", "--force-with-lease", "origin", `${branch}:${branch}`], { stdio: "inherit" });
+  return result.status === 0;
+}
+
 console.log("[auto-promote] pushing core-team branches");
-for (const b of allCoreBranches) gitOrFail(["push", "-u", "origin", b], { stdio: "inherit" });
+gitOrFail(["fetch", "origin", "--prune"], { stdio: "inherit" });
+for (const b of allCoreBranches) {
+  if (!pushCoreBranch(b)) fail(`Error: failed to push core-team branch: ${b}`);
+}
 
 console.log("[auto-promote] running merge gate");
 const mergeScript = path.join(repoRootOrFail(), "scripts/worktree/merge-agent.mjs");

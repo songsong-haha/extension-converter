@@ -48,6 +48,43 @@ function gitInOrFail(cwd, args, stdio = "inherit", env = undefined) {
   return r;
 }
 
+function sanitizeRefPart(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "")
+    .slice(0, 48) || "task";
+}
+
+function parseWorktreePorcelain(raw) {
+  const blocks = raw.split(/\n\n+/).map((b) => b.trim()).filter(Boolean);
+  const entries = [];
+  for (const block of blocks) {
+    const lines = block.split(/\r?\n/);
+    const entry = { path: "", branch: "" };
+    for (const line of lines) {
+      if (line.startsWith("worktree ")) entry.path = line.slice("worktree ".length).trim();
+      if (line.startsWith("branch refs/heads/")) entry.branch = line.slice("branch refs/heads/".length).trim();
+    }
+    if (entry.path) entries.push(entry);
+  }
+  return entries;
+}
+
+function cleanupMergeGateWorktrees() {
+  const listed = git(["worktree", "list", "--porcelain"], { stdio: "pipe" });
+  if (listed.status !== 0) return;
+  const entries = parseWorktreePorcelain(listed.stdout || "");
+  for (const entry of entries) {
+    const base = path.basename(entry.path);
+    if (!base.startsWith("merge-gate-")) continue;
+    git(["worktree", "remove", "--force", entry.path], { stdio: "ignore" });
+    fs.rmSync(entry.path, { recursive: true, force: true });
+  }
+  git(["worktree", "prune"], { stdio: "ignore" });
+}
+
 function gitPath(cwd, refPath) {
   const r = gitIn(cwd, ["rev-parse", "--git-path", refPath], "pipe");
   if (r.status !== 0) return "";
@@ -126,8 +163,11 @@ console.log("[merge-gate] running mandatory QA gate before merge");
 const qaGate = run("npm", ["run", "qa:gate"], { stdio: "inherit" });
 if (qaGate.status !== 0) fail("Error: qa gate failed");
 
+cleanupMergeGateWorktrees();
+
 const tmpWorktree = fs.mkdtempSync(path.join(os.tmpdir(), `merge-gate-${taskSlug}.`));
 const integrationBranch = `merge-int/${taskSlug}-${Date.now()}`;
+const targetBranchLocal = `merge-target/${sanitizeRefPart(taskSlug)}-${Date.now()}`;
 let addedWorktree = false;
 
 try {
@@ -136,7 +176,7 @@ try {
   addedWorktree = true;
 
   gitInOrFail(tmpWorktree, ["fetch", "origin", "--prune"]);
-  gitInOrFail(tmpWorktree, ["checkout", "-B", "__merge_target__", `origin/${targetBranch}`]);
+  gitInOrFail(tmpWorktree, ["checkout", "-B", targetBranchLocal, `origin/${targetBranch}`]);
 
   console.log(`[merge-gate] creating integration branch from origin/${sourceBranch}`);
   gitInOrFail(tmpWorktree, ["checkout", "-B", integrationBranch, `origin/${sourceBranch}`]);
@@ -156,7 +196,7 @@ try {
   console.log(`[merge-gate] updating origin/${sourceBranch} with rebased head`);
   gitInOrFail(tmpWorktree, ["push", "--force-with-lease", "origin", `${integrationBranch}:${sourceBranch}`]);
 
-  gitInOrFail(tmpWorktree, ["checkout", "__merge_target__"]);
+  gitInOrFail(tmpWorktree, ["checkout", targetBranchLocal]);
   console.log(`[merge-gate] merging ${sourceBranch} into ${targetBranch}`);
   const mergeResult = gitIn(tmpWorktree, ["merge", "--no-ff", sourceBranch, "-m", `merge: ${sourceBranch}`], "inherit", {
     ...process.env,
@@ -182,4 +222,5 @@ try {
 } finally {
   if (addedWorktree) git(["worktree", "remove", "--force", tmpWorktree], { stdio: "ignore" });
   fs.rmSync(tmpWorktree, { recursive: true, force: true });
+  cleanupMergeGateWorktrees();
 }
