@@ -30,7 +30,7 @@
         "npm run test:e2e passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "split_from=US-001; metric=non-ko conversion_completed rate; owner=growth+qa+designer"
     },
     {

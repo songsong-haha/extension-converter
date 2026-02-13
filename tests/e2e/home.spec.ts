@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("homepage conversion funnel", () => {
   test("shows trust proof copy after conversion completes", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?lang=ko");
 
     await page.locator('input[type="file"]').setInputFiles({
       name: "tiny.gif",
@@ -106,12 +106,12 @@ test.describe("homepage conversion funnel", () => {
   });
 
   test("shows conversion CTA guidance before format selection", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?lang=ko");
     await expect(page.getByText("이미지를 드래그하거나 클릭하여 업로드")).toBeVisible();
   });
 
   test("shows inline format selection tip after file upload", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?lang=ko");
 
     await page.locator('input[type="file"]').setInputFiles({
       name: "tiny.png",
@@ -125,6 +125,28 @@ test.describe("homepage conversion funnel", () => {
     await expect(
       page.getByText("팁: 투명 배경 유지가 필요하면 PNG, 용량을 줄이려면 WebP를 선택하세요.")
     ).toBeVisible();
+  });
+
+  test("renders english converter widget guidance and actions", async ({ page }) => {
+    await page.goto("/?lang=en");
+    await expect(page.getByText("Drag an image here or click to upload")).toBeVisible();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "tiny.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7VQ0YAAAAASUVORK5CYII=",
+        "base64"
+      ),
+    });
+
+    await expect(
+      page.getByText("Tip: Keep PNG for transparency, or choose WebP for smaller files.")
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Choose a format" })).toBeVisible();
+
+    await page.getByRole("button", { name: /^JPG/i }).click();
+    await expect(page.getByRole("button", { name: "Convert PNG → JPG" })).toBeVisible();
   });
 
   test("renders FAQ entries and FAQ structured data", async ({ page }) => {

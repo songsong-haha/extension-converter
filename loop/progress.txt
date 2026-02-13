@@ -15,3 +15,8 @@ Started: 2026-02-13T18:13:09Z
 - item id: US-001A
 - changed files: src/app/page.tsx, src/i18n/messages.ts, src/i18n/resolve-locale.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
 - reusable learnings: Use locale resolution order `lang` query -> `Accept-Language` negotiation -> default locale, and pin locale-sensitive e2e assertions with explicit query params to avoid browser-header flakiness.
+
+- time (UTC): 2026-02-13T18:32:01Z
+- item id: US-001B
+- changed files: src/app/page.tsx, src/features/converter/components/conversion-progress.tsx, src/features/converter/components/converter-widget.tsx, src/features/converter/components/file-preview.tsx, src/features/converter/components/format-selector.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
+- reusable learnings: Keep client-widget copy in a locale dictionary shared by subcomponents, and make e2e locale-sensitive assertions explicit (`?lang=ko`/`?lang=en`) when locale negotiation can vary by environment headers.

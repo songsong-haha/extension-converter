@@ -41,6 +41,26 @@ export interface HomeMessages {
   languageEn: string;
 }
 
+export interface ConverterMessages {
+  invalidImage: string;
+  unknownConversionError: string;
+  dropzoneTitle: string;
+  dropzoneFormats: string;
+  formatSelectorLabel: string;
+  formatTipDefault: string;
+  formatTipBySource: Partial<Record<string, string>>;
+  statusLoading: string;
+  statusConverting: string;
+  statusDone: string;
+  statusError: string;
+  trustMessage: string;
+  downloadLabel: (filename: string) => string;
+  chooseFormatLabel: string;
+  convertLabel: (source: string, target: string) => string;
+  chooseAnotherFile: string;
+  removeFileAriaLabel: string;
+}
+
 export const HOME_MESSAGES: Record<Locale, HomeMessages> = {
   ko: {
     badge: "100% 무료 · 서버 업로드 없음",
@@ -108,5 +128,60 @@ export const HOME_MESSAGES: Record<Locale, HomeMessages> = {
     languageLabel: "Language",
     languageKo: "Korean",
     languageEn: "English",
+  },
+};
+
+export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
+  ko: {
+    invalidImage: "이미지 파일만 지원됩니다.",
+    unknownConversionError: "변환 중 오류가 발생했습니다.",
+    dropzoneTitle: "이미지를 드래그하거나 클릭하여 업로드",
+    dropzoneFormats: "PNG, JPG, WebP, GIF, BMP, AVIF 지원",
+    formatSelectorLabel: "변환할 포맷을 선택하세요",
+    formatTipDefault:
+      "팁: 투명 배경은 PNG, 웹 업로드 용량 최적화는 WebP, 파비콘 제작은 ICO를 권장합니다.",
+    formatTipBySource: {
+      png: "팁: 투명 배경 유지가 필요하면 PNG, 용량을 줄이려면 WebP를 선택하세요.",
+      jpg: "팁: 사진 선명도 우선이면 JPG, 더 작은 파일이 필요하면 WebP를 선택하세요.",
+      jpeg: "팁: 사진 선명도 우선이면 JPG, 더 작은 파일이 필요하면 WebP를 선택하세요.",
+      gif: "팁: GIF를 정지 이미지로 바꿀 때는 PNG, 웹 업로드 용량 최적화는 WebP가 유리합니다.",
+      ico: "팁: 웹 사이트 파비콘으로 쓸 파일이면 ICO를 유지하고, 일반 이미지 용도면 PNG를 권장합니다.",
+    },
+    statusLoading: "파일 로딩 중...",
+    statusConverting: "변환 중...",
+    statusDone: "✨ 변환 완료!",
+    statusError: "❌ 변환 실패",
+    trustMessage: "안심하세요. 파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.",
+    downloadLabel: (filename) => `다운로드 (${filename})`,
+    chooseFormatLabel: "포맷을 선택하세요",
+    convertLabel: (source, target) => `${source.toUpperCase()} → ${target.toUpperCase()} 변환`,
+    chooseAnotherFile: "다른 파일",
+    removeFileAriaLabel: "파일 제거",
+  },
+  en: {
+    invalidImage: "Only image files are supported.",
+    unknownConversionError: "An error occurred during conversion.",
+    dropzoneTitle: "Drag an image here or click to upload",
+    dropzoneFormats: "Supports PNG, JPG, WebP, GIF, BMP, and AVIF",
+    formatSelectorLabel: "Choose a target format",
+    formatTipDefault:
+      "Tip: Use PNG for transparency, WebP for smaller web uploads, and ICO for favicons.",
+    formatTipBySource: {
+      png: "Tip: Keep PNG for transparency, or choose WebP for smaller files.",
+      jpg: "Tip: Keep JPG for photo fidelity, or choose WebP for a smaller file size.",
+      jpeg: "Tip: Keep JPG for photo fidelity, or choose WebP for a smaller file size.",
+      gif: "Tip: Convert GIF to PNG for a still image, or choose WebP for web size optimization.",
+      ico: "Tip: Keep ICO for website favicons, or use PNG for general image workflows.",
+    },
+    statusLoading: "Loading file...",
+    statusConverting: "Converting...",
+    statusDone: "✨ Conversion complete!",
+    statusError: "❌ Conversion failed",
+    trustMessage: "Your file is processed only in your browser and is never uploaded to a server.",
+    downloadLabel: (filename) => `Download (${filename})`,
+    chooseFormatLabel: "Choose a format",
+    convertLabel: (source, target) => `Convert ${source.toUpperCase()} → ${target.toUpperCase()}`,
+    chooseAnotherFile: "Another file",
+    removeFileAriaLabel: "Remove file",
   },
 };

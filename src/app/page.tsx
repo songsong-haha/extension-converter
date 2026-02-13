@@ -215,7 +215,7 @@ export default async function Home({ searchParams }: HomeProps) {
           className="glass p-6 sm:p-8 mb-20 animate-fade-up"
           style={{ animationDelay: "0.2s" }}
         >
-          <ConverterWidget />
+          <ConverterWidget locale={locale} />
         </section>
 
         <section className="animate-fade-up" style={{ animationDelay: "0.4s" }}>
