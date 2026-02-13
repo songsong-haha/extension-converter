@@ -1,21 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/conversion-failure-observability-phase-13",
-  "description": "Auto-seeded from backlog: 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 13)",
+  "branchName": "agent/growth/format-selection-guidance-experiment-phase-14",
+  "description": "Auto-seeded from backlog: 포맷 선택 가이드 인라인 UX + 실험 플래그 + 이벤트 계측 (Phase 14)",
   "userStories": [
     {
       "id": "US-001",
-      "title": "실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 13)",
-      "description": "Implement backlog ticket `conversion-failure-observability-phase-13` with measurable impact on conversion_failed_to_retry_success rate.",
+      "title": "포맷 선택 가이드 인라인 UX + 실험 플래그 + 이벤트 계측 (Phase 14)",
+      "description": "Implement backlog ticket `format-selection-guidance-experiment-phase-14` with measurable impact on format_selected rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `conversion-failure-observability-phase-13` is implemented.",
+        "Backlog ticket `format-selection-guidance-experiment-phase-14` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "seeded_from_backlog=true; metric=conversion_failed_to_retry_success rate; owner=ceo+growth+qa+analytics+designer"
+      "notes": "seeded_from_backlog=true; metric=format_selected rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }

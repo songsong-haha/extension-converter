@@ -131,6 +131,9 @@ test.describe("homepage conversion funnel", () => {
 
     await expect(page.getByText("PNG 파일을 올렸어요")).toBeVisible();
     await expect(page.getByRole("button", { name: "빠른 선택: WEBP" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /webp\s+\.webp/i })
+    ).toContainText("빠른 선택");
     const previewImage = page.locator('img[alt="tiny.png"]').first();
     await expect(previewImage).toHaveAttribute("loading", "lazy");
     await expect(previewImage).toHaveAttribute("decoding", "async");

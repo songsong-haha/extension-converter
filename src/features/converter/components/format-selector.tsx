@@ -76,6 +76,9 @@ export default function FormatSelector({
             availableFormats.find((format) => format.extension === extension)
         )
         .filter((format): format is FormatInfo => Boolean(format));
+    const quickPickExtensions = new Set(
+        quickPickFormats.map((format) => format.extension)
+    );
 
     return (
         <div className="w-full">
@@ -117,6 +120,8 @@ export default function FormatSelector({
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
                 {availableFormats.map((format) => {
                     const isSelected = selected === format.extension;
+                    const isGuidanceRecommended =
+                        showGuidance && quickPickExtensions.has(format.extension);
                     return (
                         <button
                             key={format.extension}
@@ -128,6 +133,8 @@ export default function FormatSelector({
                                 "border",
                                 isSelected
                                     ? "border-[var(--primary-400)] bg-[rgba(124,58,237,0.15)] shadow-[0_0_20px_rgba(124,58,237,0.2)]"
+                                    : isGuidanceRecommended
+                                      ? "border-[var(--primary-400)]/70 bg-[rgba(124,58,237,0.1)] hover:bg-[rgba(124,58,237,0.18)]"
                                     : "border-[var(--glass-border)] bg-[var(--glass-bg)] hover:bg-[var(--glass-hover)] hover:border-[var(--glass-border-strong)]",
                                 "active:scale-95",
                             ].join(" ")}
@@ -141,6 +148,11 @@ export default function FormatSelector({
                             <span className="text-[10px] text-[var(--text-muted)]">
                                 .{format.extension}
                             </span>
+                            {isGuidanceRecommended && !isSelected && (
+                                <span className="rounded-full border border-[var(--primary-400)]/70 bg-[rgba(124,58,237,0.1)] px-1.5 py-0.5 text-[9px] font-semibold text-[var(--text-secondary)]">
+                                    {messages.formatGuidanceQuickPickLabel}
+                                </span>
+                            )}
                         </button>
                     );
                 })}

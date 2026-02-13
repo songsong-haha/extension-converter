@@ -33,6 +33,9 @@ npm run agent:create -- analytics event-retention main ga
 
 - `file_selected`
 - `format_selected`
+- `format_guidance_exposed`
+- `format_guidance_quick_selected`
+- `format_guidance_bypassed`
 - `conversion_started`
 - `conversion_completed`
 - `conversion_failed`

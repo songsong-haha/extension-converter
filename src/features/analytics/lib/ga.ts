@@ -5,6 +5,7 @@ export type AnalyticsEventName =
   | "format_selected"
   | "format_guidance_exposed"
   | "format_guidance_quick_selected"
+  | "format_guidance_bypassed"
   | "pre_conversion_dropoff"
   | "conversion_started"
   | "conversion_completed"

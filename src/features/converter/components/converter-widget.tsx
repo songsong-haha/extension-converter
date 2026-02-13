@@ -724,10 +724,18 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                             });
                         }}
                         onSelect={(f: FormatInfo) => {
+                            const selectedFromGuidance = selectedFromGuidanceRef.current;
+                            if (isFormatGuidanceVariant && !selectedFromGuidance) {
+                                trackLocaleEvent("format_guidance_bypassed", {
+                                    source_format: sourceExt || "unknown",
+                                    target_format: f.extension,
+                                    experiment_variant: experimentVariant,
+                                });
+                            }
                             trackLocaleEvent("format_selected", {
                                 source_format: sourceExt || "unknown",
                                 target_format: f.extension,
-                                selected_from_guidance: selectedFromGuidanceRef.current,
+                                selected_from_guidance: selectedFromGuidance,
                                 experiment_variant: experimentVariant,
                             });
                             selectedFromGuidanceRef.current = false;
