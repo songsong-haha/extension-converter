@@ -187,6 +187,10 @@ async function buildPreviewImage(
 
 export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const PRE_CONVERSION_DROPOFF_SESSION_KEY = "pre_conversion_dropoff_tracked";
+    const formatSelectionGuidanceExperiment =
+        process.env.NEXT_PUBLIC_FORMAT_SELECTION_GUIDANCE_EXPERIMENT ?? "variant";
+    const experimentVariant = formatSelectionGuidanceExperiment.toLowerCase();
+    const isFormatGuidanceVariant = experimentVariant !== "control";
     const messages = CONVERTER_MESSAGES[locale];
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -201,6 +205,8 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const hasTrackedDropOffRef = useRef(false);
     const retryAttemptRef = useRef(0);
     const lastFailureCategoryRef = useRef<string>("");
+    const hasTrackedGuidanceExposureRef = useRef(false);
+    const selectedFromGuidanceRef = useRef(false);
     const previewUrlRef = useRef<string>("");
     const postConversionAdImpressionTrackedRef = useRef(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -312,6 +318,8 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         setFailureCategory("");
         lastFailureCategoryRef.current = "";
         postConversionAdImpressionTrackedRef.current = false;
+        hasTrackedGuidanceExposureRef.current = false;
+        selectedFromGuidanceRef.current = false;
     }, [messages.invalidImage, trackLocaleEvent, updatePreviewUrl]);
 
     const handleDrop = useCallback(
@@ -458,7 +466,21 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         retryAttemptRef.current = 0;
         lastFailureCategoryRef.current = "";
         postConversionAdImpressionTrackedRef.current = false;
+        hasTrackedGuidanceExposureRef.current = false;
+        selectedFromGuidanceRef.current = false;
     }, [clearPreviewUrl]);
+
+    useEffect(() => {
+        if (!file || !isFormatGuidanceVariant || hasTrackedGuidanceExposureRef.current) {
+            return;
+        }
+
+        trackLocaleEvent("format_guidance_exposed", {
+            source_format: (getFileExtension(file.name) || "unknown").toLowerCase(),
+            experiment_variant: experimentVariant,
+        });
+        hasTrackedGuidanceExposureRef.current = true;
+    }, [experimentVariant, file, isFormatGuidanceVariant, trackLocaleEvent]);
 
     useEffect(() => {
         return () => {
@@ -596,13 +618,25 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                     {/* Format selector */}
                     <FormatSelector
                         sourceFormat={sourceExt}
+                        showGuidance={isFormatGuidanceVariant}
                         selected={targetFormat}
                         messages={messages}
+                        onGuidanceQuickSelect={(f: FormatInfo) => {
+                            selectedFromGuidanceRef.current = true;
+                            trackLocaleEvent("format_guidance_quick_selected", {
+                                source_format: sourceExt || "unknown",
+                                recommended_target_format: f.extension,
+                                experiment_variant: experimentVariant,
+                            });
+                        }}
                         onSelect={(f: FormatInfo) => {
                             trackLocaleEvent("format_selected", {
                                 source_format: sourceExt || "unknown",
                                 target_format: f.extension,
+                                selected_from_guidance: selectedFromGuidanceRef.current,
+                                experiment_variant: experimentVariant,
                             });
+                            selectedFromGuidanceRef.current = false;
                             setTargetFormat(f.extension);
                             setResult(null);
                             setStatus("idle");

@@ -60,6 +60,9 @@ export interface ConverterMessages {
   formatSelectorLabel: string;
   formatTipDefault: string;
   formatTipBySource: Partial<Record<string, string>>;
+  formatGuidanceHeadingDefault: string;
+  formatGuidanceHeadingBySource: Partial<Record<string, string>>;
+  formatGuidanceQuickPickLabel: string;
   statusLoading: string;
   statusConverting: string;
   statusDone: string;
@@ -175,6 +178,15 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
       gif: "팁: GIF를 정지 이미지로 바꿀 때는 PNG, 웹 업로드 용량 최적화는 WebP가 유리합니다.",
       ico: "팁: 웹 사이트 파비콘으로 쓸 파일이면 ICO를 유지하고, 일반 이미지 용도면 PNG를 권장합니다.",
     },
+    formatGuidanceHeadingDefault: "빠른 포맷 선택 가이드",
+    formatGuidanceHeadingBySource: {
+      png: "PNG 파일을 올렸어요",
+      jpg: "JPG 사진 최적화 가이드",
+      jpeg: "JPG 사진 최적화 가이드",
+      gif: "GIF 변환 추천",
+      ico: "ICO 파일 활용 가이드",
+    },
+    formatGuidanceQuickPickLabel: "빠른 선택",
     statusLoading: "파일 로딩 중...",
     statusConverting: "변환 중...",
     statusDone: "✨ 변환 완료!",
@@ -228,6 +240,15 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
       gif: "Tip: Convert GIF to PNG for a still image, or choose WebP for web size optimization.",
       ico: "Tip: Keep ICO for website favicons, or use PNG for general image workflows.",
     },
+    formatGuidanceHeadingDefault: "Quick format guidance",
+    formatGuidanceHeadingBySource: {
+      png: "You uploaded a PNG file",
+      jpg: "JPG optimization guidance",
+      jpeg: "JPG optimization guidance",
+      gif: "Recommended choices for GIF",
+      ico: "ICO workflow guidance",
+    },
+    formatGuidanceQuickPickLabel: "Quick pick",
     statusLoading: "Loading file...",
     statusConverting: "Converting...",
     statusDone: "✨ Conversion complete!",

@@ -111,7 +111,9 @@ test.describe("homepage conversion funnel", () => {
     await expect(page.getByText("이미지를 드래그하거나 클릭하여 업로드")).toBeVisible();
   });
 
-  test("shows inline format selection tip after file upload", async ({ page }) => {
+  test("shows inline format guidance experiment panel after file upload", async ({
+    page,
+  }) => {
     await page.goto("/?lang=ko");
 
     await page.locator('input[type="file"]').setInputFiles({
@@ -123,9 +125,8 @@ test.describe("homepage conversion funnel", () => {
       ),
     });
 
-    await expect(
-      page.getByText("팁: 투명 배경 유지가 필요하면 PNG, 용량을 줄이려면 WebP를 선택하세요.")
-    ).toBeVisible();
+    await expect(page.getByText("PNG 파일을 올렸어요")).toBeVisible();
+    await expect(page.getByRole("button", { name: "빠른 선택: WEBP" })).toBeVisible();
     await expect(
       page.getByText("파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.")
     ).toBeVisible();
@@ -164,9 +165,8 @@ test.describe("homepage conversion funnel", () => {
       ),
     });
 
-    await expect(
-      page.getByText("Tip: Keep PNG for transparency, or choose WebP for smaller files.")
-    ).toBeVisible();
+    await expect(page.getByText("You uploaded a PNG file")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Quick pick: WEBP" })).toBeVisible();
     await expect(
       page.getByText("Your file is processed only in your browser and is never uploaded to a server.")
     ).toBeVisible();
