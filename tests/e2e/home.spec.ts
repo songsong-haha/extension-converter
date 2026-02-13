@@ -16,4 +16,13 @@ test.describe("homepage conversion funnel", () => {
     await page.goto("/");
     await expect(page.getByText("이미지를 드래그하거나 클릭하여 업로드")).toBeVisible();
   });
+
+  test("renders hero copy variant B when query param is provided", async ({ page }) => {
+    await page.goto("/?heroVariant=b");
+
+    await expect(
+      page.getByRole("heading", { name: /파일 선택 5초면,\s*지금 바로 포맷 변경 완료/i })
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "지금 바로 변환 시작" })).toBeVisible();
+  });
 });

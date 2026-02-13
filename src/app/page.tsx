@@ -5,7 +5,23 @@ const SUPPORTED_FORMAT_LABELS = UNIQUE_TARGET_FORMATS.map((format) => format.lab
 const SUPPORTED_FORMAT_COUNT = SUPPORTED_FORMAT_LABELS.length;
 const HERO_FORMAT_LIST = SUPPORTED_FORMAT_LABELS.join(", ");
 const HERO_SUPPORT_COPY = `${HERO_FORMAT_LIST} 지원 포맷 ${SUPPORTED_FORMAT_COUNT}종을 브라우저에서 바로 변환할 수 있어요.`;
-const PRIMARY_CTA_LABEL = "파일 업로드하고 변환";
+const HERO_COPY_VARIANTS = {
+  a: {
+    title: "업로드 한 번으로,",
+    accent: "원하는 포맷으로 바로 변환",
+    cta: "파일 업로드하고 변환",
+  },
+  b: {
+    title: "파일 선택 5초면,",
+    accent: "지금 바로 포맷 변경 완료",
+    cta: "지금 바로 변환 시작",
+  },
+} as const;
+
+type HeroVariantKey = keyof typeof HERO_COPY_VARIANTS;
+
+const getHeroVariant = (heroVariant?: string): HeroVariantKey =>
+  heroVariant === "b" ? "b" : "a";
 
 const FEATURES = [
     {
@@ -87,7 +103,17 @@ const FEATURES = [
   },
 ];
 
-export default function Home() {
+type HomeProps = {
+  searchParams?: Promise<{
+    heroVariant?: string;
+  }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const resolvedSearchParams = await searchParams;
+  const heroVariant = getHeroVariant(resolvedSearchParams?.heroVariant);
+  const heroCopy = HERO_COPY_VARIANTS[heroVariant];
+
   return (
     <div className="bg-gradient-animated min-h-screen">
       {/* Decorative orbs */}
@@ -106,9 +132,9 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-4">
-            업로드 한 번으로,
+            {heroCopy.title}
             <br className="hidden sm:block" />{" "}
-            <span className="text-gradient">원하는 포맷으로 바로 변환</span>
+            <span className="text-gradient">{heroCopy.accent}</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
@@ -120,7 +146,7 @@ export default function Home() {
             href="#converter-widget"
             className="inline-flex mt-8 items-center justify-center rounded-xl bg-[var(--primary-500)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-400)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-400)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-100)]"
           >
-            {PRIMARY_CTA_LABEL}
+            {heroCopy.cta}
           </a>
         </section>
 
