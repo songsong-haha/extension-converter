@@ -13,7 +13,11 @@ import {
     trackEvent,
     type AnalyticsEventName,
 } from "@/features/analytics/lib/ga";
-import { CONVERTER_MESSAGES, type Locale } from "@/i18n/messages";
+import {
+    CONVERTER_MESSAGES,
+    type ConverterMessages,
+    type Locale,
+} from "@/i18n/messages";
 
 function classifyConversionError(err: unknown): string {
     if (!(err instanceof Error)) {
@@ -47,41 +51,12 @@ interface ConverterWidgetProps {
 }
 
 type AnalyticsParams = Record<string, string | number | boolean | undefined>;
-function getFailureGuide(category: string, locale: Locale): string {
-    const koGuide: Record<string, string> = {
-        unsupported_target_format:
-            "선택한 출력 포맷이 브라우저에서 지원되지 않습니다. 다른 포맷으로 다시 시도해 주세요.",
-        canvas_context_unavailable:
-            "브라우저 그래픽 처리 리소스가 부족합니다. 탭을 새로고침한 뒤 다시 시도해 주세요.",
-        memory_limit_exceeded:
-            "이미지 크기가 너무 커서 메모리가 부족할 수 있습니다. 더 작은 파일이나 다른 포맷으로 시도해 주세요.",
-        image_decode_failed:
-            "파일 디코딩에 실패했습니다. 원본 파일이 손상되었는지 확인한 뒤 다른 포맷으로 시도해 주세요.",
-        conversion_aborted:
-            "변환이 중단되었습니다. 같은 설정으로 다시 시도하거나 다른 포맷을 선택해 주세요.",
-        conversion_runtime_error:
-            "브라우저 환경에서 일시적인 오류가 발생했습니다. 같은 설정으로 재시도하거나 다른 포맷을 선택해 주세요.",
-        unknown:
-            "브라우저 환경에서 일시적인 오류가 발생했습니다. 같은 설정으로 재시도하거나 다른 포맷을 선택해 주세요.",
-    };
-    const enGuide: Record<string, string> = {
-        unsupported_target_format:
-            "This output format is not supported in your browser. Try a different format.",
-        canvas_context_unavailable:
-            "Browser graphics resources are temporarily unavailable. Refresh and try again.",
-        memory_limit_exceeded:
-            "The image may be too large for available memory. Try a smaller file or another format.",
-        image_decode_failed:
-            "The file could not be decoded. Check the source file and try another format.",
-        conversion_aborted:
-            "Conversion was interrupted. Retry with the same settings or choose another format.",
-        conversion_runtime_error:
-            "A temporary browser error occurred. Retry with the same settings or choose another format.",
-        unknown:
-            "A temporary browser error occurred. Retry with the same settings or choose another format.",
-    };
-    const guideMap = locale === "en" ? enGuide : koGuide;
-    return guideMap[category] || guideMap.unknown;
+function getFailureGuide(category: string, messages: ConverterMessages): string {
+    return (
+        messages.failureGuides[category] ??
+        messages.failureGuides.unknown ??
+        messages.unknownConversionError
+    );
 }
 
 function getRecoveryFormats(sourceFormat?: string, targetFormat?: string): string[] {
@@ -462,7 +437,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                     />
 
                     <div className="rounded-xl border border-[var(--glass-border)] bg-[var(--surface-200)] px-4 py-3 text-sm text-[var(--text-secondary)]">
-                        파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.
+                        {messages.processingTrustMessage}
                     </div>
 
                     {/* Progress */}
@@ -472,19 +447,15 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                     {error && (
                         <div className="rounded-xl border border-red-400/25 bg-red-400/10 px-4 py-4 text-sm text-red-200">
                             <p className="font-semibold text-red-100">
-                                {locale === "en" ? "Conversion failed." : "변환에 실패했어요."}
+                                {messages.conversionFailedHeading}
                             </p>
-                            <p className="mt-1">{getFailureGuide(failureCategory, locale)}</p>
+                            <p className="mt-1">{getFailureGuide(failureCategory, messages)}</p>
                             <p className="mt-2 text-red-300/90">{error}</p>
-                            <p className="mt-2 text-red-300/90">
-                                {locale === "en"
-                                    ? "Your file was not uploaded to any server."
-                                    : "파일은 서버로 업로드되지 않았습니다."}
-                            </p>
+                            <p className="mt-2 text-red-300/90">{messages.errorUploadSafetyMessage}</p>
                             {recoveryFormats.length > 0 && (
                                 <div className="mt-3">
                                     <p className="mb-2 text-xs font-medium uppercase tracking-wide text-red-200/80">
-                                        {locale === "en" ? "Try another format" : "다른 포맷으로 시도"}
+                                        {messages.recoveryFormatsHeading}
                                     </p>
                                     <div className="flex flex-wrap gap-2">
                                         {recoveryFormats.map((format) => (
@@ -550,9 +521,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                                 {!targetFormat
                                     ? messages.chooseFormatLabel
                                     : status === "error"
-                                      ? locale === "en"
-                                          ? "Retry with same settings"
-                                          : "같은 설정으로 다시 시도"
+                                      ? messages.retrySameSettingsLabel
                                       : messages.convertLabel(sourceExt ?? "", targetFormat)}
                             </Button>
                         )}

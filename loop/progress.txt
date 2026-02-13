@@ -30,3 +30,10 @@ Started: 2026-02-13T18:13:09Z
 - item id: US-001
 - changed files: src/features/converter/components/converter-widget.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
 - reusable learnings: Keep failure-recovery UX locale-aware by layering category-specific guide copy and retry/alternative-format actions on top of the shared message dictionary; pin locale in e2e error-path tests to avoid Accept-Language-dependent CTA mismatches.
+
+Started: 2026-02-13T18:52:53Z
+
+- time (UTC): 2026-02-13T18:56:37Z
+- item id: US-001 (`full-i18n-rollout-ko-en-phase-2`)
+- changed files: src/i18n/messages.ts, src/features/converter/components/converter-widget.tsx, tests/e2e/home.spec.ts, docs/GROWTH_BACKLOG.md, loop/prd.json, loop/progress.txt
+- reusable learnings: Eliminate locale conditionals in UI components by expanding the shared i18n message contract to cover error/recovery microcopy; add locale-pinned e2e checks for pre-conversion trust copy and error-recovery labels to prevent mixed-language regressions.
