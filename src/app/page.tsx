@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import ConverterWidget from "@/features/converter/components/converter-widget";
 import { UNIQUE_TARGET_FORMATS } from "@/features/converter/lib/format-registry";
-import { HOME_MESSAGES } from "@/i18n/messages";
+import { HOME_MESSAGES, SEO_MESSAGES, type Locale } from "@/i18n/messages";
 import { resolveLocale } from "@/i18n/resolve-locale";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -29,13 +30,37 @@ const SUPPORTED_FORMAT_LABELS = UNIQUE_TARGET_FORMATS.map((format) => format.lab
 const SUPPORTED_FORMAT_COUNT = SUPPORTED_FORMAT_LABELS.length;
 const HERO_FORMAT_LIST = SUPPORTED_FORMAT_LABELS.join(", ");
 
-export default async function Home({ searchParams }: HomeProps) {
+async function resolveRequestLocale(searchParams: HomeProps["searchParams"]): Promise<Locale> {
   const resolvedSearchParams = await getSearchParams(searchParams);
   const requestHeaders = await headers();
-  const locale = resolveLocale({
+  return resolveLocale({
     langParam: resolvedSearchParams.lang,
     acceptLanguage: requestHeaders.get("accept-language"),
   });
+}
+
+export async function generateMetadata({
+  searchParams,
+}: HomeProps): Promise<Metadata> {
+  const locale = await resolveRequestLocale(searchParams);
+  const seo = SEO_MESSAGES[locale];
+
+  return {
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    openGraph: {
+      title: seo.title,
+      description: seo.description,
+      type: "website",
+      locale: seo.openGraphLocale,
+      alternateLocale: [seo.openGraphAlternateLocale],
+    },
+  };
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const locale = await resolveRequestLocale(searchParams);
   const messages = HOME_MESSAGES[locale];
 
   const heroSupportCopy = messages.heroSupportCopy(

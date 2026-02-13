@@ -41,6 +41,14 @@ export interface HomeMessages {
   languageEn: string;
 }
 
+export interface SeoMessages {
+  title: string;
+  description: string;
+  keywords: string[];
+  openGraphLocale: string;
+  openGraphAlternateLocale: string;
+}
+
 export interface ConverterMessages {
   invalidImage: string;
   unknownConversionError: string;
@@ -183,5 +191,40 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
     convertLabel: (source, target) => `Convert ${source.toUpperCase()} → ${target.toUpperCase()}`,
     chooseAnotherFile: "Another file",
     removeFileAriaLabel: "Remove file",
+  },
+};
+
+export const SEO_MESSAGES: Record<Locale, SeoMessages> = {
+  ko: {
+    title: "ExtensionConverter — 무료 이미지 포맷 변환기",
+    description:
+      "PNG, JPG, WebP, GIF, BMP, AVIF, ICO를 3초만에 변환하세요. 100% 무료, 서버 업로드 없이 브라우저에서 바로 변환됩니다.",
+    keywords: [
+      "이미지 변환",
+      "파일 변환",
+      "PNG to JPG",
+      "WebP 변환",
+      "무료 변환기",
+      "image converter",
+      "extension converter",
+    ],
+    openGraphLocale: "ko_KR",
+    openGraphAlternateLocale: "en_US",
+  },
+  en: {
+    title: "ExtensionConverter — Free image format converter",
+    description:
+      "Convert PNG, JPG, WebP, GIF, BMP, AVIF, and ICO in seconds. 100% free and fully in-browser with no server uploads.",
+    keywords: [
+      "image converter",
+      "file converter",
+      "PNG to JPG",
+      "WebP converter",
+      "free converter",
+      "extension converter",
+      "in-browser conversion",
+    ],
+    openGraphLocale: "en_US",
+    openGraphAlternateLocale: "ko_KR",
   },
 };

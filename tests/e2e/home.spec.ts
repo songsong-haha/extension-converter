@@ -149,6 +149,58 @@ test.describe("homepage conversion funnel", () => {
     await expect(page.getByRole("button", { name: "Convert PNG → JPG" })).toBeVisible();
   });
 
+  test("completes conversion with english trust copy", async ({ page }) => {
+    await page.goto("/?lang=en");
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "tiny.gif",
+      mimeType: "image/gif",
+      buffer: Buffer.from(
+        "R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==",
+        "base64"
+      ),
+    });
+
+    await page.getByRole("button", { name: /^PNG/i }).click();
+    await page.getByRole("button", { name: /Convert GIF → PNG/ }).click();
+
+    await expect(
+      page.getByText("Your file is processed only in your browser and is never uploaded to a server.")
+    ).toBeVisible();
+  });
+
+  test("localizes metadata and FAQ schema by selected locale", async ({ page }) => {
+    await page.goto("/?lang=en");
+    await expect(page).toHaveTitle("ExtensionConverter — Free image format converter");
+    const englishDescription = await page
+      .locator('meta[name="description"]')
+      .getAttribute("content");
+    expect(englishDescription).toContain(
+      "Convert PNG, JPG, WebP, GIF, BMP, AVIF, and ICO in seconds."
+    );
+    const hasEnglishFaqSchema = await page.evaluate(() => {
+      const scripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
+      return scripts.some((script) =>
+        script.textContent?.includes('"name":"Is it really free?"')
+      );
+    });
+    expect(hasEnglishFaqSchema).toBe(true);
+
+    await page.goto("/?lang=ko");
+    await expect(page).toHaveTitle("ExtensionConverter — 무료 이미지 포맷 변환기");
+    const koreanDescription = await page
+      .locator('meta[name="description"]')
+      .getAttribute("content");
+    expect(koreanDescription).toContain("PNG, JPG, WebP, GIF, BMP, AVIF, ICO를 3초만에 변환하세요.");
+    const hasKoreanFaqSchema = await page.evaluate(() => {
+      const scripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
+      return scripts.some((script) =>
+        script.textContent?.includes('"name":"정말 무료인가요?"')
+      );
+    });
+    expect(hasKoreanFaqSchema).toBe(true);
+  });
+
   test("renders FAQ entries and FAQ structured data", async ({ page }) => {
     await page.goto("/?lang=ko");
 

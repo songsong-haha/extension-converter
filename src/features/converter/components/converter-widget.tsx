@@ -9,7 +9,10 @@ import { convertFile, isValidImage } from "../lib/converter-engine";
 import { getFileExtension } from "../lib/format-registry";
 import type { FormatInfo } from "../lib/format-registry";
 import type { ConversionStatus, ConversionResult } from "../types";
-import { trackEvent } from "@/features/analytics/lib/ga";
+import {
+    trackEvent,
+    type AnalyticsEventName,
+} from "@/features/analytics/lib/ga";
 import { CONVERTER_MESSAGES, type Locale } from "@/i18n/messages";
 
 function classifyConversionError(err: unknown): string {
@@ -43,6 +46,8 @@ interface ConverterWidgetProps {
     locale: Locale;
 }
 
+type AnalyticsParams = Record<string, string | number | boolean | undefined>;
+
 export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const PRE_CONVERSION_DROPOFF_SESSION_KEY = "pre_conversion_dropoff_tracked";
     const messages = CONVERTER_MESSAGES[locale];
@@ -59,6 +64,15 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const retryAttemptRef = useRef(0);
     const lastFailureCategoryRef = useRef<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const trackLocaleEvent = useCallback(
+        (eventName: AnalyticsEventName, params: AnalyticsParams = {}) => {
+            trackEvent(eventName, {
+                locale,
+                ...params,
+            });
+        },
+        [locale]
+    );
 
     const hasSessionDropOffMarker = useCallback((): boolean => {
         if (typeof window === "undefined") {
@@ -94,26 +108,26 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                 hasTrackedDropOffRef.current = true;
                 return;
             }
-            trackEvent("pre_conversion_dropoff", {
+            trackLocaleEvent("pre_conversion_dropoff", {
                 source_format: (sourceFormat || "unknown").toLowerCase(),
             });
             setSessionDropOffMarker();
             hasTrackedDropOffRef.current = true;
         },
-        [hasSessionDropOffMarker, setSessionDropOffMarker]
+        [hasSessionDropOffMarker, setSessionDropOffMarker, trackLocaleEvent]
     );
 
     const handleFile = useCallback((f: File) => {
         const extension = getFileExtension(f.name);
         if (!isValidImage(f)) {
-            trackEvent("file_selected", {
+            trackLocaleEvent("file_selected", {
                 is_valid_image: false,
                 source_format: extension || "unknown",
             });
             setError(messages.invalidImage);
             return;
         }
-        trackEvent("file_selected", {
+        trackLocaleEvent("file_selected", {
             is_valid_image: true,
             source_format: extension || "unknown",
             file_size_bytes: f.size,
@@ -127,7 +141,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         hasStartedConversionRef.current = false;
         retryAttemptRef.current = 0;
         lastFailureCategoryRef.current = "";
-    }, [messages.invalidImage]);
+    }, [messages.invalidImage, trackLocaleEvent]);
 
     const handleDrop = useCallback(
         (e: React.DragEvent) => {
@@ -165,7 +179,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
 
         if (isRetry) {
             retryAttemptRef.current += 1;
-            trackEvent("conversion_retry_started", {
+            trackLocaleEvent("conversion_retry_started", {
                 source_format: sourceFormat,
                 target_format: targetFormat,
                 retry_attempt: retryAttemptRef.current,
@@ -175,7 +189,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
 
         try {
             hasStartedConversionRef.current = true;
-            trackEvent("conversion_started", {
+            trackLocaleEvent("conversion_started", {
                 source_format: sourceFormat,
                 target_format: targetFormat,
             });
@@ -194,7 +208,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             setProgress(100);
             setResult(result);
             setStatus("done");
-            trackEvent("conversion_completed", {
+            trackLocaleEvent("conversion_completed", {
                 source_format: sourceFormat,
                 target_format: result.format,
                 duration_ms: Math.round(result.duration),
@@ -203,7 +217,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             });
 
             if (retryAttemptRef.current > 0) {
-                trackEvent("conversion_retry_result", {
+                trackLocaleEvent("conversion_retry_result", {
                     source_format: sourceFormat,
                     target_format: result.format,
                     retry_attempt: retryAttemptRef.current,
@@ -217,7 +231,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             const failureCategory = classifyConversionError(err);
             setStatus("error");
             setError(err instanceof Error ? err.message : messages.unknownConversionError);
-            trackEvent("conversion_failed", {
+            trackLocaleEvent("conversion_failed", {
                 source_format: sourceFormat,
                 target_format: targetFormat,
                 failure_category: failureCategory,
@@ -225,7 +239,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             });
 
             if (retryAttemptRef.current > 0) {
-                trackEvent("conversion_retry_result", {
+                trackLocaleEvent("conversion_retry_result", {
                     source_format: sourceFormat,
                     target_format: targetFormat,
                     retry_attempt: retryAttemptRef.current,
@@ -236,7 +250,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
 
             lastFailureCategoryRef.current = failureCategory;
         }
-    }, [file, messages.unknownConversionError, status, targetFormat]);
+    }, [file, messages.unknownConversionError, status, targetFormat, trackLocaleEvent]);
 
     const handleDownload = useCallback(() => {
         if (!result) return;
@@ -246,11 +260,11 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         a.download = result.filename;
         a.click();
         URL.revokeObjectURL(url);
-        trackEvent("file_downloaded", {
+        trackLocaleEvent("file_downloaded", {
             output_format: result.format,
             output_size_bytes: result.convertedSize,
         });
-    }, [result]);
+    }, [result, trackLocaleEvent]);
 
     const handleReset = useCallback(() => {
         setFile(null);
@@ -378,7 +392,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                         selected={targetFormat}
                         messages={messages}
                         onSelect={(f: FormatInfo) => {
-                            trackEvent("format_selected", {
+                            trackLocaleEvent("format_selected", {
                                 source_format: sourceExt || "unknown",
                                 target_format: f.extension,
                             });
