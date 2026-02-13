@@ -27,3 +27,8 @@ Started: 2026-02-13T15:41:51Z
 - item id: US-001
 - changed files: loop/progress.txt
 - reusable learnings: If a selected story is already functionally implemented, run the full required gate and record a new promotion checkpoint before branch sync and main fast-forward.
+
+- time (UTC): 2026-02-13T17:10:08Z
+- item id: US-001
+- changed files: src/features/converter/components/format-selector.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
+- reusable learnings: Source-format-aware inline guidance near option chips can improve first decision speed; lock it with an upload-to-selector e2e assertion so copy regressions are caught early.
