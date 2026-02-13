@@ -17,3 +17,8 @@ Started: 2026-02-13T15:41:51Z
 - item id: US-001
 - changed files: src/features/converter/components/converter-widget.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
 - reusable learnings: For image-conversion e2e, use a known-valid in-memory tiny GIF payload to avoid canvas decode flakiness; assert trust copy only after successful conversion status.
+
+- time (UTC): 2026-02-13T16:49:05Z
+- item id: US-001
+- changed files: loop/progress.txt
+- reusable learnings: When a loop-selected ticket is already implemented on its task branch, re-run the full gate (`lint`, `build`, `test:e2e`) before promotion and record a fresh progress checkpoint for traceability.
