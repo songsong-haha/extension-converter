@@ -24,3 +24,8 @@ Started: 2026-02-13T14:43:38Z
 - item id: US-001
 - changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/progress.txt
 - reusable learnings: Keep hero promise copy broad enough for UX polish but back it with registry-derived support text so messaging stays accurate as formats evolve.
+- time (UTC): 2026-02-13T15:14:39Z
+- item id: US-001
+- changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/progress.txt
+- reusable learnings: When tightening hero messaging, keep one unambiguous primary CTA and update E2E headline matchers in the same change to prevent copy-related regressions.
+

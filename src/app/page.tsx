@@ -1,11 +1,11 @@
 import ConverterWidget from "@/features/converter/components/converter-widget";
 import { UNIQUE_TARGET_FORMATS } from "@/features/converter/lib/format-registry";
 
-const SUPPORTED_FORMATS_TEXT = UNIQUE_TARGET_FORMATS.map((format) => format.label).join(", ");
-const SUPPORTED_FORMAT_COUNT = UNIQUE_TARGET_FORMATS.length;
-const HERO_FORMAT_PREVIEW = UNIQUE_TARGET_FORMATS.slice(0, 4).map((format) => format.label).join(" · ");
-const HERO_SUPPORT_COPY = `${HERO_FORMAT_PREVIEW} 등 ${SUPPORTED_FORMAT_COUNT}개 포맷 지원`;
-const PRIMARY_CTA_LABEL = "무료 변환 시작";
+const SUPPORTED_FORMAT_LABELS = UNIQUE_TARGET_FORMATS.map((format) => format.label);
+const SUPPORTED_FORMAT_COUNT = SUPPORTED_FORMAT_LABELS.length;
+const HERO_FORMAT_PREVIEW = SUPPORTED_FORMAT_LABELS.slice(0, 4).join(" · ");
+const HERO_SUPPORT_COPY = `${HERO_FORMAT_PREVIEW} 포함 총 ${SUPPORTED_FORMAT_COUNT}개 포맷 변환 지원`;
+const PRIMARY_CTA_LABEL = "이미지 업로드하고 무료 변환";
 
 const FEATURES = [
     {
@@ -83,7 +83,7 @@ const FEATURES = [
       </svg>
     ),
     title: `${UNIQUE_TARGET_FORMATS.length}가지 포맷`,
-    desc: `${SUPPORTED_FORMATS_TEXT} 간 자유로운 변환.`,
+    desc: `${SUPPORTED_FORMAT_LABELS.join(", ")} 간 자유로운 변환.`,
   },
 ];
 
@@ -106,9 +106,9 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-4">
-            이미지 포맷 변환,
+            이미지를 올리면,
             <br className="hidden sm:block" />{" "}
-            <span className="text-gradient">업로드 한 번</span>으로 완료
+            <span className="text-gradient">원하는 포맷으로 즉시 변환</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
