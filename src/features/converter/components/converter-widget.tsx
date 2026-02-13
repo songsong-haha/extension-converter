@@ -25,23 +25,47 @@ export default function ConverterWidget() {
     const hasTrackedDropOffRef = useRef(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const hasSessionDropOffMarker = useCallback((): boolean => {
+        if (typeof window === "undefined") {
+            return false;
+        }
+
+        try {
+            return window.sessionStorage.getItem(PRE_CONVERSION_DROPOFF_SESSION_KEY) === "1";
+        } catch {
+            return false;
+        }
+    }, [PRE_CONVERSION_DROPOFF_SESSION_KEY]);
+
+    const setSessionDropOffMarker = useCallback((): void => {
+        if (typeof window === "undefined") {
+            return;
+        }
+
+        try {
+            window.sessionStorage.setItem(PRE_CONVERSION_DROPOFF_SESSION_KEY, "1");
+        } catch {
+            // Ignore storage failures (e.g. disabled storage in private mode).
+        }
+    }, [PRE_CONVERSION_DROPOFF_SESSION_KEY]);
+
     const trackPreConversionDropOff = useCallback(
         (sourceFormat: string) => {
             if (typeof window === "undefined" || hasTrackedDropOffRef.current) {
                 return;
             }
-            const alreadyTracked = window.sessionStorage.getItem(PRE_CONVERSION_DROPOFF_SESSION_KEY) === "1";
+            const alreadyTracked = hasSessionDropOffMarker();
             if (alreadyTracked) {
                 hasTrackedDropOffRef.current = true;
                 return;
             }
             trackEvent("pre_conversion_dropoff", {
-                source_format: sourceFormat || "unknown",
+                source_format: (sourceFormat || "unknown").toLowerCase(),
             });
-            window.sessionStorage.setItem(PRE_CONVERSION_DROPOFF_SESSION_KEY, "1");
+            setSessionDropOffMarker();
             hasTrackedDropOffRef.current = true;
         },
-        [PRE_CONVERSION_DROPOFF_SESSION_KEY]
+        [hasSessionDropOffMarker, setSessionDropOffMarker]
     );
 
     const handleFile = useCallback((f: File) => {

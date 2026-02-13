@@ -8,3 +8,7 @@ Started: 2026-02-13T15:41:51Z
 2026-02-13T15:43:28Z | item=US-002
 - changed files: src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
 - reusable learnings: For session-level abandonment analytics, avoid firing in effect cleanup tied to state changes; fire on page lifecycle signals and reset per-file conversion-start state to prevent false drop-off suppression.
+- time (UTC): 2026-02-13T16:11:57Z
+- item id: US-002
+- changed files: src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
+- reusable learnings: Guard sessionStorage access for pre-conversion drop-off analytics so private-mode/storage failures do not break one-per-session event capture; normalize source-format payload casing for consistent analytics dimensions.
