@@ -45,3 +45,16 @@ next-env.d.ts
 /.worktrees/
 /.agents/*.json
 /.agents/*.md
+
+# loop runtime artifacts (generated, not source)
+/loop/.runner.lock/
+/loop/archive/
+/loop/runner.log
+/loop/runner.error.log
+/loop/runner.pid
+/loop/heartbeat.json
+/loop/runner.meta.json
+/loop/supervisor-state.json
+/loop/.last-branch
+/loop/prd.json
+/loop/progress.txt

@@ -13,39 +13,46 @@ This repository is configured for parallel agent execution using Git worktrees.
 
 - Integration branch: `main`
 - Agent branch pattern: `agent/<agent-name>/<task-slug>`
-- Agent branches are short-lived and merged through PRs or local review.
+- Mandatory core-team agents per task:
+  - `agent/ceo/<task-slug>`
+  - `agent/growth/<task-slug>`
+  - `agent/qa/<task-slug>`
+  - `agent/analytics/<task-slug>`
+  - `agent/designer/<task-slug>`
+- Agent branches are short-lived and merged through merge-gate + auto-promote.
 
 ## Lifecycle
 
-1. Create an isolated worktree for an agent task.
-2. Run development/tests inside that worktree.
-3. Commit on the agent branch.
-4. Merge back to `main` after review.
-5. Remove worktree and metadata.
+1. Create mandatory core-team worktrees for one task slug.
+2. Run implementation + validation in each role branch.
+3. Commit on the task branch(es).
+4. Run merge-gate/auto-promote to merge to `main`.
+5. Remove task worktrees and metadata.
 
 ## Commands
 
 ```bash
-pnpm agent:create <agent-name> <task-slug> [base-branch] [task-template]
-pnpm agent:list
-pnpm agent:remove <agent-name> <task-slug>
-pnpm agent:remove:branch <agent-name> <task-slug>
+npm run agent:task:start -- <task-slug> [base-branch]
+npm run agent:teams:start -- 3 main
+npm run agent:merge -- <agent-name> <task-slug> [target-branch]
+npm run agent:auto-promote -- growth <task-slug> [target-branch]
+npm run agent:list
+npm run agent:remove -- <agent-name> <task-slug>
+npm run agent:remove:branch -- <agent-name> <task-slug> --delete-branch
 ```
 
 ## Example
 
 ```bash
-pnpm agent:create converter parser-refactor main
-cd .worktrees/converter-parser-refactor
-pnpm install
-pnpm lint
+npm run agent:task:start -- parser-refactor main
+cd .worktrees/growth-parser-refactor
+npm install
+npm run lint
 # implement + commit
 cd ../..
-pnpm agent:list
-pnpm agent:remove converter parser-refactor
-
-# GA 템플릿 사용 예시
-pnpm agent:create analytics ga-instrumentation main ga
+npm run agent:merge -- growth parser-refactor main
+npm run agent:auto-promote -- growth parser-refactor main
+npm run agent:list
 ```
 
 ## Operational Rules
@@ -55,3 +62,4 @@ pnpm agent:create analytics ga-instrumentation main ga
 - Rebase or merge `main` into long-running agent branches regularly.
 - Keep `.worktrees/` out of commits.
 - Track each active task with metadata in `.agents/*.json`.
+- Worktree automation scripts are Node.js files under `scripts/worktree/*.mjs`.

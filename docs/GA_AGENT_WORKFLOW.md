@@ -15,9 +15,9 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 GA 작업은 이벤트 단위로 분리해서 진행합니다.
 
 ```bash
-pnpm agent:create analytics event-conversion main ga
-pnpm agent:create analytics event-download main ga
-pnpm agent:create analytics event-retention main ga
+npm run agent:create -- analytics event-conversion main ga
+npm run agent:create -- analytics event-download main ga
+npm run agent:create -- analytics event-retention main ga
 ```
 
 각 작업은 `.agents/<agent>-<task>.md`에 카드가 자동 생성됩니다.
@@ -42,7 +42,7 @@ pnpm agent:create analytics event-retention main ga
 
 ## 5) 검증 체크
 
-1. `pnpm dev` 실행
+1. `npm run dev` 실행
 2. GA DebugView에서 이벤트 수신 확인
 3. 라우트 이동 시 `page_view` 확인
 4. 변환/다운로드 시 이벤트 파라미터 확인

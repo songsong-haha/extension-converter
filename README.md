@@ -41,15 +41,15 @@ See `docs/GA_AGENT_WORKFLOW.md` for event catalog and validation checklist.
 This repo supports parallel work using Git worktrees.
 
 ```bash
-pnpm agent:create <agent-name> <task-slug> [base-branch] [task-template]
-pnpm agent:list
-pnpm agent:remove <agent-name> <task-slug>
+npm run agent:create -- <agent-name> <task-slug> [base-branch] [task-template]
+npm run agent:list
+npm run agent:remove -- <agent-name> <task-slug>
 ```
 
 GA task example:
 
 ```bash
-pnpm agent:create analytics event-conversion main ga
+npm run agent:create -- analytics event-conversion main ga
 ```
 
 This command creates:
@@ -64,6 +64,12 @@ Use a small-task loop with mandatory QA branch:
 
 ```bash
 npm run agent:task:start -- <task-slug> [base-branch]
+```
+
+Start up to 3 full core-team task lanes at once from backlog:
+
+```bash
+npm run agent:teams:start -- 3 main
 ```
 
 Merge only via QA gate (lint + build + Playwright pass required):
@@ -103,7 +109,7 @@ Run one iteration:
 pnpm loop:run:once
 ```
 
-Run forever (until `<promise>COMPLETE</promise>` appears):
+Run forever:
 
 ```bash
 pnpm loop:run
@@ -130,6 +136,11 @@ npm run loop:bg:status
 npm run loop:bg:stop
 ```
 
+Completion behavior in background supervisor:
+- when the agent prints `<promise>COMPLETE</promise>`, the current PRD cycle is treated as done
+- the supervisor checks backlog continuity and starts the next cycle instead of stopping
+- stop explicitly with `npm run loop:bg:stop`
+
 One-shot promote flow after agent commit:
 
 ```bash
@@ -138,11 +149,14 @@ npm run agent:auto-promote -- growth <task-slug> [target-branch]
 
 This performs:
 - push `agent/growth/<task-slug>`
+- push `agent/ceo/<task-slug>`
 - push `agent/qa/<task-slug>`
+- push `agent/analytics/<task-slug>`
+- push `agent/designer/<task-slug>`
 - run merge gate (`lint`, `build`, `test:e2e`, `qa:ai`)
 - merge into target branch
 - push target branch
-- remove local growth/qa worktrees + local branches
+- remove local core-team worktrees + local branches
 - try remote branch deletion (non-blocking)
 
 macOS auto-restart with `launchd`:
@@ -169,7 +183,8 @@ In that case, use `loop:bg:*` commands or move the repo to a non-protected path 
 
 Main files:
 
-- `scripts/loop/codex-loop.sh`: infinite loop runner
+- `scripts/loop/codex-loop.mjs`: infinite loop runner
+- `scripts/worktree/*.mjs`: worktree + merge/auto-promote automation
 - `loop/prompt.md`: per-iteration agent instructions
 - `loop/prd.json`: active plan (created from example)
 - `loop/progress.txt`: cumulative iteration log
