@@ -22,3 +22,8 @@ Started: 2026-02-13T15:41:51Z
 - item id: US-001
 - changed files: loop/progress.txt
 - reusable learnings: When a loop-selected ticket is already implemented on its task branch, re-run the full gate (`lint`, `build`, `test:e2e`) before promotion and record a fresh progress checkpoint for traceability.
+
+- time (UTC): 2026-02-13T16:57:13Z
+- item id: US-001
+- changed files: loop/progress.txt
+- reusable learnings: If a selected story is already functionally implemented, run the full required gate and record a new promotion checkpoint before branch sync and main fast-forward.
