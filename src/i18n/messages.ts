@@ -61,7 +61,13 @@ export interface ConverterMessages {
   statusConverting: string;
   statusDone: string;
   statusError: string;
+  processingTrustMessage: string;
   trustMessage: string;
+  conversionFailedHeading: string;
+  errorUploadSafetyMessage: string;
+  recoveryFormatsHeading: string;
+  retrySameSettingsLabel: string;
+  failureGuides: Record<string, string>;
   downloadLabel: (filename: string) => string;
   chooseFormatLabel: string;
   convertLabel: (source: string, target: string) => string;
@@ -159,7 +165,28 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
     statusConverting: "변환 중...",
     statusDone: "✨ 변환 완료!",
     statusError: "❌ 변환 실패",
+    processingTrustMessage: "파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.",
     trustMessage: "안심하세요. 파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.",
+    conversionFailedHeading: "변환에 실패했어요.",
+    errorUploadSafetyMessage: "파일은 서버로 업로드되지 않았습니다.",
+    recoveryFormatsHeading: "다른 포맷으로 시도",
+    retrySameSettingsLabel: "같은 설정으로 다시 시도",
+    failureGuides: {
+      unsupported_target_format:
+        "선택한 출력 포맷이 브라우저에서 지원되지 않습니다. 다른 포맷으로 다시 시도해 주세요.",
+      canvas_context_unavailable:
+        "브라우저 그래픽 처리 리소스가 부족합니다. 탭을 새로고침한 뒤 다시 시도해 주세요.",
+      memory_limit_exceeded:
+        "이미지 크기가 너무 커서 메모리가 부족할 수 있습니다. 더 작은 파일이나 다른 포맷으로 시도해 주세요.",
+      image_decode_failed:
+        "파일 디코딩에 실패했습니다. 원본 파일이 손상되었는지 확인한 뒤 다른 포맷으로 시도해 주세요.",
+      conversion_aborted:
+        "변환이 중단되었습니다. 같은 설정으로 다시 시도하거나 다른 포맷을 선택해 주세요.",
+      conversion_runtime_error:
+        "브라우저 환경에서 일시적인 오류가 발생했습니다. 같은 설정으로 재시도하거나 다른 포맷을 선택해 주세요.",
+      unknown:
+        "브라우저 환경에서 일시적인 오류가 발생했습니다. 같은 설정으로 재시도하거나 다른 포맷을 선택해 주세요.",
+    },
     downloadLabel: (filename) => `다운로드 (${filename})`,
     chooseFormatLabel: "포맷을 선택하세요",
     convertLabel: (source, target) => `${source.toUpperCase()} → ${target.toUpperCase()} 변환`,
@@ -185,7 +212,28 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
     statusConverting: "Converting...",
     statusDone: "✨ Conversion complete!",
     statusError: "❌ Conversion failed",
+    processingTrustMessage: "Your file is processed only in your browser and is never uploaded to a server.",
     trustMessage: "Your file is processed only in your browser and is never uploaded to a server.",
+    conversionFailedHeading: "Conversion failed.",
+    errorUploadSafetyMessage: "Your file was not uploaded to any server.",
+    recoveryFormatsHeading: "Try another format",
+    retrySameSettingsLabel: "Retry with same settings",
+    failureGuides: {
+      unsupported_target_format:
+        "This output format is not supported in your browser. Try a different format.",
+      canvas_context_unavailable:
+        "Browser graphics resources are temporarily unavailable. Refresh and try again.",
+      memory_limit_exceeded:
+        "The image may be too large for available memory. Try a smaller file or another format.",
+      image_decode_failed:
+        "The file could not be decoded. Check the source file and try another format.",
+      conversion_aborted:
+        "Conversion was interrupted. Retry with the same settings or choose another format.",
+      conversion_runtime_error:
+        "A temporary browser error occurred. Retry with the same settings or choose another format.",
+      unknown:
+        "A temporary browser error occurred. Retry with the same settings or choose another format.",
+    },
     downloadLabel: (filename) => `Download (${filename})`,
     chooseFormatLabel: "Choose a format",
     convertLabel: (source, target) => `Convert ${source.toUpperCase()} → ${target.toUpperCase()}`,

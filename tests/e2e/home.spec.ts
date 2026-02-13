@@ -165,10 +165,32 @@ test.describe("homepage conversion funnel", () => {
     await expect(
       page.getByText("Tip: Keep PNG for transparency, or choose WebP for smaller files.")
     ).toBeVisible();
+    await expect(
+      page.getByText("Your file is processed only in your browser and is never uploaded to a server.")
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "Choose a format" })).toBeVisible();
 
     await page.getByRole("button", { name: /^JPG/i }).click();
     await expect(page.getByRole("button", { name: "Convert PNG → JPG" })).toBeVisible();
+  });
+
+  test("shows english failure guide with retry and alternative formats", async ({ page }) => {
+    await page.goto("/?lang=en");
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "broken.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("not-a-real-image"),
+    });
+
+    await page.getByRole("button", { name: /^JPG/i }).click();
+    await page.getByRole("button", { name: /Convert PNG → JPG/ }).click();
+
+    await expect(page.getByText("Conversion failed.")).toBeVisible();
+    await expect(page.getByText("Your file was not uploaded to any server.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Retry with same settings" })).toBeVisible();
+    await expect(page.getByText("Try another format")).toBeVisible();
+    await expect(page.getByRole("button", { name: "webp", exact: true })).toBeVisible();
   });
 
   test("completes conversion with english trust copy", async ({ page }) => {
