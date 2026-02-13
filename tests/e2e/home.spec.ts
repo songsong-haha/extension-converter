@@ -16,4 +16,19 @@ test.describe("homepage conversion funnel", () => {
     await page.goto("/");
     await expect(page.getByText("이미지를 드래그하거나 클릭하여 업로드")).toBeVisible();
   });
+
+  test("renders FAQ entries and FAQ structured data", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(page.getByRole("heading", { name: "자주 묻는 질문" })).toBeVisible();
+    await expect(page.getByText("정말 무료인가요?")).toBeVisible();
+    await expect(page.getByText("파일이 서버로 업로드되나요?")).toBeVisible();
+    await expect(page.getByText("어떤 포맷을 지원하나요?")).toBeVisible();
+
+    const hasFaqSchema = await page.evaluate(() => {
+      const scripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
+      return scripts.some((script) => script.textContent?.includes('"@type":"FAQPage"'));
+    });
+    expect(hasFaqSchema).toBe(true);
+  });
 });

@@ -6,6 +6,22 @@ const SUPPORTED_FORMAT_COUNT = SUPPORTED_FORMAT_LABELS.length;
 const HERO_FORMAT_LIST = SUPPORTED_FORMAT_LABELS.join(", ");
 const HERO_SUPPORT_COPY = `${HERO_FORMAT_LIST} 지원 포맷 ${SUPPORTED_FORMAT_COUNT}종을 브라우저에서 바로 변환할 수 있어요.`;
 const PRIMARY_CTA_LABEL = "파일 업로드하고 변환";
+const FAQ_ITEMS = [
+  {
+    question: "정말 무료인가요?",
+    answer:
+      "네. 회원가입 없이 무료로 사용할 수 있으며 변환 횟수 제한도 없습니다.",
+  },
+  {
+    question: "파일이 서버로 업로드되나요?",
+    answer:
+      "아니요. 변환은 브라우저 안에서 처리되며 파일은 외부 서버로 전송되지 않습니다.",
+  },
+  {
+    question: "어떤 포맷을 지원하나요?",
+    answer: `${HERO_FORMAT_LIST} 등 주요 이미지 포맷 간 변환을 지원합니다.`,
+  },
+] as const;
 
 const FEATURES = [
     {
@@ -88,6 +104,19 @@ const FEATURES = [
 ];
 
 export default function Home() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ_ITEMS.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+
   return (
     <div className="bg-gradient-animated min-h-screen">
       {/* Decorative orbs */}
@@ -160,6 +189,28 @@ export default function Home() {
           </div>
         </section>
 
+        {/* FAQ */}
+        <section className="mt-20 animate-fade-up" style={{ animationDelay: "0.5s" }}>
+          <h2 className="text-center text-sm font-medium text-[var(--text-muted)] uppercase tracking-widest mb-8">
+            자주 묻는 질문
+          </h2>
+          <div className="space-y-3">
+            {FAQ_ITEMS.map((item) => (
+              <details
+                key={item.question}
+                className="glass-card p-5 group open:bg-[var(--surface-200)]/50"
+              >
+                <summary className="cursor-pointer list-none text-sm font-semibold text-[var(--text-primary)]">
+                  {item.question}
+                </summary>
+                <p className="mt-3 text-xs text-[var(--text-secondary)] leading-relaxed">
+                  {item.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </section>
+
         {/* Footer */}
         <footer className="mt-20 pt-8 border-t border-[var(--glass-border)] text-center">
           <p className="text-xs text-[var(--text-muted)]">
@@ -167,6 +218,10 @@ export default function Home() {
           </p>
         </footer>
       </main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
     </div>
   );
 }
