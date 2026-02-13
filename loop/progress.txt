@@ -27,3 +27,16 @@ Started: 2026-02-13T15:41:51Z
 - item id: US-001
 - changed files: loop/progress.txt
 - reusable learnings: If a selected story is already functionally implemented, run the full required gate and record a new promotion checkpoint before branch sync and main fast-forward.
+
+## 2026-02-13T17:27:57Z
+- item: US-001
+- changed files:
+  - src/features/analytics/lib/ga.ts
+  - src/features/converter/components/converter-widget.tsx
+  - src/features/converter/components/format-selector.tsx
+  - tests/e2e/home.spec.ts
+  - loop/prd.json
+- reusable learnings:
+  - Gate growth UX experiments behind a `NEXT_PUBLIC_*` variant flag and default to `variant` for measurable rollout.
+  - Track experiment exposure once-per-file state with a `useRef` guard to avoid duplicate analytics events from rerenders.
+  - Keep baseline conversion events (`format_selected`) and add experiment context params instead of replacing existing event names.

@@ -35,6 +35,22 @@ test.describe("homepage conversion funnel", () => {
     await expect(page.getByText("이미지를 드래그하거나 클릭하여 업로드")).toBeVisible();
   });
 
+  test("shows inline format guidance experiment panel after upload", async ({ page }) => {
+    await page.goto("/");
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "tiny.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7VQ0YAAAAASUVORK5CYII=",
+        "base64"
+      ),
+    });
+
+    await expect(page.getByText("PNG 파일을 올렸어요")).toBeVisible();
+    await expect(page.getByRole("button", { name: "빠른 선택: WebP" })).toBeVisible();
+  });
+
   test("renders FAQ entries and FAQ structured data", async ({ page }) => {
     await page.goto("/");
 

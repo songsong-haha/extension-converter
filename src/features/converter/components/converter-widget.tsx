@@ -13,6 +13,10 @@ import { trackEvent } from "@/features/analytics/lib/ga";
 
 export default function ConverterWidget() {
     const PRE_CONVERSION_DROPOFF_SESSION_KEY = "pre_conversion_dropoff_tracked";
+    const FORMAT_SELECTION_GUIDANCE_EXPERIMENT =
+        process.env.NEXT_PUBLIC_FORMAT_SELECTION_GUIDANCE_EXPERIMENT || "variant";
+    const isFormatGuidanceVariant =
+        FORMAT_SELECTION_GUIDANCE_EXPERIMENT.toLowerCase() !== "control";
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [targetFormat, setTargetFormat] = useState<string>("");
@@ -23,6 +27,8 @@ export default function ConverterWidget() {
     const [isDragging, setIsDragging] = useState(false);
     const hasStartedConversionRef = useRef(false);
     const hasTrackedDropOffRef = useRef(false);
+    const hasTrackedGuidanceExposureRef = useRef(false);
+    const selectedFromGuidanceRef = useRef(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const hasSessionDropOffMarker = useCallback((): boolean => {
@@ -90,6 +96,8 @@ export default function ConverterWidget() {
         setStatus("idle");
         setProgress(0);
         hasStartedConversionRef.current = false;
+        hasTrackedGuidanceExposureRef.current = false;
+        selectedFromGuidanceRef.current = false;
     }, []);
 
     const handleDrop = useCallback(
@@ -184,7 +192,20 @@ export default function ConverterWidget() {
         setResult(null);
         setError("");
         hasStartedConversionRef.current = false;
+        hasTrackedGuidanceExposureRef.current = false;
+        selectedFromGuidanceRef.current = false;
     }, []);
+
+    useEffect(() => {
+        if (!file || !isFormatGuidanceVariant || hasTrackedGuidanceExposureRef.current) {
+            return;
+        }
+        trackEvent("format_guidance_exposed", {
+            source_format: (getFileExtension(file.name) || "unknown").toLowerCase(),
+            experiment_variant: FORMAT_SELECTION_GUIDANCE_EXPERIMENT.toLowerCase(),
+        });
+        hasTrackedGuidanceExposureRef.current = true;
+    }, [file, isFormatGuidanceVariant, FORMAT_SELECTION_GUIDANCE_EXPERIMENT]);
 
     useEffect(() => {
         if (!file) {
@@ -295,12 +316,26 @@ export default function ConverterWidget() {
                     {/* Format selector */}
                     <FormatSelector
                         sourceFormat={sourceExt}
+                        showGuidance={isFormatGuidanceVariant}
+                        onGuidanceQuickSelect={(f: FormatInfo) => {
+                            selectedFromGuidanceRef.current = true;
+                            trackEvent("format_guidance_quick_selected", {
+                                source_format: sourceExt || "unknown",
+                                recommended_target_format: f.extension,
+                                experiment_variant:
+                                    FORMAT_SELECTION_GUIDANCE_EXPERIMENT.toLowerCase(),
+                            });
+                        }}
                         selected={targetFormat}
                         onSelect={(f: FormatInfo) => {
                             trackEvent("format_selected", {
                                 source_format: sourceExt || "unknown",
                                 target_format: f.extension,
+                                selected_from_guidance: selectedFromGuidanceRef.current,
+                                experiment_variant:
+                                    FORMAT_SELECTION_GUIDANCE_EXPERIMENT.toLowerCase(),
                             });
+                            selectedFromGuidanceRef.current = false;
                             setTargetFormat(f.extension);
                             setResult(null);
                             setStatus("idle");
