@@ -1,0 +1,12 @@
+[loop-bg] ===== start 2026-02-13T15:24:48Z pid=6544 =====
+[loop-supervisor] child start: 2026-02-13T15:24:48Z
+[backlog-ensure] open tickets exist (3), no action
+
+===============================================================
+  Loop Iteration 1 (infinite)
+===============================================================
+[backlog-ensure] open tickets exist (3), no action
+
+===============================================================
+  Loop Iteration 2 (infinite)
+===============================================================

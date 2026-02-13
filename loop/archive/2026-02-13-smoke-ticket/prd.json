@@ -1,6 +1,6 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/conversion-growth",
+  "branchName": "loop/conversion-growth",
   "description": "Continuous micro-improvements for conversion and quality",
   "userStories": [
     {
@@ -14,11 +14,7 @@
         "pnpm build passes"
       ],
       "priority": 1,
-<<<<<<< Updated upstream
-      "passes": true,
-=======
       "passes": false,
->>>>>>> Stashed changes
       "notes": ""
     },
     {

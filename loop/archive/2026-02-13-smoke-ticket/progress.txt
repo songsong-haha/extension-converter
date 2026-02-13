@@ -1,0 +1,7 @@
+# Loop Progress Log
+
+## Codebase Patterns
+- Run  before merge when behavior changed.
+
+---
+Started: 2026-02-13T14:43:37Z

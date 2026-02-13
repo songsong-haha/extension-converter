@@ -1,0 +1,92 @@
+[loop-bg] ===== start 2026-02-13T14:55:36Z pid=21428 =====
+OpenAI Codex v0.101.0 (research preview)
+--------
+workdir: /Users/song-eun-u/Documents/github/extension-converter
+model: gpt-5.3-codex
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: none
+reasoning summaries: auto
+session id: 019c5780-10aa-7ab3-bb1d-04787849b605
+--------
+user
+# Codex Loop Instructions
+
+You are a long-running autonomous coding agent for this repository.
+
+1. Read `loop/prd.json`.
+2. Read `docs/LOOP_AUTOPROMOTE_RUNBOOK.md`.
+3. Read `loop/progress.txt` and check `Codebase Patterns` first.
+4. Ensure backlog continuity before implementation:
+   - run `npm run backlog:ensure`
+   - when backlog is empty, add exactly three new tickets based on `project-report.md`
+   - always continue one ticket at a time, starting from highest-priority-looking item
+   - keep 2~3 active worktree lanes by running `npm run agent:batch:start -- 3 main` when slots are empty
+5. Move to `branchName` in PRD (create from `main` if missing).
+6. Pick exactly one highest-priority item where `passes` is `false`.
+7. Implement only that one item.
+8. Run validation commands for this repo:
+   - `npm run lint`
+   - `npm run build`
+   - `npm run test:e2e`
+   - `npm run qa:ai` (non-blocking)
+9. If checks pass:
+   - commit all changes using: `feat: [ID] - [Title]`
+   - set `passes: true` for the completed item in `loop/prd.json`
+10. Append progress to `loop/progress.txt`:
+   - time (UTC)
+   - item id
+   - changed files
+   - reusable learnings
+11. If all items are complete, print exactly:
+   - `<promise>COMPLETE</promise>`
+
+Rules:
+- Work on one item per iteration.
+- Keep changes small and reviewable.
+- Preserve existing project conventions.
+- End-of-task policy is mandatory: in each core-team worktree, commit all completed scope (exclude unfinished scope), then push all core branches before merge.
+- For continuous operation, require PRD `branchName` to follow `agent/growth/<task-slug>`.
+- Mandatory core-team branches must exist for each task:
+  - `agent/ceo/<task-slug>`
+  - `agent/growth/<task-slug>`
+  - `agent/qa/<task-slug>`
+  - `agent/analytics/<task-slug>`
+  - if missing, create them using `npm run agent:task:start -- <task-slug> main`
+- If the repo already has unrelated modified/untracked files, do not stop for that reason.
+- Leave unrelated pre-existing changes untouched and continue with only the selected story.
+mcp: chrome-devtools starting
+2026-02-13T14:55:36.637008Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c56ea-f85f-7043-b975-46f299bce112
+2026-02-13T14:55:36.663964Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5748-6633-7f63-9f39-573fbc52887c
+2026-02-13T14:55:36.677567Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c56ba-6964-7210-8417-26a073f88953
+2026-02-13T14:55:36.691880Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c577f-ba88-7673-adce-a2b6d16573b2
+2026-02-13T14:55:36.722025Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5728-d729-7f23-a160-37cd4607b8f7
+2026-02-13T14:55:36.747324Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c577c-f07f-7463-a7d6-0d0778b4f779
+2026-02-13T14:55:36.772615Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5727-0437-71e2-b071-c4e2a3e237e6
+2026-02-13T14:55:36.798200Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c56a8-50a6-7e71-8c15-94f535217e37
+2026-02-13T14:55:36.824926Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5779-0b7d-7bf3-a323-d3f5212bcac6
+2026-02-13T14:55:36.837364Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5679-6009-7632-8355-02e30770d7b5
+2026-02-13T14:55:36.861134Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c56c4-9020-7f02-8afe-26c0a6fdb296
+2026-02-13T14:55:36.886046Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c575a-fc84-77a2-86ac-3adb19f4f05f
+mcp: chrome-devtools ready
+mcp startup: ready: chrome-devtools
+2026-02-13T14:55:36.899408Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5657-1043-7f80-96ca-09308ca94767
+2026-02-13T14:55:36.915043Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c56bc-a7e0-7782-909f-ce915e8684a8
+2026-02-13T14:55:36.926726Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c572f-e4f6-7f23-bf55-118b89db4425
+2026-02-13T14:55:36.939710Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5746-5aab-7a02-9686-5b6a290fb8d1
+2026-02-13T14:55:36.962198Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5750-11ca-7900-b9b8-540a2f1ddcfd
+2026-02-13T14:55:36.976412Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c576d-90be-7663-8eff-1c5768e01c24
+2026-02-13T14:55:37.002171Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c56c0-5173-7671-83de-1777e2af39b2
+2026-02-13T14:55:37.027473Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c574f-9ed9-7922-872c-f19ec921a258
+2026-02-13T14:55:37.056210Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5758-f72b-74e3-8777-abb1028f571b
+2026-02-13T14:55:37.085179Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c566f-4a29-7573-8a93-8b3924e7b47b
+2026-02-13T14:55:37.108862Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c577a-07a3-76a1-8572-25aee30faec4
+2026-02-13T14:55:37.134456Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c577c-88ed-7851-9c9d-ce027bf4893a
+2026-02-13T14:55:37.157405Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5738-9a75-7e62-a9de-a7b81ff9f6f7
+2026-02-13T14:55:37.181911Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c56c3-d35d-7543-9887-3be52b97d7dc
+2026-02-13T14:55:37.207111Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c577c-2b48-7c03-b3ff-94a17e64b925
+2026-02-13T14:55:37.230251Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c5770-81a0-7672-8403-147a9dee3e22
+2026-02-13T14:55:37.252837Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c56af-60f1-7513-8461-71393ead5f49
+2026-02-13T14:55:37.276441Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c572b-4219-7923-9c37-b86c3669c801
+2026-02-13T14:55:37.301628Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c56de-2332-7cd3-b593-e641309dca4c
