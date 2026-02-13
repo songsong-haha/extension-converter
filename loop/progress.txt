@@ -4,36 +4,24 @@
 - Carry forward only reusable patterns, not raw logs.
 
 ---
-Started: 2026-02-13T15:41:51Z
-2026-02-13T15:43:28Z | item=US-002
-- changed files: src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
-- reusable learnings: For session-level abandonment analytics, avoid firing in effect cleanup tied to state changes; fire on page lifecycle signals and reset per-file conversion-start state to prevent false drop-off suppression.
-- time (UTC): 2026-02-13T16:11:57Z
-- item id: US-002
-- changed files: src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
-- reusable learnings: Guard sessionStorage access for pre-conversion drop-off analytics so private-mode/storage failures do not break one-per-session event capture; normalize source-format payload casing for consistent analytics dimensions.
+Started: 2026-02-13T18:13:09Z
 
-- time (UTC): 2026-02-13T16:45:38Z
-- item id: US-001
+- time (UTC): 2026-02-13T18:16:56Z
+- item id: US-001 (`trust-error-ux-flow-phase-1`)
 - changed files: src/features/converter/components/converter-widget.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
-- reusable learnings: For image-conversion e2e, use a known-valid in-memory tiny GIF payload to avoid canvas decode flakiness; assert trust copy only after successful conversion status.
+- reusable learnings: Surface trust reassurance before conversion and inside error states; pair failure guidance with one-click alternative formats and retry CTA to reduce post-failure drop-off.
 
-- time (UTC): 2026-02-13T16:49:05Z
-- item id: US-001
-- changed files: loop/progress.txt
-- reusable learnings: When a loop-selected ticket is already implemented on its task branch, re-run the full gate (`lint`, `build`, `test:e2e`) before promotion and record a fresh progress checkpoint for traceability.
+- time (UTC): 2026-02-13T18:27:21Z
+- item id: US-001A
+- changed files: src/app/page.tsx, src/i18n/messages.ts, src/i18n/resolve-locale.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
+- reusable learnings: Use locale resolution order `lang` query -> `Accept-Language` negotiation -> default locale, and pin locale-sensitive e2e assertions with explicit query params to avoid browser-header flakiness.
 
-- time (UTC): 2026-02-13T16:57:13Z
-- item id: US-001
-- changed files: loop/progress.txt
-- reusable learnings: If a selected story is already functionally implemented, run the full required gate and record a new promotion checkpoint before branch sync and main fast-forward.
+- time (UTC): 2026-02-13T18:32:01Z
+- item id: US-001B
+- changed files: src/app/page.tsx, src/features/converter/components/conversion-progress.tsx, src/features/converter/components/converter-widget.tsx, src/features/converter/components/file-preview.tsx, src/features/converter/components/format-selector.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
+- reusable learnings: Keep client-widget copy in a locale dictionary shared by subcomponents, and make e2e locale-sensitive assertions explicit (`?lang=ko`/`?lang=en`) when locale negotiation can vary by environment headers.
 
-- time (UTC): 2026-02-13T17:10:08Z
-- item id: US-001
-- changed files: src/features/converter/components/format-selector.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
-- reusable learnings: Source-format-aware inline guidance near option chips can improve first decision speed; lock it with an upload-to-selector e2e assertion so copy regressions are caught early.
-
-- time (UTC): 2026-02-13T17:23:40Z
-- item id: US-001
-- changed files: src/features/converter/components/converter-widget.tsx, src/features/analytics/lib/ga.ts, scripts/qa/track-growth-loop.mjs, docs/GA_AGENT_WORKFLOW.md, loop/prd.json, loop/progress.txt
-- reusable learnings: Classify conversion failures at catch-time and emit a dedicated retry lifecycle (`conversion_retry_started`/`conversion_retry_result`) so `conversion_failed_to_retry_success` can be computed reliably in the reporting pipeline.
+- time (UTC): 2026-02-13T18:35:43Z
+- item id: US-001C
+- changed files: src/app/page.tsx, src/features/converter/components/converter-widget.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
+- reusable learnings: Centralize locale-aware SEO metadata in the page-level metadata generator so query/header locale resolution stays consistent with rendered copy and FAQ schema; attach `locale` to every conversion funnel analytics event through one wrapper to avoid per-event drift.

@@ -2,17 +2,23 @@
 
 import React from "react";
 import type { ConversionStatus } from "../types";
+import type { ConverterMessages } from "@/i18n/messages";
 
 interface ConversionProgressProps {
     status: ConversionStatus;
     progress: number; // 0-100
     statusText?: string;
+    messages: Pick<
+        ConverterMessages,
+        "statusLoading" | "statusConverting" | "statusDone" | "statusError"
+    >;
 }
 
 export default function ConversionProgress({
     status,
     progress,
     statusText,
+    messages,
 }: ConversionProgressProps) {
     if (status === "idle") return null;
 
@@ -29,10 +35,10 @@ export default function ConversionProgress({
             {/* Status text */}
             <div className="flex items-center justify-between text-xs">
                 <span className="text-[var(--text-secondary)]">
-                    {status === "loading" && "파일 로딩 중..."}
-                    {status === "converting" && (statusText || "변환 중...")}
-                    {status === "done" && "✨ 변환 완료!"}
-                    {status === "error" && "❌ 변환 실패"}
+                    {status === "loading" && messages.statusLoading}
+                    {status === "converting" && (statusText || messages.statusConverting)}
+                    {status === "done" && messages.statusDone}
+                    {status === "error" && messages.statusError}
                 </span>
                 <span className="text-[var(--text-muted)] tabular-nums">
                     {Math.round(progress)}%

@@ -9,7 +9,11 @@ import { convertFile, isValidImage } from "../lib/converter-engine";
 import { getFileExtension } from "../lib/format-registry";
 import type { FormatInfo } from "../lib/format-registry";
 import type { ConversionStatus, ConversionResult } from "../types";
-import { trackEvent } from "@/features/analytics/lib/ga";
+import {
+    trackEvent,
+    type AnalyticsEventName,
+} from "@/features/analytics/lib/ga";
+import { CONVERTER_MESSAGES, type Locale } from "@/i18n/messages";
 
 function classifyConversionError(err: unknown): string {
     if (!(err instanceof Error)) {
@@ -38,8 +42,15 @@ function classifyConversionError(err: unknown): string {
     return "conversion_runtime_error";
 }
 
-export default function ConverterWidget() {
+interface ConverterWidgetProps {
+    locale: Locale;
+}
+
+type AnalyticsParams = Record<string, string | number | boolean | undefined>;
+
+export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const PRE_CONVERSION_DROPOFF_SESSION_KEY = "pre_conversion_dropoff_tracked";
+    const messages = CONVERTER_MESSAGES[locale];
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [targetFormat, setTargetFormat] = useState<string>("");
@@ -53,6 +64,15 @@ export default function ConverterWidget() {
     const retryAttemptRef = useRef(0);
     const lastFailureCategoryRef = useRef<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const trackLocaleEvent = useCallback(
+        (eventName: AnalyticsEventName, params: AnalyticsParams = {}) => {
+            trackEvent(eventName, {
+                locale,
+                ...params,
+            });
+        },
+        [locale]
+    );
 
     const hasSessionDropOffMarker = useCallback((): boolean => {
         if (typeof window === "undefined") {
@@ -88,26 +108,26 @@ export default function ConverterWidget() {
                 hasTrackedDropOffRef.current = true;
                 return;
             }
-            trackEvent("pre_conversion_dropoff", {
+            trackLocaleEvent("pre_conversion_dropoff", {
                 source_format: (sourceFormat || "unknown").toLowerCase(),
             });
             setSessionDropOffMarker();
             hasTrackedDropOffRef.current = true;
         },
-        [hasSessionDropOffMarker, setSessionDropOffMarker]
+        [hasSessionDropOffMarker, setSessionDropOffMarker, trackLocaleEvent]
     );
 
     const handleFile = useCallback((f: File) => {
         const extension = getFileExtension(f.name);
         if (!isValidImage(f)) {
-            trackEvent("file_selected", {
+            trackLocaleEvent("file_selected", {
                 is_valid_image: false,
                 source_format: extension || "unknown",
             });
-            setError("이미지 파일만 지원됩니다.");
+            setError(messages.invalidImage);
             return;
         }
-        trackEvent("file_selected", {
+        trackLocaleEvent("file_selected", {
             is_valid_image: true,
             source_format: extension || "unknown",
             file_size_bytes: f.size,
@@ -121,7 +141,7 @@ export default function ConverterWidget() {
         hasStartedConversionRef.current = false;
         retryAttemptRef.current = 0;
         lastFailureCategoryRef.current = "";
-    }, []);
+    }, [messages.invalidImage, trackLocaleEvent]);
 
     const handleDrop = useCallback(
         (e: React.DragEvent) => {
@@ -159,7 +179,7 @@ export default function ConverterWidget() {
 
         if (isRetry) {
             retryAttemptRef.current += 1;
-            trackEvent("conversion_retry_started", {
+            trackLocaleEvent("conversion_retry_started", {
                 source_format: sourceFormat,
                 target_format: targetFormat,
                 retry_attempt: retryAttemptRef.current,
@@ -169,7 +189,7 @@ export default function ConverterWidget() {
 
         try {
             hasStartedConversionRef.current = true;
-            trackEvent("conversion_started", {
+            trackLocaleEvent("conversion_started", {
                 source_format: sourceFormat,
                 target_format: targetFormat,
             });
@@ -188,7 +208,7 @@ export default function ConverterWidget() {
             setProgress(100);
             setResult(result);
             setStatus("done");
-            trackEvent("conversion_completed", {
+            trackLocaleEvent("conversion_completed", {
                 source_format: sourceFormat,
                 target_format: result.format,
                 duration_ms: Math.round(result.duration),
@@ -197,7 +217,7 @@ export default function ConverterWidget() {
             });
 
             if (retryAttemptRef.current > 0) {
-                trackEvent("conversion_retry_result", {
+                trackLocaleEvent("conversion_retry_result", {
                     source_format: sourceFormat,
                     target_format: result.format,
                     retry_attempt: retryAttemptRef.current,
@@ -210,8 +230,8 @@ export default function ConverterWidget() {
         } catch (err) {
             const failureCategory = classifyConversionError(err);
             setStatus("error");
-            setError(err instanceof Error ? err.message : "변환 중 오류가 발생했습니다.");
-            trackEvent("conversion_failed", {
+            setError(err instanceof Error ? err.message : messages.unknownConversionError);
+            trackLocaleEvent("conversion_failed", {
                 source_format: sourceFormat,
                 target_format: targetFormat,
                 failure_category: failureCategory,
@@ -219,7 +239,7 @@ export default function ConverterWidget() {
             });
 
             if (retryAttemptRef.current > 0) {
-                trackEvent("conversion_retry_result", {
+                trackLocaleEvent("conversion_retry_result", {
                     source_format: sourceFormat,
                     target_format: targetFormat,
                     retry_attempt: retryAttemptRef.current,
@@ -230,7 +250,7 @@ export default function ConverterWidget() {
 
             lastFailureCategoryRef.current = failureCategory;
         }
-    }, [file, status, targetFormat]);
+    }, [file, messages.unknownConversionError, status, targetFormat, trackLocaleEvent]);
 
     const handleDownload = useCallback(() => {
         if (!result) return;
@@ -240,11 +260,11 @@ export default function ConverterWidget() {
         a.download = result.filename;
         a.click();
         URL.revokeObjectURL(url);
-        trackEvent("file_downloaded", {
+        trackLocaleEvent("file_downloaded", {
             output_format: result.format,
             output_size_bytes: result.convertedSize,
         });
-    }, [result]);
+    }, [result, trackLocaleEvent]);
 
     const handleReset = useCallback(() => {
         setFile(null);
@@ -333,10 +353,10 @@ export default function ConverterWidget() {
 
                     <div>
                         <p className="text-[var(--text-primary)] font-medium">
-                            이미지를 드래그하거나 클릭하여 업로드
+                            {messages.dropzoneTitle}
                         </p>
                         <p className="text-sm text-[var(--text-muted)] mt-1">
-                            PNG, JPG, WebP, GIF, BMP, AVIF 지원
+                            {messages.dropzoneFormats}
                         </p>
                     </div>
                 </div>
@@ -348,6 +368,7 @@ export default function ConverterWidget() {
                         previewUrl={previewUrl}
                         conversionResult={result ?? undefined}
                         onRemove={handleReset}
+                        removeAriaLabel={messages.removeFileAriaLabel}
                     />
 
                     {/* Arrow indicator */}
@@ -369,8 +390,9 @@ export default function ConverterWidget() {
                     <FormatSelector
                         sourceFormat={sourceExt}
                         selected={targetFormat}
+                        messages={messages}
                         onSelect={(f: FormatInfo) => {
-                            trackEvent("format_selected", {
+                            trackLocaleEvent("format_selected", {
                                 source_format: sourceExt || "unknown",
                                 target_format: f.extension,
                             });
@@ -382,7 +404,7 @@ export default function ConverterWidget() {
                     />
 
                     {/* Progress */}
-                    <ConversionProgress status={status} progress={progress} />
+                    <ConversionProgress status={status} progress={progress} messages={messages} />
 
                     {/* Error */}
                     {error && (
@@ -394,7 +416,7 @@ export default function ConverterWidget() {
                     {/* Actions */}
                     {status === "done" && result && (
                         <p className="text-sm text-[var(--text-secondary)]">
-                            안심하세요. 파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.
+                            {messages.trustMessage}
                         </p>
                     )}
                     <div className="flex gap-3">
@@ -410,10 +432,10 @@ export default function ConverterWidget() {
                                             strokeLinejoin="round"
                                         />
                                     </svg>
-                                    다운로드 ({result.filename})
+                                    {messages.downloadLabel(result.filename)}
                                 </Button>
                                 <Button onClick={handleReset} variant="secondary" size="lg">
-                                    다른 파일
+                                    {messages.chooseAnotherFile}
                                 </Button>
                             </>
                         ) : (
@@ -425,8 +447,8 @@ export default function ConverterWidget() {
                                 isLoading={status === "converting"}
                             >
                                 {!targetFormat
-                                    ? "포맷을 선택하세요"
-                                    : `${sourceExt?.toUpperCase()} → ${targetFormat.toUpperCase()} 변환`}
+                                    ? messages.chooseFormatLabel
+                                    : messages.convertLabel(sourceExt ?? "", targetFormat)}
                             </Button>
                         )}
                     </div>

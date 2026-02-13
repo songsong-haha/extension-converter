@@ -10,6 +10,7 @@ interface FilePreviewProps {
     previewUrl: string;
     conversionResult?: ConversionResult;
     onRemove: () => void;
+    removeAriaLabel: string;
 }
 
 export default function FilePreview({
@@ -17,6 +18,7 @@ export default function FilePreview({
     previewUrl,
     conversionResult,
     onRemove,
+    removeAriaLabel,
 }: FilePreviewProps) {
     const ext = getFileExtension(file.name).toUpperCase();
 
@@ -53,7 +55,7 @@ export default function FilePreview({
             <button
                 onClick={onRemove}
                 className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-[var(--surface-300)] cursor-pointer"
-                aria-label="Remove file"
+                aria-label={removeAriaLabel}
             >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
