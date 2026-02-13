@@ -515,11 +515,13 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             setFailureCategory(failureCategory);
 
             if (retryAttemptRef.current > 0) {
+                const previousFailureCategory = lastFailureCategoryRef.current || failureCategory;
                 trackLocaleEvent("conversion_retry_result", {
                     source_format: sourceFormat,
                     target_format: targetFormat,
                     retry_attempt: retryAttemptRef.current,
                     retry_outcome: "failed",
+                    previous_failure_category: previousFailureCategory,
                     failure_category: failureCategory,
                 });
             }

@@ -58,8 +58,14 @@ test("builds dashboard with retry success metric and top failure category", () =
       JSON.stringify({ name: "conversion_failed", params: { failure_category: "image_decode_failed" } }),
       JSON.stringify({ name: "conversion_failed", params: { failure_category: "memory_limit_exceeded" } }),
       JSON.stringify({ name: "conversion_failed", params: { failure_category: "image_decode_failed" } }),
-      JSON.stringify({ name: "conversion_retry_result", params: { retry_outcome: "success" } }),
-      JSON.stringify({ name: "conversion_retry_result", params: { retry_outcome: "failed" } }),
+      JSON.stringify({
+        name: "conversion_retry_result",
+        params: { retry_outcome: "success", previous_failure_category: "image_decode_failed" },
+      }),
+      JSON.stringify({
+        name: "conversion_retry_result",
+        params: { retry_outcome: "failed", previous_failure_category: "memory_limit_exceeded" },
+      }),
       "{malformed",
       "",
     ].join("\n"),
@@ -84,6 +90,10 @@ test("builds dashboard with retry success metric and top failure category", () =
   assert.match(dashboard, /conversion_failed_to_retry_success_rate: 33.3% \(1\/3\)/);
   assert.match(dashboard, /conversion_retry_result: success=1, failed=1/);
   assert.match(dashboard, /top_conversion_failure_category: image_decode_failed/);
+  assert.match(
+    dashboard,
+    /retry_recovery_by_failure_category: image_decode_failed:1\/1\(100%\), memory_limit_exceeded:0\/1\(0%\)/,
+  );
   assert.match(dashboard, /- \[ \] `next-item` \| next/);
 });
 
@@ -109,4 +119,5 @@ test("falls back to zeroed analytics summary when events file is missing", () =>
   assert.match(dashboard, /conversion_failed_to_retry_success_rate: 0% \(0\/0\)/);
   assert.match(dashboard, /conversion_retry_result: success=0, failed=0/);
   assert.match(dashboard, /top_conversion_failure_category: unknown/);
+  assert.match(dashboard, /retry_recovery_by_failure_category: none/);
 });

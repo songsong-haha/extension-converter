@@ -73,6 +73,7 @@ function parseAnalyticsSummary() {
       retryFailedCount: 0,
       retrySuccessRate: 0,
       topFailureCategory: "unknown",
+      retryRecoveryByCategory: "none",
     };
   }
 
@@ -86,6 +87,7 @@ function parseAnalyticsSummary() {
   let retrySuccessCount = 0;
   let retryFailedCount = 0;
   const failureCategories = new Map();
+  const retryOutcomesByCategory = new Map();
 
   for (const line of lines) {
     try {
@@ -101,8 +103,15 @@ function parseAnalyticsSummary() {
 
       if (name === "conversion_retry_result") {
         const outcome = String(params.retry_outcome ?? "");
+        const category = String(
+          params.previous_failure_category ?? params.failure_category ?? "unknown",
+        );
+        const bucket = retryOutcomesByCategory.get(category) ?? { success: 0, failed: 0 };
         if (outcome === "success") retrySuccessCount += 1;
         if (outcome === "failed") retryFailedCount += 1;
+        if (outcome === "success") bucket.success += 1;
+        if (outcome === "failed") bucket.failed += 1;
+        retryOutcomesByCategory.set(category, bucket);
       }
     } catch {
       // Ignore malformed event rows to keep reporting robust.
@@ -121,12 +130,22 @@ function parseAnalyticsSummary() {
   const retrySuccessRate =
     failedCount > 0 ? Math.round((retrySuccessCount / failedCount) * 1000) / 10 : 0;
 
+  const retryRecoveryByCategory = Array.from(retryOutcomesByCategory.entries())
+    .sort(([leftCategory], [rightCategory]) => leftCategory.localeCompare(rightCategory))
+    .map(([category, counts]) => {
+      const attempts = counts.success + counts.failed;
+      const successRate = attempts > 0 ? Math.round((counts.success / attempts) * 1000) / 10 : 0;
+      return `${category}:${counts.success}/${attempts}(${successRate}%)`;
+    })
+    .join(", ") || "none";
+
   return {
     failedCount,
     retrySuccessCount,
     retryFailedCount,
     retrySuccessRate,
     topFailureCategory,
+    retryRecoveryByCategory,
   };
 }
 
@@ -151,6 +170,7 @@ function main() {
     `- conversion_failed_to_retry_success_rate: ${analytics.retrySuccessRate}% (${analytics.retrySuccessCount}/${analytics.failedCount})`,
     `- conversion_retry_result: success=${analytics.retrySuccessCount}, failed=${analytics.retryFailedCount}`,
     `- top_conversion_failure_category: ${analytics.topFailureCategory}`,
+    `- retry_recovery_by_failure_category: ${analytics.retryRecoveryByCategory}`,
     "",
     "## Next Micro Task",
     backlog.next ?? "- [ ] 백로그 항목이 없습니다.",

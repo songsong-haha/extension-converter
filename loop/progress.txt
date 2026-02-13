@@ -4,16 +4,9 @@
 - Carry forward only reusable patterns, not raw logs.
 
 ---
-Started: 2026-02-13T19:41:44Z
+Started: 2026-02-13T19:45:35Z
 
-- time (UTC): 2026-02-13T19:44:08Z
-- item id: US-001
-- changed files:
-  - docs/GROWTH_BACKLOG.md
-  - loop/prd.json
-  - loop/progress.txt
-  - src/features/converter/components/converter-widget.tsx
-  - tests/e2e/home.spec.ts
-- reusable learnings:
-  - For post-conversion monetization, defer ad rendering until after the primary completion action (download) to reduce UX interference.
-  - Keep ad impression tracking tied to actual render conditions to avoid premature analytics events.
+### 2026-02-13T19:48:34Z
+- item: US-001 (`conversion-failure-observability-phase-13`)
+- changed_files: docs/GA_AGENT_WORKFLOW.md, docs/GROWTH_BACKLOG.md, loop/prd.json, scripts/qa/track-growth-loop.mjs, src/features/converter/components/converter-widget.tsx, tests/track-growth-loop.test.mjs
+- reusable_learnings: Include `previous_failure_category` in retry result events to preserve failure-to-recovery attribution, and compute per-category retry recovery summaries in `growth:track` to expose actionable remediation hotspots.

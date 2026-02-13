@@ -46,7 +46,9 @@ npm run agent:create -- analytics event-retention main ga
 
 - `conversion_failed.failure_category`: 실패 원인 분류값
 - `conversion_retry_result.retry_outcome`: `success`/`failed`
+- `conversion_retry_result.previous_failure_category`: 재시도 대상이 된 직전 실패 원인
 - 대시보드 파이프라인(`npm run growth:track`)은 `test-results/analytics/events.ndjson`를 읽어 `conversion_failed_to_retry_success_rate`를 계산합니다.
+- 대시보드는 `retry_recovery_by_failure_category`로 실패 원인별 재시도 회복률을 함께 출력합니다.
 
 ## 5) 검증 체크
 
