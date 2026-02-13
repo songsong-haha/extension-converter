@@ -1,21 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/full-i18n-rollout-ko-en-phase-9",
-  "description": "Auto-seeded from backlog: KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 9)",
+  "branchName": "agent/growth/theme-system-and-dark-mode-phase-10",
+  "description": "Auto-seeded from backlog: 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 10)",
   "userStories": [
     {
       "id": "US-001",
-      "title": "KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 9)",
-      "description": "Implement backlog ticket `full-i18n-rollout-ko-en-phase-9` with measurable impact on non-ko conversion_completed rate.",
+      "title": "테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 10)",
+      "description": "Implement backlog ticket `theme-system-and-dark-mode-phase-10` with measurable impact on dark_mode_session conversion_completed rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `full-i18n-rollout-ko-en-phase-9` is implemented.",
+        "Backlog ticket `theme-system-and-dark-mode-phase-10` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "seeded_from_backlog=true; metric=non-ko conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
+      "notes": "seeded_from_backlog=true; metric=dark_mode_session conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }

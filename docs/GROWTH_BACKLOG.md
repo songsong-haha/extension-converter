@@ -39,7 +39,7 @@ Each ticket should require at least 10 minutes of pure implementation work (excl
 
 - [x] `full-i18n-rollout-ko-en-phase-9` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 9) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
 
-- [ ] `theme-system-and-dark-mode-phase-10` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 10) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+- [x] `theme-system-and-dark-mode-phase-10` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 10) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
 
 - [ ] `performance-budget-and-image-optimization-phase-11` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 11) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
 
@@ -48,3 +48,5 @@ Each ticket should require at least 10 minutes of pure implementation work (excl
 - [ ] `conversion-failure-observability-phase-13` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 13) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
 
 - [ ] `format-selection-guidance-experiment-phase-14` | 포맷 선택 가이드 인라인 UX + 실험 플래그 + 이벤트 계측 (Phase 14) | metric: format_selected rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-25m | source: project-report P1: selection friction
+
+- [ ] `trust-error-ux-flow-phase-15` | 신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 (Phase 15) | metric: upload_to_conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P0: trust and error UX

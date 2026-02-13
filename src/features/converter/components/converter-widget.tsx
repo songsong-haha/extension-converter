@@ -672,20 +672,20 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
 
                     {/* Error */}
                     {error && (
-                        <div className="rounded-xl border border-red-400/25 bg-red-400/10 px-4 py-4 text-sm text-red-200">
-                            <p className="font-semibold text-red-100">
+                        <div className="rounded-xl border border-[var(--danger-border)] bg-[var(--danger-bg)] px-4 py-4 text-sm text-[var(--danger-text-secondary)]">
+                            <p className="font-semibold text-[var(--danger-text-primary)]">
                                 {messages.conversionFailedHeading}
                             </p>
                             <p className="mt-1">{getFailureGuide(failureCategory, messages)}</p>
-                            <p className="mt-2 text-red-300/90">{error}</p>
-                            <p className="mt-2 text-red-300/90">{messages.errorUploadSafetyMessage}</p>
+                            <p className="mt-2 text-[var(--danger-text-secondary)]">{error}</p>
+                            <p className="mt-2 text-[var(--danger-text-secondary)]">{messages.errorUploadSafetyMessage}</p>
                             {recoveryFormats.length > 0 && (
                                 <div className="mt-3">
-                                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-red-200/80">
+                                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--danger-text-secondary)]/90">
                                         {messages.recoveryFormatsHeading}
                                     </p>
                                     {recommendedRecoveryFormat && (
-                                        <p className="mb-2 text-xs text-red-200/90">
+                                        <p className="mb-2 text-xs text-[var(--danger-text-secondary)]">
                                             {messages.recoveryRecommendedFormat(recommendedRecoveryFormat)}
                                         </p>
                                     )}
@@ -694,7 +694,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                                             <button
                                                 key={format}
                                                 type="button"
-                                                className="rounded-lg border border-red-200/30 bg-red-200/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-red-100 transition hover:bg-red-200/20"
+                                                className="rounded-lg border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--danger-text-primary)] transition hover:bg-[var(--glass-hover)]"
                                                 onClick={() => {
                                                     setTargetFormat(format);
                                                     setStatus("idle");
