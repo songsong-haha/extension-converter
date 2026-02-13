@@ -55,7 +55,7 @@ export default function FormatSelector({
                                 "border",
                                 isSelected
                                     ? "border-[var(--primary-400)] bg-[rgba(124,58,237,0.15)] shadow-[0_0_20px_rgba(124,58,237,0.2)]"
-                                    : "border-[var(--glass-border)] bg-[var(--glass-bg)] hover:bg-[var(--glass-hover)] hover:border-[rgba(255,255,255,0.12)]",
+                                    : "border-[var(--glass-border)] bg-[var(--glass-bg)] hover:bg-[var(--glass-hover)] hover:border-[var(--glass-border-strong)]",
                                 "active:scale-95",
                             ].join(" ")}
                         >

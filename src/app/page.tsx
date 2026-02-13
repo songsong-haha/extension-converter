@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
+import ThemeToggle from "@/components/theme-toggle";
 import ConverterWidget from "@/features/converter/components/converter-widget";
 import { UNIQUE_TARGET_FORMATS } from "@/features/converter/lib/format-registry";
 import { HOME_MESSAGES, SEO_MESSAGES, type Locale } from "@/i18n/messages";
@@ -192,28 +193,35 @@ export default async function Home({ searchParams }: HomeProps) {
             {messages.badge}
           </div>
 
-          <div className="flex justify-center items-center gap-2 mb-6">
-            <span className="text-xs text-[var(--text-muted)]">{messages.languageLabel}</span>
-            <Link
-              href="/?lang=ko"
-              className={`${languageLinkClass} ${
-                locale === "ko"
-                  ? "border-[var(--primary-400)] text-[var(--text-primary)]"
-                  : "border-[var(--glass-border)] text-[var(--text-muted)]"
-              }`}
-            >
-              {messages.languageKo}
-            </Link>
-            <Link
-              href="/?lang=en"
-              className={`${languageLinkClass} ${
-                locale === "en"
-                  ? "border-[var(--primary-400)] text-[var(--text-primary)]"
-                  : "border-[var(--glass-border)] text-[var(--text-muted)]"
-              }`}
-            >
-              {messages.languageEn}
-            </Link>
+          <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[var(--text-muted)]">{messages.languageLabel}</span>
+              <Link
+                href="/?lang=ko"
+                className={`${languageLinkClass} ${
+                  locale === "ko"
+                    ? "border-[var(--primary-400)] text-[var(--text-primary)]"
+                    : "border-[var(--glass-border)] text-[var(--text-muted)]"
+                }`}
+              >
+                {messages.languageKo}
+              </Link>
+              <Link
+                href="/?lang=en"
+                className={`${languageLinkClass} ${
+                  locale === "en"
+                    ? "border-[var(--primary-400)] text-[var(--text-primary)]"
+                    : "border-[var(--glass-border)] text-[var(--text-muted)]"
+                }`}
+              >
+                {messages.languageEn}
+              </Link>
+            </div>
+            <ThemeToggle
+              themeLabel={messages.themeLabel}
+              lightModeLabel={messages.lightModeLabel}
+              darkModeLabel={messages.darkModeLabel}
+            />
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-4">

@@ -51,6 +51,20 @@ interface ConverterWidgetProps {
 }
 
 type AnalyticsParams = Record<string, string | number | boolean | undefined>;
+
+function getActiveThemeMode(): "light" | "dark" | "unknown" {
+    if (typeof document === "undefined") {
+        return "unknown";
+    }
+
+    const theme = document.documentElement.dataset.theme;
+    if (theme === "light" || theme === "dark") {
+        return theme;
+    }
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 function getFailureGuide(category: string, messages: ConverterMessages): string {
     return (
         messages.failureGuides[category] ??
@@ -90,6 +104,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         (eventName: AnalyticsEventName, params: AnalyticsParams = {}) => {
             trackEvent(eventName, {
                 locale,
+                theme_mode: getActiveThemeMode(),
                 ...params,
             });
         },

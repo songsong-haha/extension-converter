@@ -4,36 +4,8 @@
 - Carry forward only reusable patterns, not raw logs.
 
 ---
-Started: 2026-02-13T18:13:09Z
+Started: 2026-02-13T18:57:56Z
 
-- time (UTC): 2026-02-13T18:16:56Z
-- item id: US-001 (`trust-error-ux-flow-phase-1`)
-- changed files: src/features/converter/components/converter-widget.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
-- reusable learnings: Surface trust reassurance before conversion and inside error states; pair failure guidance with one-click alternative formats and retry CTA to reduce post-failure drop-off.
-
-- time (UTC): 2026-02-13T18:27:21Z
-- item id: US-001A
-- changed files: src/app/page.tsx, src/i18n/messages.ts, src/i18n/resolve-locale.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
-- reusable learnings: Use locale resolution order `lang` query -> `Accept-Language` negotiation -> default locale, and pin locale-sensitive e2e assertions with explicit query params to avoid browser-header flakiness.
-
-- time (UTC): 2026-02-13T18:32:01Z
-- item id: US-001B
-- changed files: src/app/page.tsx, src/features/converter/components/conversion-progress.tsx, src/features/converter/components/converter-widget.tsx, src/features/converter/components/file-preview.tsx, src/features/converter/components/format-selector.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
-- reusable learnings: Keep client-widget copy in a locale dictionary shared by subcomponents, and make e2e locale-sensitive assertions explicit (`?lang=ko`/`?lang=en`) when locale negotiation can vary by environment headers.
-
-- time (UTC): 2026-02-13T18:35:43Z
-- item id: US-001C
-- changed files: src/app/page.tsx, src/features/converter/components/converter-widget.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
-- reusable learnings: Centralize locale-aware SEO metadata in the page-level metadata generator so query/header locale resolution stays consistent with rendered copy and FAQ schema; attach `locale` to every conversion funnel analytics event through one wrapper to avoid per-event drift.
-
-- time (UTC): 2026-02-13T18:51:28Z
-- item id: US-001
-- changed files: src/features/converter/components/converter-widget.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
-- reusable learnings: Keep failure-recovery UX locale-aware by layering category-specific guide copy and retry/alternative-format actions on top of the shared message dictionary; pin locale in e2e error-path tests to avoid Accept-Language-dependent CTA mismatches.
-
-Started: 2026-02-13T18:52:53Z
-
-- time (UTC): 2026-02-13T18:56:37Z
-- item id: US-001 (`full-i18n-rollout-ko-en-phase-2`)
-- changed files: src/i18n/messages.ts, src/features/converter/components/converter-widget.tsx, tests/e2e/home.spec.ts, docs/GROWTH_BACKLOG.md, loop/prd.json, loop/progress.txt
-- reusable learnings: Eliminate locale conditionals in UI components by expanding the shared i18n message contract to cover error/recovery microcopy; add locale-pinned e2e checks for pre-conversion trust copy and error-recovery labels to prevent mixed-language regressions.
+2026-02-13T19:02:13Z | US-001
+- Changed files: docs/GROWTH_BACKLOG.md, loop/prd.json, loop/progress.txt, src/app/globals.css, src/app/page.tsx, src/components/theme-toggle.tsx, src/components/ui/button.tsx, src/features/converter/components/converter-widget.tsx, src/features/converter/components/file-preview.tsx, src/features/converter/components/format-selector.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts
+- Reusable learnings: Build theme via CSS tokens (`:root` + `[data-theme=\"dark\"]`) so landing/converter/result stay synchronized with one toggle; include `theme_mode` on funnel events to analyze dark-mode conversion impact without creating parallel event names.
