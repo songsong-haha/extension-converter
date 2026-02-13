@@ -125,6 +125,28 @@ test.describe("homepage conversion funnel", () => {
     await expect(
       page.getByText("팁: 투명 배경 유지가 필요하면 PNG, 용량을 줄이려면 WebP를 선택하세요.")
     ).toBeVisible();
+    await expect(
+      page.getByText("파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.")
+    ).toBeVisible();
+  });
+
+  test("shows failure guide with retry and alternative formats on conversion error", async ({ page }) => {
+    await page.goto("/");
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "broken.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("not-a-real-image"),
+    });
+
+    await page.getByRole("button", { name: /^JPG/i }).click();
+    await page.getByRole("button", { name: /PNG\s*→\s*JPG 변환/ }).click();
+
+    await expect(page.getByText("변환에 실패했어요.")).toBeVisible();
+    await expect(page.getByText("파일은 서버로 업로드되지 않았습니다.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "같은 설정으로 다시 시도" })).toBeVisible();
+    await expect(page.getByText("다른 포맷으로 시도")).toBeVisible();
+    await expect(page.getByRole("button", { name: "webp", exact: true })).toBeVisible();
   });
 
   test("renders english converter widget guidance and actions", async ({ page }) => {

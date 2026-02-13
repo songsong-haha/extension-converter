@@ -1,53 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/full-i18n-rollout-ko-en-phase-2",
-  "description": "Auto-seeded from backlog: KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 2)",
+  "branchName": "agent/growth/trust-error-ux-flow-phase-1",
+  "description": "Auto-seeded from backlog: 신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 (Phase 1)",
   "userStories": [
     {
-      "id": "US-001A",
-      "title": "KO/EN 로케일 해석기 및 랜딩/FAQ 사전 구축",
-      "description": "Implement locale resolver plus shared KO/EN message dictionaries and wire homepage hero/features/FAQ copy for `full-i18n-rollout-ko-en-phase-2`.",
+      "id": "US-001",
+      "title": "신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 (Phase 1)",
+      "description": "Implement backlog ticket `trust-error-ux-flow-phase-1` with measurable impact on upload_to_conversion_completed rate.",
       "acceptanceCriteria": [
-        "Locale is resolved deterministically (query + accept-language fallback) with Korean as default.",
-        "Homepage hero/features/FAQ copy renders from KO/EN dictionary entries.",
+        "Backlog ticket `trust-error-ux-flow-phase-1` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "split_from=US-001; metric=non-ko conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
-    },
-    {
-      "id": "US-001B",
-      "title": "변환 위젯 주요 카피 KO/EN 전환",
-      "description": "Localize converter widget, upload guidance, conversion progress, and action labels with the shared dictionary.",
-      "acceptanceCriteria": [
-        "Converter widget text is driven by the locale dictionary.",
-        "Korean default UX remains unchanged when locale is unspecified.",
-        "npm run lint passes",
-        "npm run build passes",
-        "npm run test:e2e passes"
-      ],
-      "priority": 2,
-      "passes": true,
-      "notes": "split_from=US-001; metric=non-ko conversion_completed rate; owner=growth+qa+designer"
-    },
-    {
-      "id": "US-001C",
-      "title": "메타데이터/추적/테스트의 로케일 연동 마무리",
-      "description": "Localize metadata/structured data and extend e2e coverage for English funnel assertions.",
-      "acceptanceCriteria": [
-        "Localized metadata + FAQ schema reflect selected locale.",
-        "Analytics locale context is included for funnel events.",
-        "E2E covers one English happy path and one Korean regression path.",
-        "npm run lint passes",
-        "npm run build passes",
-        "npm run test:e2e passes"
-      ],
-      "priority": 3,
-      "passes": true,
-      "notes": "split_from=US-001; metric=non-ko conversion_completed rate; owner=growth+qa+analytics"
+      "passes": false,
+      "notes": "seeded_from_backlog=true; metric=upload_to_conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }

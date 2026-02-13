@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import FormatSelector from "./format-selector";
 import FilePreview from "./file-preview";
 import ConversionProgress from "./conversion-progress";
@@ -47,6 +47,52 @@ interface ConverterWidgetProps {
 }
 
 type AnalyticsParams = Record<string, string | number | boolean | undefined>;
+function getFailureGuide(category: string, locale: Locale): string {
+    const koGuide: Record<string, string> = {
+        unsupported_target_format:
+            "선택한 출력 포맷이 브라우저에서 지원되지 않습니다. 다른 포맷으로 다시 시도해 주세요.",
+        canvas_context_unavailable:
+            "브라우저 그래픽 처리 리소스가 부족합니다. 탭을 새로고침한 뒤 다시 시도해 주세요.",
+        memory_limit_exceeded:
+            "이미지 크기가 너무 커서 메모리가 부족할 수 있습니다. 더 작은 파일이나 다른 포맷으로 시도해 주세요.",
+        image_decode_failed:
+            "파일 디코딩에 실패했습니다. 원본 파일이 손상되었는지 확인한 뒤 다른 포맷으로 시도해 주세요.",
+        conversion_aborted:
+            "변환이 중단되었습니다. 같은 설정으로 다시 시도하거나 다른 포맷을 선택해 주세요.",
+        conversion_runtime_error:
+            "브라우저 환경에서 일시적인 오류가 발생했습니다. 같은 설정으로 재시도하거나 다른 포맷을 선택해 주세요.",
+        unknown:
+            "브라우저 환경에서 일시적인 오류가 발생했습니다. 같은 설정으로 재시도하거나 다른 포맷을 선택해 주세요.",
+    };
+    const enGuide: Record<string, string> = {
+        unsupported_target_format:
+            "This output format is not supported in your browser. Try a different format.",
+        canvas_context_unavailable:
+            "Browser graphics resources are temporarily unavailable. Refresh and try again.",
+        memory_limit_exceeded:
+            "The image may be too large for available memory. Try a smaller file or another format.",
+        image_decode_failed:
+            "The file could not be decoded. Check the source file and try another format.",
+        conversion_aborted:
+            "Conversion was interrupted. Retry with the same settings or choose another format.",
+        conversion_runtime_error:
+            "A temporary browser error occurred. Retry with the same settings or choose another format.",
+        unknown:
+            "A temporary browser error occurred. Retry with the same settings or choose another format.",
+    };
+    const guideMap = locale === "en" ? enGuide : koGuide;
+    return guideMap[category] || guideMap.unknown;
+}
+
+function getRecoveryFormats(sourceFormat?: string, targetFormat?: string): string[] {
+    const source = (sourceFormat || "").toLowerCase();
+    const currentTarget = (targetFormat || "").toLowerCase();
+    const preferred = ["webp", "png", "jpg", "avif", "bmp", "gif", "ico"];
+
+    return preferred
+        .filter((format) => format !== source && format !== currentTarget)
+        .slice(0, 3);
+}
 
 export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const PRE_CONVERSION_DROPOFF_SESSION_KEY = "pre_conversion_dropoff_tracked";
@@ -58,6 +104,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const [progress, setProgress] = useState(0);
     const [result, setResult] = useState<ConversionResult | null>(null);
     const [error, setError] = useState<string>("");
+    const [failureCategory, setFailureCategory] = useState<string>("");
     const [isDragging, setIsDragging] = useState(false);
     const hasStartedConversionRef = useRef(false);
     const hasTrackedDropOffRef = useRef(false);
@@ -140,6 +187,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         setProgress(0);
         hasStartedConversionRef.current = false;
         retryAttemptRef.current = 0;
+        setFailureCategory("");
         lastFailureCategoryRef.current = "";
     }, [messages.invalidImage, trackLocaleEvent]);
 
@@ -196,6 +244,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             setStatus("converting");
             setProgress(20);
             setError("");
+            setFailureCategory("");
 
             // Simulate progress while converting
             const progressInterval = setInterval(() => {
@@ -227,6 +276,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                 retryAttemptRef.current = 0;
                 lastFailureCategoryRef.current = "";
             }
+            setFailureCategory("");
         } catch (err) {
             const failureCategory = classifyConversionError(err);
             setStatus("error");
@@ -237,6 +287,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                 failure_category: failureCategory,
                 error_name: err instanceof Error ? err.name : "UnknownError",
             });
+            setFailureCategory(failureCategory);
 
             if (retryAttemptRef.current > 0) {
                 trackLocaleEvent("conversion_retry_result", {
@@ -274,6 +325,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         setProgress(0);
         setResult(null);
         setError("");
+        setFailureCategory("");
         hasStartedConversionRef.current = false;
         retryAttemptRef.current = 0;
         lastFailureCategoryRef.current = "";
@@ -312,6 +364,10 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     }, [file, trackPreConversionDropOff]);
 
     const sourceExt = file ? getFileExtension(file.name) : undefined;
+    const recoveryFormats = useMemo(
+        () => getRecoveryFormats(sourceExt, targetFormat),
+        [sourceExt, targetFormat]
+    );
 
     return (
         <div className="w-full max-w-2xl mx-auto space-y-6">
@@ -400,16 +456,61 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                             setResult(null);
                             setStatus("idle");
                             setProgress(0);
+                            setError("");
+                            setFailureCategory("");
                         }}
                     />
+
+                    <div className="rounded-xl border border-[var(--glass-border)] bg-[var(--surface-200)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+                        파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.
+                    </div>
 
                     {/* Progress */}
                     <ConversionProgress status={status} progress={progress} messages={messages} />
 
                     {/* Error */}
                     {error && (
-                        <div className="text-sm text-red-400 bg-red-400/10 rounded-xl px-4 py-3 border border-red-400/20">
-                            {error}
+                        <div className="rounded-xl border border-red-400/25 bg-red-400/10 px-4 py-4 text-sm text-red-200">
+                            <p className="font-semibold text-red-100">
+                                {locale === "en" ? "Conversion failed." : "변환에 실패했어요."}
+                            </p>
+                            <p className="mt-1">{getFailureGuide(failureCategory, locale)}</p>
+                            <p className="mt-2 text-red-300/90">{error}</p>
+                            <p className="mt-2 text-red-300/90">
+                                {locale === "en"
+                                    ? "Your file was not uploaded to any server."
+                                    : "파일은 서버로 업로드되지 않았습니다."}
+                            </p>
+                            {recoveryFormats.length > 0 && (
+                                <div className="mt-3">
+                                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-red-200/80">
+                                        {locale === "en" ? "Try another format" : "다른 포맷으로 시도"}
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {recoveryFormats.map((format) => (
+                                            <button
+                                                key={format}
+                                                type="button"
+                                                className="rounded-lg border border-red-200/30 bg-red-200/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-red-100 transition hover:bg-red-200/20"
+                                                onClick={() => {
+                                                    setTargetFormat(format);
+                                                    setStatus("idle");
+                                                    setProgress(0);
+                                                    setError("");
+                                                    setFailureCategory("");
+                                                    trackLocaleEvent("format_selected", {
+                                                        source_format: sourceExt || "unknown",
+                                                        target_format: format,
+                                                        selection_context: "error_recovery",
+                                                    });
+                                                }}
+                                            >
+                                                {format}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -448,7 +549,11 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                             >
                                 {!targetFormat
                                     ? messages.chooseFormatLabel
-                                    : messages.convertLabel(sourceExt ?? "", targetFormat)}
+                                    : status === "error"
+                                      ? locale === "en"
+                                          ? "Retry with same settings"
+                                          : "같은 설정으로 다시 시도"
+                                      : messages.convertLabel(sourceExt ?? "", targetFormat)}
                             </Button>
                         )}
                     </div>
