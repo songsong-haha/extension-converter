@@ -42,3 +42,11 @@ Started: 2026-02-13T14:43:38Z
 - item id: US-002
 - changed files: loop/prd.json, loop/progress.txt
 - reusable learnings: Run lint/build/e2e sequentially in this repo during loop validation; running them in parallel can create transient failures around shared test-results and build artifacts.
+- time (UTC): 2026-02-13T15:28:53Z
+- item id: US-001
+- changed files: src/app/page.tsx, loop/progress.txt
+- reusable learnings: Keep hero CTA text imperative and specific to the first action, while deriving support claims from registry-backed format constants to avoid stale conversion promises.
+- time (UTC): 2026-02-13T15:37:39Z
+- item id: US-001
+- changed files: src/app/page.tsx, loop/progress.txt
+- reusable learnings: Generate hero support claims directly from format-registry-backed constants so CTA copy stays accurate as supported formats evolve.
