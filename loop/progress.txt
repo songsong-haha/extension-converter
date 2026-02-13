@@ -25,3 +25,8 @@ Started: 2026-02-13T18:13:09Z
 - item id: US-001C
 - changed files: src/app/page.tsx, src/features/converter/components/converter-widget.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
 - reusable learnings: Centralize locale-aware SEO metadata in the page-level metadata generator so query/header locale resolution stays consistent with rendered copy and FAQ schema; attach `locale` to every conversion funnel analytics event through one wrapper to avoid per-event drift.
+
+- time (UTC): 2026-02-13T18:51:28Z
+- item id: US-001
+- changed files: src/features/converter/components/converter-widget.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
+- reusable learnings: Keep failure-recovery UX locale-aware by layering category-specific guide copy and retry/alternative-format actions on top of the shared message dictionary; pin locale in e2e error-path tests to avoid Accept-Language-dependent CTA mismatches.
