@@ -4,8 +4,8 @@
 - Carry forward only reusable patterns, not raw logs.
 
 ---
-Started: 2026-02-13T19:12:35Z
+Started: 2026-02-13T19:17:43Z
 
-2026-02-13T19:16:24Z | US-001
-- changed files: docs/GROWTH_BACKLOG.md, loop/prd.json, loop/progress.txt, package.json, scripts/qa/track-growth-loop.mjs, tests/e2e/home.spec.ts, tests/track-growth-loop.test.mjs
-- reusable learnings: Keep growth dashboard inputs configurable via env-path overrides so loop automation can validate retry-success metrics deterministically with isolated fixtures.
+2026-02-13T19:21:07Z | US-001 | changed files: src/features/analytics/lib/ga.ts, src/features/converter/components/converter-widget.tsx, src/features/converter/components/format-selector.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt, docs/GROWTH_BACKLOG.md
+- Reusable learnings: Gate UX experiments with a single env flag and still include `experiment_variant` in both control and variant analytics payloads for clean downstream segmentation.
+- Reusable learnings: Keep experiment UI localized through existing message contracts; this avoids hard-coded strings and keeps e2e assertions stable across locales.
