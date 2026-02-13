@@ -65,6 +65,7 @@ export default function ConverterWidget() {
         setError("");
         setStatus("idle");
         setProgress(0);
+        hasStartedConversionRef.current = false;
     }, []);
 
     const handleDrop = useCallback(
@@ -158,6 +159,7 @@ export default function ConverterWidget() {
         setProgress(0);
         setResult(null);
         setError("");
+        hasStartedConversionRef.current = false;
     }, []);
 
     useEffect(() => {
@@ -177,14 +179,18 @@ export default function ConverterWidget() {
                 maybeTrackDropOff();
             }
         };
+        const handleBeforeUnload = () => {
+            maybeTrackDropOff();
+        };
 
         document.addEventListener("visibilitychange", handleVisibilityChange);
         window.addEventListener("pagehide", maybeTrackDropOff);
+        window.addEventListener("beforeunload", handleBeforeUnload);
 
         return () => {
             document.removeEventListener("visibilitychange", handleVisibilityChange);
             window.removeEventListener("pagehide", maybeTrackDropOff);
-            maybeTrackDropOff();
+            window.removeEventListener("beforeunload", handleBeforeUnload);
         };
     }, [file, trackPreConversionDropOff]);
 
