@@ -11,6 +11,33 @@ import type { FormatInfo } from "../lib/format-registry";
 import type { ConversionStatus, ConversionResult } from "../types";
 import { trackEvent } from "@/features/analytics/lib/ga";
 
+function classifyConversionError(err: unknown): string {
+    if (!(err instanceof Error)) {
+        return "unknown";
+    }
+
+    const message = err.message.toLowerCase();
+    const name = err.name.toLowerCase();
+
+    if (message.includes("unsupported target format")) {
+        return "unsupported_target_format";
+    }
+    if (message.includes("canvas context")) {
+        return "canvas_context_unavailable";
+    }
+    if (message.includes("out of memory") || message.includes("memory")) {
+        return "memory_limit_exceeded";
+    }
+    if (message.includes("createimagebitmap") || message.includes("imagebitmap")) {
+        return "image_decode_failed";
+    }
+    if (name === "aborterror") {
+        return "conversion_aborted";
+    }
+
+    return "conversion_runtime_error";
+}
+
 export default function ConverterWidget() {
     const PRE_CONVERSION_DROPOFF_SESSION_KEY = "pre_conversion_dropoff_tracked";
     const [file, setFile] = useState<File | null>(null);
@@ -23,6 +50,8 @@ export default function ConverterWidget() {
     const [isDragging, setIsDragging] = useState(false);
     const hasStartedConversionRef = useRef(false);
     const hasTrackedDropOffRef = useRef(false);
+    const retryAttemptRef = useRef(0);
+    const lastFailureCategoryRef = useRef<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const hasSessionDropOffMarker = useCallback((): boolean => {
@@ -90,6 +119,8 @@ export default function ConverterWidget() {
         setStatus("idle");
         setProgress(0);
         hasStartedConversionRef.current = false;
+        retryAttemptRef.current = 0;
+        lastFailureCategoryRef.current = "";
     }, []);
 
     const handleDrop = useCallback(
@@ -123,8 +154,20 @@ export default function ConverterWidget() {
     const handleConvert = useCallback(async () => {
         if (!file || !targetFormat) return;
 
+        const sourceFormat = getFileExtension(file.name) || "unknown";
+        const isRetry = status === "error";
+
+        if (isRetry) {
+            retryAttemptRef.current += 1;
+            trackEvent("conversion_retry_started", {
+                source_format: sourceFormat,
+                target_format: targetFormat,
+                retry_attempt: retryAttemptRef.current,
+                previous_failure_category: lastFailureCategoryRef.current || "unknown",
+            });
+        }
+
         try {
-            const sourceFormat = getFileExtension(file.name) || "unknown";
             hasStartedConversionRef.current = true;
             trackEvent("conversion_started", {
                 source_format: sourceFormat,
@@ -152,14 +195,42 @@ export default function ConverterWidget() {
                 original_size_bytes: result.originalSize,
                 converted_size_bytes: result.convertedSize,
             });
+
+            if (retryAttemptRef.current > 0) {
+                trackEvent("conversion_retry_result", {
+                    source_format: sourceFormat,
+                    target_format: result.format,
+                    retry_attempt: retryAttemptRef.current,
+                    retry_outcome: "success",
+                    previous_failure_category: lastFailureCategoryRef.current || "unknown",
+                });
+                retryAttemptRef.current = 0;
+                lastFailureCategoryRef.current = "";
+            }
         } catch (err) {
+            const failureCategory = classifyConversionError(err);
             setStatus("error");
             setError(err instanceof Error ? err.message : "변환 중 오류가 발생했습니다.");
             trackEvent("conversion_failed", {
+                source_format: sourceFormat,
                 target_format: targetFormat,
+                failure_category: failureCategory,
+                error_name: err instanceof Error ? err.name : "UnknownError",
             });
+
+            if (retryAttemptRef.current > 0) {
+                trackEvent("conversion_retry_result", {
+                    source_format: sourceFormat,
+                    target_format: targetFormat,
+                    retry_attempt: retryAttemptRef.current,
+                    retry_outcome: "failed",
+                    failure_category: failureCategory,
+                });
+            }
+
+            lastFailureCategoryRef.current = failureCategory;
         }
-    }, [file, targetFormat]);
+    }, [file, status, targetFormat]);
 
     const handleDownload = useCallback(() => {
         if (!result) return;
@@ -184,6 +255,8 @@ export default function ConverterWidget() {
         setResult(null);
         setError("");
         hasStartedConversionRef.current = false;
+        retryAttemptRef.current = 0;
+        lastFailureCategoryRef.current = "";
     }, []);
 
     useEffect(() => {
