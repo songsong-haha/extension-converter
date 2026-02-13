@@ -36,9 +36,17 @@ pnpm agent:create analytics event-retention main ga
 - `conversion_started`
 - `conversion_completed`
 - `conversion_failed`
+- `conversion_retry_started`
+- `conversion_retry_result`
 - `file_downloaded`
 
 필요 시 `src/features/analytics/lib/ga.ts`의 `AnalyticsEventName` 타입에 이벤트를 추가하고, 해당 이벤트를 발행하는 UI 지점을 명시적으로 연결합니다.
+
+실패 관측 지표:
+
+- `conversion_failed.failure_category`: 실패 원인 분류값
+- `conversion_retry_result.retry_outcome`: `success`/`failed`
+- 대시보드 파이프라인(`npm run growth:track`)은 `test-results/analytics/events.ndjson`를 읽어 `conversion_failed_to_retry_success_rate`를 계산합니다.
 
 ## 5) 검증 체크
 
