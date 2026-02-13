@@ -35,6 +35,18 @@ test.describe("homepage conversion funnel", () => {
     await expect(page.getByText("이미지를 드래그하거나 클릭하여 업로드")).toBeVisible();
   });
 
+  test("keeps primary CTA visible within first mobile viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/");
+
+    const cta = page.getByRole("link", { name: "파일 업로드하고 변환" });
+    await expect(cta).toBeVisible();
+
+    const box = await cta.boundingBox();
+    expect(box).not.toBeNull();
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(667);
+  });
+
   test("renders FAQ entries and FAQ structured data", async ({ page }) => {
     await page.goto("/");
 

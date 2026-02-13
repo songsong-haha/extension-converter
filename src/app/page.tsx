@@ -125,29 +125,29 @@ export default function Home() {
         <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[var(--accent-500)] rounded-full opacity-[0.04] blur-[100px]" />
       </div>
 
-      <main className="relative max-w-4xl mx-auto px-6 py-16 sm:py-24">
+      <main className="relative max-w-4xl mx-auto px-6 py-10 sm:py-24">
         {/* Hero */}
-        <section className="text-center mb-16 animate-fade-up">
+        <section className="text-center mb-10 sm:mb-16 animate-fade-up">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-[var(--text-secondary)] mb-6 backdrop-blur-xl">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-[var(--text-secondary)] mb-4 sm:mb-6 backdrop-blur-xl">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--success-400)] animate-pulse" />
             100% 무료 · 서버 업로드 없음
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-4">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-3 sm:mb-4">
             업로드 한 번으로,
             <br className="hidden sm:block" />{" "}
             <span className="text-gradient">원하는 포맷으로 바로 변환</span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
             {HERO_SUPPORT_COPY}
             <br className="sm:hidden" /> 회원가입 없이 브라우저에서 바로 변환하세요.
           </p>
 
           <a
             href="#converter-widget"
-            className="inline-flex mt-8 items-center justify-center rounded-xl bg-[var(--primary-500)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-400)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-400)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-100)]"
+            className="inline-flex mt-6 sm:mt-8 items-center justify-center rounded-xl bg-[var(--primary-500)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-400)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-400)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-100)]"
           >
             {PRIMARY_CTA_LABEL}
           </a>
@@ -156,7 +156,7 @@ export default function Home() {
         {/* Converter */}
         <section
           id="converter-widget"
-          className="glass p-6 sm:p-8 mb-20 animate-fade-up"
+          className="glass p-6 sm:p-8 mb-16 sm:mb-20 animate-fade-up"
           style={{ animationDelay: "0.2s" }}
         >
           <ConverterWidget />

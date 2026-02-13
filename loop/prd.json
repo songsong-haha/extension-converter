@@ -1,21 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/conversion-proof",
-  "description": "Auto-seeded from backlog: 변환 완료 후 신뢰 문구 1줄 추가",
+  "branchName": "agent/growth/mobile-cta-visibility",
+  "description": "Auto-seeded from backlog: 모바일 1스크린 내 CTA 가시성 개선",
   "userStories": [
     {
       "id": "US-001",
-      "title": "변환 완료 후 신뢰 문구 1줄 추가",
-      "description": "Implement backlog ticket `conversion-proof` with measurable impact on conversion_complete rate.",
+      "title": "모바일 1스크린 내 CTA 가시성 개선",
+      "description": "Implement backlog ticket `mobile-cta-visibility` with measurable impact on mobile bounce rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `conversion-proof` is implemented.",
+        "Backlog ticket `mobile-cta-visibility` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "seeded_from_backlog=true; metric=conversion_complete rate; owner=growth+qa"
+      "notes": "seeded_from_backlog=true; metric=mobile bounce rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }
