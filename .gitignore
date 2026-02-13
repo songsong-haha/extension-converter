@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/test-results/
 
 # next.js
 /.next/
@@ -43,3 +44,4 @@ next-env.d.ts
 # worktree / multi-agent runtime state
 /.worktrees/
 /.agents/*.json
+/.agents/*.md

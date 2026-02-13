@@ -1,0 +1,43 @@
+name: Growth Loop
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  continuous-growth-qa:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browser
+        run: npx -y playwright@1.56.0 install --with-deps chromium
+
+      - name: Run quality gate
+        run: npm run qa:gate
+
+      - name: Suggest next micro-task
+        run: node scripts/worktree/suggest-next-task.mjs
+        if: always()
+
+      - name: Upload growth loop artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: growth-loop-artifacts
+          path: |
+            test-results/playwright
+            test-results/ai-qa
+          if-no-files-found: ignore

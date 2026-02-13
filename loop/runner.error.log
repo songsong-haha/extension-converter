@@ -1,0 +1,15 @@
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+job-working-directory: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+/bin/bash: /Users/song-eun-u/Documents/github/extension-converter/scripts/loop/codex-loop.sh: Operation not permitted
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+job-working-directory: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+/bin/bash: /Users/song-eun-u/Documents/github/extension-converter/scripts/loop/codex-loop.sh: Operation not permitted
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+job-working-directory: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+/bin/bash: /Users/song-eun-u/Documents/github/extension-converter/scripts/loop/codex-loop.sh: Operation not permitted
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+job-working-directory: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+/bin/bash: /Users/song-eun-u/Documents/github/extension-converter/scripts/loop/codex-loop.sh: Operation not permitted
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+job-working-directory: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+/bin/bash: /Users/song-eun-u/Documents/github/extension-converter/scripts/loop/codex-loop.sh: Operation not permitted
