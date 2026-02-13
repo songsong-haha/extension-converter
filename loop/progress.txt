@@ -4,11 +4,9 @@
 - Carry forward only reusable patterns, not raw logs.
 
 ---
-Started: 2026-02-13T19:22:37Z
+Started: 2026-02-13T19:26:28Z
 
-## 2026-02-13T19:24:54Z
-- item: US-001
-- changed files: docs/GROWTH_BACKLOG.md, loop/prd.json, loop/progress.txt, src/features/converter/components/converter-widget.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts
-- reusable learnings:
-  - Failure-category-aware recovery format ordering makes retry UX more actionable without changing core conversion logic.
-  - Localized recommendation copy near recovery buttons clarifies the next best step and can reduce post-failure hesitation.
+- time (UTC): 2026-02-13T19:30:50Z
+- item id: US-001
+- changed files: middleware.ts, src/i18n/constants.ts, src/i18n/resolve-locale.ts, src/app/layout.tsx, src/app/page.tsx, src/components/locale-html-sync.tsx, src/app/global-error.tsx, tests/e2e/home.spec.ts, docs/GROWTH_BACKLOG.md, loop/prd.json, loop/progress.txt
+- reusable learnings: Use middleware + shared locale resolver to keep query/cookie/accept-language priority consistent across server rendering; sync `document.documentElement.lang` from resolved route locale to avoid stale lang on client navigations.

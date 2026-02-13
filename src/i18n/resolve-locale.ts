@@ -2,6 +2,7 @@ import { DEFAULT_LOCALE, type Locale, isSupportedLocale } from "./messages";
 
 interface ResolveLocaleOptions {
   langParam?: string | string[];
+  persistedLocale?: string | null;
   acceptLanguage?: string | null;
 }
 
@@ -28,6 +29,7 @@ function parseAcceptLanguage(acceptLanguage: string): string[] {
 
 export function resolveLocale({
   langParam,
+  persistedLocale,
   acceptLanguage,
 }: ResolveLocaleOptions): Locale {
   const normalizedLangParam = Array.isArray(langParam) ? langParam[0] : langParam;
@@ -35,6 +37,13 @@ export function resolveLocale({
     const fromParam = normalizeLocaleCandidate(normalizedLangParam);
     if (isSupportedLocale(fromParam)) {
       return fromParam;
+    }
+  }
+
+  if (persistedLocale) {
+    const fromPersistedLocale = normalizeLocaleCandidate(persistedLocale);
+    if (isSupportedLocale(fromPersistedLocale)) {
+      return fromPersistedLocale;
     }
   }
 

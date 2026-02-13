@@ -37,6 +37,7 @@ test.describe("homepage conversion funnel", () => {
     await expect(
       page.getByRole("heading", { name: /One upload,\s*instant conversion to your target format/i })
     ).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(page.getByRole("heading", { name: "100% free" })).toBeVisible();
     await expect(page.getByText("100% free · no server uploads")).toBeVisible();
     await expect(page.getByText("Frequently asked questions")).toBeVisible();
@@ -59,6 +60,7 @@ test.describe("homepage conversion funnel", () => {
         name: /One upload,\s*instant conversion to your target format/i,
       })
     ).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
 
     await context.close();
   });
@@ -221,6 +223,7 @@ test.describe("homepage conversion funnel", () => {
 
   test("localizes metadata and FAQ schema by selected locale", async ({ page }) => {
     await page.goto("/?lang=en");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(page).toHaveTitle("ExtensionConverter — Free image format converter");
     const englishDescription = await page
       .locator('meta[name="description"]')
@@ -237,6 +240,7 @@ test.describe("homepage conversion funnel", () => {
     expect(hasEnglishFaqSchema).toBe(true);
 
     await page.goto("/?lang=ko");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ko");
     await expect(page).toHaveTitle("ExtensionConverter — 무료 이미지 포맷 변환기");
     const koreanDescription = await page
       .locator('meta[name="description"]')

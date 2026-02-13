@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
+import LocaleHtmlSync from "@/components/locale-html-sync";
 import ThemeToggle from "@/components/theme-toggle";
 import ConverterWidget from "@/features/converter/components/converter-widget";
 import { UNIQUE_TARGET_FORMATS } from "@/features/converter/lib/format-registry";
+import { LOCALE_HEADER_NAME } from "@/i18n/constants";
 import { HOME_MESSAGES, SEO_MESSAGES, type Locale } from "@/i18n/messages";
 import { resolveLocale } from "@/i18n/resolve-locale";
 
@@ -36,6 +38,7 @@ async function resolveRequestLocale(searchParams: HomeProps["searchParams"]): Pr
   const requestHeaders = await headers();
   return resolveLocale({
     langParam: resolvedSearchParams.lang,
+    persistedLocale: requestHeaders.get(LOCALE_HEADER_NAME),
     acceptLanguage: requestHeaders.get("accept-language"),
   });
 }
@@ -181,6 +184,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="bg-gradient-animated min-h-screen">
+      <LocaleHtmlSync locale={locale} />
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[var(--primary-500)] rounded-full opacity-[0.04] blur-[100px]" />
         <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[var(--accent-500)] rounded-full opacity-[0.04] blur-[100px]" />
