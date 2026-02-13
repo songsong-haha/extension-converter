@@ -3,9 +3,9 @@ import { UNIQUE_TARGET_FORMATS } from "@/features/converter/lib/format-registry"
 
 const SUPPORTED_FORMAT_LABELS = UNIQUE_TARGET_FORMATS.map((format) => format.label);
 const SUPPORTED_FORMAT_COUNT = SUPPORTED_FORMAT_LABELS.length;
-const HERO_FORMAT_PREVIEW = SUPPORTED_FORMAT_LABELS.slice(0, 4).join(" · ");
-const HERO_SUPPORT_COPY = `${HERO_FORMAT_PREVIEW} 포함 총 ${SUPPORTED_FORMAT_COUNT}개 포맷 변환 지원`;
-const PRIMARY_CTA_LABEL = "이미지 업로드하고 무료 변환";
+const HERO_FORMAT_PREVIEW = SUPPORTED_FORMAT_LABELS.slice(0, 4).join(", ");
+const HERO_SUPPORT_COPY = `${HERO_FORMAT_PREVIEW} 등 총 ${SUPPORTED_FORMAT_COUNT}개 포맷을 브라우저에서 바로 변환할 수 있어요.`;
+const PRIMARY_CTA_LABEL = "무료 변환 시작하기";
 
 const FEATURES = [
     {

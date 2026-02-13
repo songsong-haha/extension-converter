@@ -29,3 +29,7 @@ Started: 2026-02-13T14:43:38Z
 - changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/progress.txt
 - reusable learnings: When tightening hero messaging, keep one unambiguous primary CTA and update E2E headline matchers in the same change to prevent copy-related regressions.
 
+- time (UTC): 2026-02-13T15:16:37Z
+- item id: US-001
+- changed files: src/app/page.tsx, loop/progress.txt
+- reusable learnings: Keep the hero CTA action-first and short, while deriving support-copy format claims from registry-backed constants so marketing text stays accurate automatically.
