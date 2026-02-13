@@ -72,6 +72,7 @@ export interface ConverterMessages {
   conversionFailedHeading: string;
   errorUploadSafetyMessage: string;
   recoveryFormatsHeading: string;
+  recoveryRecommendedFormat: (format: string) => string;
   retrySameSettingsLabel: string;
   failureGuides: Record<string, string>;
   downloadLabel: (filename: string) => string;
@@ -196,6 +197,7 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
     conversionFailedHeading: "변환에 실패했어요.",
     errorUploadSafetyMessage: "파일은 서버로 업로드되지 않았습니다.",
     recoveryFormatsHeading: "다른 포맷으로 시도",
+    recoveryRecommendedFormat: (format) => `추천 포맷: ${format.toUpperCase()}`,
     retrySameSettingsLabel: "같은 설정으로 다시 시도",
     failureGuides: {
       unsupported_target_format:
@@ -258,6 +260,7 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
     conversionFailedHeading: "Conversion failed.",
     errorUploadSafetyMessage: "Your file was not uploaded to any server.",
     recoveryFormatsHeading: "Try another format",
+    recoveryRecommendedFormat: (format) => `Recommended format: ${format.toUpperCase()}`,
     retrySameSettingsLabel: "Retry with same settings",
     failureGuides: {
       unsupported_target_format:
