@@ -75,6 +75,11 @@ export interface ConverterMessages {
   chooseFormatLabel: string;
   convertLabel: (source: string, target: string) => string;
   chooseAnotherFile: string;
+  postConversionAdBadge: string;
+  postConversionAdTitle: string;
+  postConversionAdDescription: string;
+  postConversionAdCtaLabel: string;
+  postConversionAdHref: string;
   removeFileAriaLabel: string;
 }
 
@@ -200,6 +205,12 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
     chooseFormatLabel: "포맷을 선택하세요",
     convertLabel: (source, target) => `${source.toUpperCase()} → ${target.toUpperCase()} 변환`,
     chooseAnotherFile: "다른 파일",
+    postConversionAdBadge: "스폰서 추천",
+    postConversionAdTitle: "다음 작업도 빠르게 처리해보세요",
+    postConversionAdDescription:
+      "압축/리사이즈 등 후속 작업에 도움이 되는 파트너 도구를 확인할 수 있어요.",
+    postConversionAdCtaLabel: "추천 도구 보기",
+    postConversionAdHref: "https://squoosh.app/",
     removeFileAriaLabel: "파일 제거",
   },
   en: {
@@ -247,6 +258,12 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
     chooseFormatLabel: "Choose a format",
     convertLabel: (source, target) => `Convert ${source.toUpperCase()} → ${target.toUpperCase()}`,
     chooseAnotherFile: "Another file",
+    postConversionAdBadge: "Sponsored",
+    postConversionAdTitle: "Continue with your next image task",
+    postConversionAdDescription:
+      "Need compression or resizing after conversion? Explore this partner tool.",
+    postConversionAdCtaLabel: "Open partner tool",
+    postConversionAdHref: "https://squoosh.app/",
     removeFileAriaLabel: "Remove file",
   },
 };

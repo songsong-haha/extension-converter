@@ -1,21 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/performance-budget-and-image-optimization-phase-4",
-  "description": "Auto-seeded from backlog: LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 4)",
+  "branchName": "agent/growth/ad-placement-post-conversion-phase-5",
+  "description": "Auto-seeded from backlog: 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 5)",
   "userStories": [
     {
       "id": "US-001",
-      "title": "LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 4)",
-      "description": "Implement backlog ticket `performance-budget-and-image-optimization-phase-4` with measurable impact on mobile bounce rate.",
+      "title": "광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 5)",
+      "description": "Implement backlog ticket `ad-placement-post-conversion-phase-5` with measurable impact on conversion_completed rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `performance-budget-and-image-optimization-phase-4` is implemented.",
+        "Backlog ticket `ad-placement-post-conversion-phase-5` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "seeded_from_backlog=true; metric=mobile bounce rate; owner=ceo+growth+qa+analytics+designer"
+      "notes": "seeded_from_backlog=true; metric=conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }

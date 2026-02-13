@@ -202,6 +202,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const retryAttemptRef = useRef(0);
     const lastFailureCategoryRef = useRef<string>("");
     const previewUrlRef = useRef<string>("");
+    const postConversionAdImpressionTrackedRef = useRef(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const trackLocaleEvent = useCallback(
         (eventName: AnalyticsEventName, params: AnalyticsParams = {}) => {
@@ -310,6 +311,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         retryAttemptRef.current = 0;
         setFailureCategory("");
         lastFailureCategoryRef.current = "";
+        postConversionAdImpressionTrackedRef.current = false;
     }, [messages.invalidImage, trackLocaleEvent, updatePreviewUrl]);
 
     const handleDrop = useCallback(
@@ -389,6 +391,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                 original_size_bytes: result.originalSize,
                 converted_size_bytes: result.convertedSize,
             });
+            postConversionAdImpressionTrackedRef.current = false;
 
             if (retryAttemptRef.current > 0) {
                 trackLocaleEvent("conversion_retry_result", {
@@ -454,6 +457,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         hasStartedConversionRef.current = false;
         retryAttemptRef.current = 0;
         lastFailureCategoryRef.current = "";
+        postConversionAdImpressionTrackedRef.current = false;
     }, [clearPreviewUrl]);
 
     useEffect(() => {
@@ -501,6 +505,20 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         () => getRecoveryFormats(sourceExt, targetFormat),
         [sourceExt, targetFormat]
     );
+    const shouldShowPostConversionAd = status === "done" && Boolean(result);
+
+    useEffect(() => {
+        if (!shouldShowPostConversionAd || postConversionAdImpressionTrackedRef.current || !result) {
+            return;
+        }
+
+        trackLocaleEvent("post_conversion_ad_impression", {
+            source_format: sourceExt || "unknown",
+            target_format: result.format,
+            placement: "converter_post_conversion",
+        });
+        postConversionAdImpressionTrackedRef.current = true;
+    }, [result, shouldShowPostConversionAd, sourceExt, trackLocaleEvent]);
 
     return (
         <div className="w-full max-w-2xl mx-auto space-y-6">
@@ -648,6 +666,37 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                         <p className="text-sm text-[var(--text-secondary)]">
                             {messages.trustMessage}
                         </p>
+                    )}
+                    {shouldShowPostConversionAd && (
+                        <aside
+                            className="rounded-xl border border-[var(--glass-border)] bg-[var(--surface-200)]/70 px-4 py-4"
+                            data-testid="post-conversion-ad-slot"
+                        >
+                            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                                {messages.postConversionAdBadge}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
+                                {messages.postConversionAdTitle}
+                            </p>
+                            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                                {messages.postConversionAdDescription}
+                            </p>
+                            <a
+                                className="mt-3 inline-flex items-center rounded-lg border border-[var(--primary-400)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-300)]"
+                                href={messages.postConversionAdHref}
+                                target="_blank"
+                                rel="sponsored noopener noreferrer"
+                                onClick={() => {
+                                    trackLocaleEvent("post_conversion_ad_click", {
+                                        source_format: sourceExt || "unknown",
+                                        target_format: result?.format || "unknown",
+                                        placement: "converter_post_conversion",
+                                    });
+                                }}
+                            >
+                                {messages.postConversionAdCtaLabel}
+                            </a>
+                        </aside>
                     )}
                     <div className="flex gap-3">
                         {status === "done" && result ? (
