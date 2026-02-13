@@ -2,6 +2,7 @@ import ConverterWidget from "@/features/converter/components/converter-widget";
 import { UNIQUE_TARGET_FORMATS } from "@/features/converter/lib/format-registry";
 
 const SUPPORTED_FORMATS_TEXT = UNIQUE_TARGET_FORMATS.map((format) => format.label).join(", ");
+const PRIMARY_CTA_LABEL = "파일 업로드하고 무료 변환";
 
 const FEATURES = [
     {
@@ -102,20 +103,21 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-4">
-            파일 확장자,{" "}
-            <span className="text-gradient">3초</span>만에 변환
+            이미지 확장자 변환,
+            <br className="hidden sm:block" />{" "}
+            <span className="text-gradient">업로드 한 번</span>으로 완료
           </h1>
 
-          <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed">
-            {SUPPORTED_FORMATS_TEXT}
-            <br className="sm:hidden" /> 변환을 브라우저에서 바로.
+          <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
+            지원 포맷: {SUPPORTED_FORMATS_TEXT}
+            <br className="sm:hidden" /> 회원가입 없이 브라우저에서 바로 변환하세요.
           </p>
 
           <a
             href="#converter-widget"
             className="inline-flex mt-8 items-center justify-center rounded-xl bg-[var(--primary-500)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-400)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-400)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-100)]"
           >
-            무료 변환 시작하기
+            {PRIMARY_CTA_LABEL}
           </a>
         </section>
 
