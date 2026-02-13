@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import GoogleAnalytics from "@/features/analytics/components/google-analytics";
 import PageViewTracker from "@/features/analytics/components/page-view-tracker";
+import WebVitalsTracker from "@/features/analytics/components/web-vitals-tracker";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -43,6 +44,7 @@ export default function RootLayout({
         <GoogleAnalytics />
         <Suspense fallback={null}>
           <PageViewTracker />
+          <WebVitalsTracker />
         </Suspense>
         {children}
       </body>

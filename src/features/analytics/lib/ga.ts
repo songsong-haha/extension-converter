@@ -9,7 +9,10 @@ export type AnalyticsEventName =
   | "conversion_failed"
   | "conversion_retry_started"
   | "conversion_retry_result"
-  | "file_downloaded";
+  | "file_downloaded"
+  | "preview_image_optimized"
+  | "web_vital_measured"
+  | "performance_budget_exceeded";
 
 type EventParams = Record<string, string | number | boolean | undefined>;
 

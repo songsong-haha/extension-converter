@@ -83,6 +83,108 @@ function getRecoveryFormats(sourceFormat?: string, targetFormat?: string): strin
         .slice(0, 3);
 }
 
+const PREVIEW_MAX_EDGE = 320;
+const PREVIEW_MIN_REDUCTION_RATIO = 0.1;
+const PREVIEW_QUALITY = 0.82;
+
+function canOptimizePreview(fileType: string): boolean {
+    return (
+        fileType === "image/jpeg" ||
+        fileType === "image/png" ||
+        fileType === "image/webp" ||
+        fileType === "image/avif"
+    );
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob | null> {
+    return new Promise((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), "image/webp", quality);
+    });
+}
+
+async function buildPreviewImage(
+    file: File
+): Promise<{ url: string; optimized: boolean; bytes: number; format: string }> {
+    const originalUrl = URL.createObjectURL(file);
+
+    if (typeof window === "undefined" || !canOptimizePreview(file.type)) {
+        return {
+            url: originalUrl,
+            optimized: false,
+            bytes: file.size,
+            format: file.type || "unknown",
+        };
+    }
+
+    let bitmap: ImageBitmap | null = null;
+    try {
+        bitmap = await createImageBitmap(file);
+        const longestEdge = Math.max(bitmap.width, bitmap.height);
+        const scale = Math.min(1, PREVIEW_MAX_EDGE / longestEdge);
+
+        if (scale === 1) {
+            return {
+                url: originalUrl,
+                optimized: false,
+                bytes: file.size,
+                format: file.type || "unknown",
+            };
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        const context = canvas.getContext("2d");
+        if (!context) {
+            return {
+                url: originalUrl,
+                optimized: false,
+                bytes: file.size,
+                format: file.type || "unknown",
+            };
+        }
+
+        context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        const optimizedBlob = await canvasToBlob(canvas, PREVIEW_QUALITY);
+        if (!optimizedBlob) {
+            return {
+                url: originalUrl,
+                optimized: false,
+                bytes: file.size,
+                format: file.type || "unknown",
+            };
+        }
+
+        const reducedRatio = (file.size - optimizedBlob.size) / file.size;
+        if (reducedRatio < PREVIEW_MIN_REDUCTION_RATIO) {
+            return {
+                url: originalUrl,
+                optimized: false,
+                bytes: file.size,
+                format: file.type || "unknown",
+            };
+        }
+
+        const optimizedUrl = URL.createObjectURL(optimizedBlob);
+        URL.revokeObjectURL(originalUrl);
+        return {
+            url: optimizedUrl,
+            optimized: true,
+            bytes: optimizedBlob.size,
+            format: optimizedBlob.type || "image/webp",
+        };
+    } catch {
+        return {
+            url: originalUrl,
+            optimized: false,
+            bytes: file.size,
+            format: file.type || "unknown",
+        };
+    } finally {
+        bitmap?.close();
+    }
+}
+
 export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const PRE_CONVERSION_DROPOFF_SESSION_KEY = "pre_conversion_dropoff_tracked";
     const messages = CONVERTER_MESSAGES[locale];
@@ -99,6 +201,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const hasTrackedDropOffRef = useRef(false);
     const retryAttemptRef = useRef(0);
     const lastFailureCategoryRef = useRef<string>("");
+    const previewUrlRef = useRef<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
     const trackLocaleEvent = useCallback(
         (eventName: AnalyticsEventName, params: AnalyticsParams = {}) => {
@@ -154,7 +257,23 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         [hasSessionDropOffMarker, setSessionDropOffMarker, trackLocaleEvent]
     );
 
-    const handleFile = useCallback((f: File) => {
+    const updatePreviewUrl = useCallback((url: string) => {
+        if (previewUrlRef.current) {
+            URL.revokeObjectURL(previewUrlRef.current);
+        }
+        previewUrlRef.current = url;
+        setPreviewUrl(url);
+    }, []);
+
+    const clearPreviewUrl = useCallback(() => {
+        if (previewUrlRef.current) {
+            URL.revokeObjectURL(previewUrlRef.current);
+            previewUrlRef.current = "";
+        }
+        setPreviewUrl("");
+    }, []);
+
+    const handleFile = useCallback(async (f: File) => {
         const extension = getFileExtension(f.name);
         if (!isValidImage(f)) {
             trackLocaleEvent("file_selected", {
@@ -169,8 +288,20 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             source_format: extension || "unknown",
             file_size_bytes: f.size,
         });
+
+        const preview = await buildPreviewImage(f);
+        if (preview.optimized) {
+            trackLocaleEvent("preview_image_optimized", {
+                source_format: extension || "unknown",
+                original_size_bytes: f.size,
+                preview_size_bytes: preview.bytes,
+                preview_format: preview.format,
+                reduction_ratio: Number(((f.size - preview.bytes) / f.size).toFixed(4)),
+            });
+        }
+
         setFile(f);
-        setPreviewUrl(URL.createObjectURL(f));
+        updatePreviewUrl(preview.url);
         setResult(null);
         setError("");
         setStatus("idle");
@@ -179,14 +310,16 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         retryAttemptRef.current = 0;
         setFailureCategory("");
         lastFailureCategoryRef.current = "";
-    }, [messages.invalidImage, trackLocaleEvent]);
+    }, [messages.invalidImage, trackLocaleEvent, updatePreviewUrl]);
 
     const handleDrop = useCallback(
         (e: React.DragEvent) => {
             e.preventDefault();
             setIsDragging(false);
             const f = e.dataTransfer.files[0];
-            if (f) handleFile(f);
+            if (f) {
+                void handleFile(f);
+            }
         },
         [handleFile]
     );
@@ -204,7 +337,9 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const handleFileInput = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const f = e.target.files?.[0];
-            if (f) handleFile(f);
+            if (f) {
+                void handleFile(f);
+            }
         },
         [handleFile]
     );
@@ -309,7 +444,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
 
     const handleReset = useCallback(() => {
         setFile(null);
-        setPreviewUrl("");
+        clearPreviewUrl();
         setTargetFormat("");
         setStatus("idle");
         setProgress(0);
@@ -319,6 +454,14 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         hasStartedConversionRef.current = false;
         retryAttemptRef.current = 0;
         lastFailureCategoryRef.current = "";
+    }, [clearPreviewUrl]);
+
+    useEffect(() => {
+        return () => {
+            if (previewUrlRef.current) {
+                URL.revokeObjectURL(previewUrlRef.current);
+            }
+        };
     }, []);
 
     useEffect(() => {
