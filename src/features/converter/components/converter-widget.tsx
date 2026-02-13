@@ -266,6 +266,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const [status, setStatus] = useState<ConversionStatus>("idle");
     const [progress, setProgress] = useState(0);
     const [result, setResult] = useState<ConversionResult | null>(null);
+    const [hasDownloadedResult, setHasDownloadedResult] = useState(false);
     const [error, setError] = useState<string>("");
     const [failureCategory, setFailureCategory] = useState<string>("");
     const [isDragging, setIsDragging] = useState(false);
@@ -396,6 +397,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         setFile(f);
         updatePreviewUrl(preview.url);
         setResult(null);
+        setHasDownloadedResult(false);
         setError("");
         setStatus("idle");
         setProgress(0);
@@ -477,6 +479,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             clearInterval(progressInterval);
             setProgress(100);
             setResult(result);
+            setHasDownloadedResult(false);
             setStatus("done");
             trackLocaleEvent("conversion_completed", {
                 source_format: sourceFormat,
@@ -537,6 +540,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             output_format: result.format,
             output_size_bytes: result.convertedSize,
         });
+        setHasDownloadedResult(true);
     }, [result, trackLocaleEvent]);
 
     const handleReset = useCallback(() => {
@@ -546,6 +550,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         setStatus("idle");
         setProgress(0);
         setResult(null);
+        setHasDownloadedResult(false);
         setError("");
         setFailureCategory("");
         hasStartedConversionRef.current = false;
@@ -614,7 +619,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         [failureCategory, sourceExt, targetFormat]
     );
     const recommendedRecoveryFormat = recoveryFormats[0];
-    const shouldShowPostConversionAd = status === "done" && Boolean(result);
+    const shouldShowPostConversionAd = status === "done" && Boolean(result) && hasDownloadedResult;
 
     useEffect(() => {
         if (!shouldShowPostConversionAd || postConversionAdImpressionTrackedRef.current || !result) {
@@ -627,7 +632,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             placement: "converter_post_conversion",
         });
         postConversionAdImpressionTrackedRef.current = true;
-    }, [result, shouldShowPostConversionAd, sourceExt, trackLocaleEvent]);
+    }, [hasDownloadedResult, result, shouldShowPostConversionAd, sourceExt, trackLocaleEvent]);
 
     return (
         <div className="w-full max-w-2xl mx-auto space-y-6">
@@ -726,6 +731,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                             selectedFromGuidanceRef.current = false;
                             setTargetFormat(f.extension);
                             setResult(null);
+                            setHasDownloadedResult(false);
                             setStatus("idle");
                             setProgress(0);
                             setError("");
@@ -796,37 +802,6 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                             {messages.trustMessage}
                         </p>
                     )}
-                    {shouldShowPostConversionAd && (
-                        <aside
-                            className="rounded-xl border border-[var(--glass-border)] bg-[var(--surface-200)]/70 px-4 py-4"
-                            data-testid="post-conversion-ad-slot"
-                        >
-                            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                                {messages.postConversionAdBadge}
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
-                                {messages.postConversionAdTitle}
-                            </p>
-                            <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                                {messages.postConversionAdDescription}
-                            </p>
-                            <a
-                                className="mt-3 inline-flex items-center rounded-lg border border-[var(--primary-400)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-300)]"
-                                href={messages.postConversionAdHref}
-                                target="_blank"
-                                rel="sponsored noopener noreferrer"
-                                onClick={() => {
-                                    trackLocaleEvent("post_conversion_ad_click", {
-                                        source_format: sourceExt || "unknown",
-                                        target_format: result?.format || "unknown",
-                                        placement: "converter_post_conversion",
-                                    });
-                                }}
-                            >
-                                {messages.postConversionAdCtaLabel}
-                            </a>
-                        </aside>
-                    )}
                     <div className="flex gap-3">
                         {status === "done" && result ? (
                             <>
@@ -862,6 +837,37 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                             </Button>
                         )}
                     </div>
+                    {shouldShowPostConversionAd && (
+                        <aside
+                            className="rounded-xl border border-[var(--glass-border)] bg-[var(--surface-200)]/70 px-4 py-4"
+                            data-testid="post-conversion-ad-slot"
+                        >
+                            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                                {messages.postConversionAdBadge}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
+                                {messages.postConversionAdTitle}
+                            </p>
+                            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                                {messages.postConversionAdDescription}
+                            </p>
+                            <a
+                                className="mt-3 inline-flex items-center rounded-lg border border-[var(--primary-400)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-300)]"
+                                href={messages.postConversionAdHref}
+                                target="_blank"
+                                rel="sponsored noopener noreferrer"
+                                onClick={() => {
+                                    trackLocaleEvent("post_conversion_ad_click", {
+                                        source_format: sourceExt || "unknown",
+                                        target_format: result?.format || "unknown",
+                                        placement: "converter_post_conversion",
+                                    });
+                                }}
+                            >
+                                {messages.postConversionAdCtaLabel}
+                            </a>
+                        </aside>
+                    )}
                 </>
             )}
         </div>
