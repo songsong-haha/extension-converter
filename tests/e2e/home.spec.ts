@@ -211,7 +211,9 @@ test.describe("homepage conversion funnel", () => {
     await page.getByRole("button", { name: /Convert GIF → PNG/ }).click();
 
     await expect(
-      page.getByText("Your file is processed only in your browser and is never uploaded to a server.")
+      page
+        .getByText("Your file is processed only in your browser and is never uploaded to a server.")
+        .first()
     ).toBeVisible();
   });
 

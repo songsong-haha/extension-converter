@@ -4,8 +4,8 @@
 - Carry forward only reusable patterns, not raw logs.
 
 ---
-Started: 2026-02-13T19:08:37Z
+Started: 2026-02-13T19:12:35Z
 
-2026-02-13T19:11:14Z | US-001
-- changed files: docs/GROWTH_BACKLOG.md, loop/prd.json, loop/progress.txt, src/features/analytics/lib/ga.ts, src/features/converter/components/converter-widget.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts
-- reusable learnings: Keep ad surfaces gated behind post-conversion success state and instrument separate impression/click events so monetization experiments do not contaminate conversion-step behavior.
+2026-02-13T19:16:24Z | US-001
+- changed files: docs/GROWTH_BACKLOG.md, loop/prd.json, loop/progress.txt, package.json, scripts/qa/track-growth-loop.mjs, tests/e2e/home.spec.ts, tests/track-growth-loop.test.mjs
+- reusable learnings: Keep growth dashboard inputs configurable via env-path overrides so loop automation can validate retry-success metrics deterministically with isolated fixtures.
