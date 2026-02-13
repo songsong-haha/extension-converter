@@ -35,6 +35,23 @@ test.describe("homepage conversion funnel", () => {
     await expect(page.getByText("이미지를 드래그하거나 클릭하여 업로드")).toBeVisible();
   });
 
+  test("shows inline format selection tip after file upload", async ({ page }) => {
+    await page.goto("/");
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "tiny.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7VQ0YAAAAASUVORK5CYII=",
+        "base64"
+      ),
+    });
+
+    await expect(
+      page.getByText("팁: 투명 배경 유지가 필요하면 PNG, 용량을 줄이려면 WebP를 선택하세요.")
+    ).toBeVisible();
+  });
+
   test("renders FAQ entries and FAQ structured data", async ({ page }) => {
     await page.goto("/");
 

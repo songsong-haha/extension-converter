@@ -1,21 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/conversion-proof",
-  "description": "Auto-seeded from backlog: 변환 완료 후 신뢰 문구 1줄 추가",
+  "branchName": "agent/growth/format-tip-inline",
+  "description": "Auto-seeded from backlog: 포맷 선택 가이드 툴팁 추가",
   "userStories": [
     {
       "id": "US-001",
-      "title": "변환 완료 후 신뢰 문구 1줄 추가",
-      "description": "Implement backlog ticket `conversion-proof` with measurable impact on conversion_complete rate.",
+      "title": "포맷 선택 가이드 툴팁 추가",
+      "description": "Implement backlog ticket `format-tip-inline` with measurable impact on format_selected rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `conversion-proof` is implemented.",
+        "Backlog ticket `format-tip-inline` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "seeded_from_backlog=true; metric=conversion_complete rate; owner=growth+qa"
+      "notes": "seeded_from_backlog=true; metric=format_selected rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }
