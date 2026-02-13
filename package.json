@@ -33,7 +33,7 @@
     "loop:daemon:install": "node scripts/loop/install-launchd.mjs",
     "loop:daemon:uninstall": "node scripts/loop/uninstall-launchd.mjs",
     "loop:daemon:status": "node scripts/loop/status-launchd.mjs",
-    "test:loop": "node --test tests/loop-scripts.test.mjs tests/seed-prd-from-backlog.test.mjs"
+    "test:loop": "node --test tests/loop-scripts.test.mjs tests/seed-prd-from-backlog.test.mjs tests/track-growth-loop.test.mjs"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.38.0",

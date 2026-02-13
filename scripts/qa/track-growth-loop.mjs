@@ -1,11 +1,26 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import path from "node:path";
 
-const BACKLOG_PATH = "docs/GROWTH_BACKLOG.md";
-const AI_REPORT_PATH = "test-results/ai-qa/report.md";
-const PW_RESULTS_PATH = "test-results/playwright/results.json";
-const ANALYTICS_EVENTS_PATH = "test-results/analytics/events.ndjson";
-const OUTPUT_PATH = "test-results/ai-qa/dashboard.md";
+function readPathFromEnv(envKey, fallback) {
+  const value = process.env[envKey];
+  if (typeof value === "string" && value.trim()) {
+    return value.trim();
+  }
+  return fallback;
+}
+
+const BACKLOG_PATH = readPathFromEnv("LOOP_BACKLOG_PATH", "docs/GROWTH_BACKLOG.md");
+const AI_REPORT_PATH = readPathFromEnv("LOOP_AI_REPORT_PATH", "test-results/ai-qa/report.md");
+const PW_RESULTS_PATH = readPathFromEnv(
+  "LOOP_PLAYWRIGHT_RESULTS_PATH",
+  "test-results/playwright/results.json",
+);
+const ANALYTICS_EVENTS_PATH = readPathFromEnv(
+  "LOOP_ANALYTICS_EVENTS_PATH",
+  "test-results/analytics/events.ndjson",
+);
+const OUTPUT_PATH = readPathFromEnv("LOOP_GROWTH_DASHBOARD_PATH", "test-results/ai-qa/dashboard.md");
 
 function parseBacklog() {
   if (!fs.existsSync(BACKLOG_PATH)) return { total: 0, done: 0, next: null };
@@ -122,7 +137,7 @@ function main() {
   const aiVerdict = parseAiVerdict();
   const analytics = parseAnalyticsSummary();
 
-  fs.mkdirSync("test-results/ai-qa", { recursive: true });
+  fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
 
   const donePercent = backlog.total > 0 ? Math.round((backlog.done / backlog.total) * 100) : 0;
 
