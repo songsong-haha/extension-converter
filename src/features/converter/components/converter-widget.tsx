@@ -102,6 +102,26 @@ function getRecoveryFormats(
 const PREVIEW_MAX_EDGE = 320;
 const PREVIEW_MIN_REDUCTION_RATIO = 0.1;
 const PREVIEW_QUALITY = 0.82;
+type PreviewOptimizationReason =
+    | "unsupported_type"
+    | "original_small_enough"
+    | "canvas_context_unavailable"
+    | "encode_failed"
+    | "insufficient_reduction"
+    | "optimization_error";
+
+interface PreviewBuildResult {
+    url: string;
+    optimized: boolean;
+    bytes: number;
+    format: string;
+    reason?: PreviewOptimizationReason;
+    durationMs: number;
+    originalWidth?: number;
+    originalHeight?: number;
+    previewWidth?: number;
+    previewHeight?: number;
+}
 
 function canOptimizePreview(fileType: string): boolean {
     return (
@@ -120,16 +140,23 @@ function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob 
 
 async function buildPreviewImage(
     file: File
-): Promise<{ url: string; optimized: boolean; bytes: number; format: string }> {
+): Promise<PreviewBuildResult> {
     const originalUrl = URL.createObjectURL(file);
+    const buildStart = performance.now();
+
+    const withDuration = (result: Omit<PreviewBuildResult, "durationMs">): PreviewBuildResult => ({
+        ...result,
+        durationMs: Math.round(performance.now() - buildStart),
+    });
 
     if (typeof window === "undefined" || !canOptimizePreview(file.type)) {
-        return {
+        return withDuration({
             url: originalUrl,
             optimized: false,
             bytes: file.size,
             format: file.type || "unknown",
-        };
+            reason: "unsupported_type",
+        });
     }
 
     let bitmap: ImageBitmap | null = null;
@@ -139,12 +166,17 @@ async function buildPreviewImage(
         const scale = Math.min(1, PREVIEW_MAX_EDGE / longestEdge);
 
         if (scale === 1) {
-            return {
+            return withDuration({
                 url: originalUrl,
                 optimized: false,
                 bytes: file.size,
                 format: file.type || "unknown",
-            };
+                reason: "original_small_enough",
+                originalWidth: bitmap.width,
+                originalHeight: bitmap.height,
+                previewWidth: bitmap.width,
+                previewHeight: bitmap.height,
+            });
         }
 
         const canvas = document.createElement("canvas");
@@ -152,50 +184,70 @@ async function buildPreviewImage(
         canvas.height = Math.max(1, Math.round(bitmap.height * scale));
         const context = canvas.getContext("2d");
         if (!context) {
-            return {
+            return withDuration({
                 url: originalUrl,
                 optimized: false,
                 bytes: file.size,
                 format: file.type || "unknown",
-            };
+                reason: "canvas_context_unavailable",
+                originalWidth: bitmap.width,
+                originalHeight: bitmap.height,
+                previewWidth: canvas.width,
+                previewHeight: canvas.height,
+            });
         }
 
         context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
         const optimizedBlob = await canvasToBlob(canvas, PREVIEW_QUALITY);
         if (!optimizedBlob) {
-            return {
+            return withDuration({
                 url: originalUrl,
                 optimized: false,
                 bytes: file.size,
                 format: file.type || "unknown",
-            };
+                reason: "encode_failed",
+                originalWidth: bitmap.width,
+                originalHeight: bitmap.height,
+                previewWidth: canvas.width,
+                previewHeight: canvas.height,
+            });
         }
 
-        const reducedRatio = (file.size - optimizedBlob.size) / file.size;
+        const reducedRatio = file.size > 0 ? (file.size - optimizedBlob.size) / file.size : 0;
         if (reducedRatio < PREVIEW_MIN_REDUCTION_RATIO) {
-            return {
+            return withDuration({
                 url: originalUrl,
                 optimized: false,
                 bytes: file.size,
                 format: file.type || "unknown",
-            };
+                reason: "insufficient_reduction",
+                originalWidth: bitmap.width,
+                originalHeight: bitmap.height,
+                previewWidth: canvas.width,
+                previewHeight: canvas.height,
+            });
         }
 
         const optimizedUrl = URL.createObjectURL(optimizedBlob);
         URL.revokeObjectURL(originalUrl);
-        return {
+        return withDuration({
             url: optimizedUrl,
             optimized: true,
             bytes: optimizedBlob.size,
             format: optimizedBlob.type || "image/webp",
-        };
+            originalWidth: bitmap.width,
+            originalHeight: bitmap.height,
+            previewWidth: canvas.width,
+            previewHeight: canvas.height,
+        });
     } catch {
-        return {
+        return withDuration({
             url: originalUrl,
             optimized: false,
             bytes: file.size,
             format: file.type || "unknown",
-        };
+            reason: "optimization_error",
+        });
     } finally {
         bitmap?.close();
     }
@@ -313,13 +365,31 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         });
 
         const preview = await buildPreviewImage(f);
+        const reductionRatio = f.size > 0 ? Number(((f.size - preview.bytes) / f.size).toFixed(4)) : 0;
+
+        trackLocaleEvent("preview_image_optimization_evaluated", {
+            source_format: extension || "unknown",
+            original_size_bytes: f.size,
+            preview_size_bytes: preview.bytes,
+            preview_format: preview.format,
+            optimized: preview.optimized,
+            optimization_reason: preview.reason || "optimized",
+            reduction_ratio: reductionRatio,
+            preview_build_ms: preview.durationMs,
+            original_width: preview.originalWidth,
+            original_height: preview.originalHeight,
+            preview_width: preview.previewWidth,
+            preview_height: preview.previewHeight,
+        });
+
         if (preview.optimized) {
             trackLocaleEvent("preview_image_optimized", {
                 source_format: extension || "unknown",
                 original_size_bytes: f.size,
                 preview_size_bytes: preview.bytes,
                 preview_format: preview.format,
-                reduction_ratio: Number(((f.size - preview.bytes) / f.size).toFixed(4)),
+                reduction_ratio: reductionRatio,
+                preview_build_ms: preview.durationMs,
             });
         }
 

@@ -1,21 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/theme-system-and-dark-mode-phase-10",
-  "description": "Auto-seeded from backlog: 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 10)",
+  "branchName": "agent/growth/performance-budget-and-image-optimization-phase-11",
+  "description": "Auto-seeded from backlog: LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 11)",
   "userStories": [
     {
       "id": "US-001",
-      "title": "테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 10)",
-      "description": "Implement backlog ticket `theme-system-and-dark-mode-phase-10` with measurable impact on dark_mode_session conversion_completed rate.",
+      "title": "LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 11)",
+      "description": "Implement backlog ticket `performance-budget-and-image-optimization-phase-11` with measurable impact on mobile bounce rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `theme-system-and-dark-mode-phase-10` is implemented.",
+        "Backlog ticket `performance-budget-and-image-optimization-phase-11` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "seeded_from_backlog=true; metric=dark_mode_session conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
+      "notes": "seeded_from_backlog=true; metric=mobile bounce rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }
