@@ -9,6 +9,7 @@ import { convertFile, isValidImage } from "../lib/converter-engine";
 import { getFileExtension } from "../lib/format-registry";
 import type { FormatInfo } from "../lib/format-registry";
 import type { ConversionStatus, ConversionResult } from "../types";
+import { trackEvent } from "@/features/analytics/lib/ga";
 
 export default function ConverterWidget() {
     const [file, setFile] = useState<File | null>(null);
@@ -22,10 +23,20 @@ export default function ConverterWidget() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFile = useCallback((f: File) => {
+        const extension = getFileExtension(f.name);
         if (!isValidImage(f)) {
+            trackEvent("file_selected", {
+                is_valid_image: false,
+                source_format: extension || "unknown",
+            });
             setError("이미지 파일만 지원됩니다.");
             return;
         }
+        trackEvent("file_selected", {
+            is_valid_image: true,
+            source_format: extension || "unknown",
+            file_size_bytes: f.size,
+        });
         setFile(f);
         setPreviewUrl(URL.createObjectURL(f));
         setResult(null);
@@ -66,6 +77,11 @@ export default function ConverterWidget() {
         if (!file || !targetFormat) return;
 
         try {
+            const sourceFormat = getFileExtension(file.name) || "unknown";
+            trackEvent("conversion_started", {
+                source_format: sourceFormat,
+                target_format: targetFormat,
+            });
             setStatus("converting");
             setProgress(20);
             setError("");
@@ -81,9 +97,19 @@ export default function ConverterWidget() {
             setProgress(100);
             setResult(result);
             setStatus("done");
+            trackEvent("conversion_completed", {
+                source_format: sourceFormat,
+                target_format: result.format,
+                duration_ms: Math.round(result.duration),
+                original_size_bytes: result.originalSize,
+                converted_size_bytes: result.convertedSize,
+            });
         } catch (err) {
             setStatus("error");
             setError(err instanceof Error ? err.message : "변환 중 오류가 발생했습니다.");
+            trackEvent("conversion_failed", {
+                target_format: targetFormat,
+            });
         }
     }, [file, targetFormat]);
 
@@ -95,6 +121,10 @@ export default function ConverterWidget() {
         a.download = result.filename;
         a.click();
         URL.revokeObjectURL(url);
+        trackEvent("file_downloaded", {
+            output_format: result.format,
+            output_size_bytes: result.convertedSize,
+        });
     }, [result]);
 
     const handleReset = useCallback(() => {
@@ -186,6 +216,10 @@ export default function ConverterWidget() {
                         sourceFormat={sourceExt}
                         selected={targetFormat}
                         onSelect={(f: FormatInfo) => {
+                            trackEvent("format_selected", {
+                                source_format: sourceExt || "unknown",
+                                target_format: f.extension,
+                            });
                             setTargetFormat(f.extension);
                             setResult(null);
                             setStatus("idle");

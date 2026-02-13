@@ -20,6 +20,44 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Google Analytics (GA4)
+
+Set your GA measurement ID:
+
+```bash
+echo 'NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX' >> .env.local
+```
+
+The app will automatically:
+
+- load GA script only when the env var exists
+- send `page_view` on route changes
+- send conversion funnel events from the converter widget
+
+See `docs/GA_AGENT_WORKFLOW.md` for event catalog and validation checklist.
+
+## Agent Workflow
+
+This repo supports parallel work using Git worktrees.
+
+```bash
+pnpm agent:create <agent-name> <task-slug> [base-branch] [task-template]
+pnpm agent:list
+pnpm agent:remove <agent-name> <task-slug>
+```
+
+GA task example:
+
+```bash
+pnpm agent:create analytics event-conversion main ga
+```
+
+This command creates:
+
+- `.worktrees/<agent>-<task>/` worktree
+- `.agents/<agent>-<task>.json` metadata
+- `.agents/<agent>-<task>.md` task card (from template)
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

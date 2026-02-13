@@ -18,6 +18,7 @@ DELETE_BRANCH="${3:-}"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 WORKTREE_PATH="$REPO_ROOT/.worktrees/${AGENT_NAME}-${TASK_SLUG}"
 METADATA_PATH="$REPO_ROOT/.agents/${AGENT_NAME}-${TASK_SLUG}.json"
+TASK_CARD_PATH="$REPO_ROOT/.agents/${AGENT_NAME}-${TASK_SLUG}.md"
 BRANCH="agent/${AGENT_NAME}/${TASK_SLUG}"
 
 if [[ ! -d "$WORKTREE_PATH" ]]; then
@@ -27,6 +28,7 @@ fi
 
 git worktree remove "$WORKTREE_PATH"
 rm -f "$METADATA_PATH"
+rm -f "$TASK_CARD_PATH"
 
 git worktree prune
 

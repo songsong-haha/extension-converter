@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "agent:create": "bash scripts/worktree/create-agent.sh",
+    "agent:create:ga": "bash scripts/worktree/create-agent.sh $npm_config_agent $npm_config_task ${npm_config_base:-main} ga",
     "agent:list": "bash scripts/worktree/list-agents.sh",
     "agent:remove": "bash scripts/worktree/remove-agent.sh",
     "agent:remove:branch": "bash scripts/worktree/remove-agent.sh $npm_config_agent $npm_config_task --delete-branch"

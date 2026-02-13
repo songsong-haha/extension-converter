@@ -26,7 +26,7 @@ This repository is configured for parallel agent execution using Git worktrees.
 ## Commands
 
 ```bash
-pnpm agent:create <agent-name> <task-slug> [base-branch]
+pnpm agent:create <agent-name> <task-slug> [base-branch] [task-template]
 pnpm agent:list
 pnpm agent:remove <agent-name> <task-slug>
 pnpm agent:remove:branch <agent-name> <task-slug>
@@ -43,6 +43,9 @@ pnpm lint
 cd ../..
 pnpm agent:list
 pnpm agent:remove converter parser-refactor
+
+# GA 템플릿 사용 예시
+pnpm agent:create analytics ga-instrumentation main ga
 ```
 
 ## Operational Rules

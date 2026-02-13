@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
+import GoogleAnalytics from "@/features/analytics/components/google-analytics";
+import PageViewTracker from "@/features/analytics/components/page-view-tracker";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,6 +40,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${inter.variable} antialiased`}>
+        <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
         {children}
       </body>
     </html>

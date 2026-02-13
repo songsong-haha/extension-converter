@@ -1,9 +1,9 @@
 # Agent Task Card
 
-- Agent Name:
-- Task Slug:
-- Branch:
-- Worktree Path:
+- Agent Name: {{AGENT_NAME}}
+- Task Slug: {{TASK_SLUG}}
+- Branch: {{AGENT_BRANCH}}
+- Worktree Path: {{WORKTREE_PATH}}
 - Objective:
 - Constraints:
 - Inputs:

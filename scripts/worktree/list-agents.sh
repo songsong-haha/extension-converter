@@ -15,7 +15,7 @@ git worktree list
 echo
 echo "== Agent Metadata =="
 if [[ -d "$METADATA_DIR" ]]; then
-  ls -1 "$METADATA_DIR"/*.json 2>/dev/null || echo "(none)"
+  ls -1 "$METADATA_DIR"/*.json "$METADATA_DIR"/*.md 2>/dev/null || echo "(none)"
 else
   echo "(none)"
 fi
