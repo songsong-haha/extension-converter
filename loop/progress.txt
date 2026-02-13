@@ -37,3 +37,8 @@ Started: 2026-02-13T14:43:38Z
 - item id: US-001
 - changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
 - reusable learnings: Keep hero acquisition copy and E2E assertions aligned in the same patch, and generate support claims from format-registry constants to avoid stale CTA messaging.
+
+- time (UTC): 2026-02-13T15:21:37Z
+- item id: US-002
+- changed files: loop/prd.json, loop/progress.txt
+- reusable learnings: Run lint/build/e2e sequentially in this repo during loop validation; running them in parallel can create transient failures around shared test-results and build artifacts.
