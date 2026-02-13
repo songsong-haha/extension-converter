@@ -7,11 +7,29 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "codex:precompact": "node scripts/codex/pre-compact.mjs",
+    "test:e2e": "playwright test",
+    "qa:ai": "node scripts/qa/ai-qa.mjs",
+    "qa:gate": "node scripts/qa/qa-gate.mjs",
+    "growth:track": "node scripts/qa/track-growth-loop.mjs",
     "agent:create": "bash scripts/worktree/create-agent.sh",
     "agent:create:ga": "bash scripts/worktree/create-agent.sh $npm_config_agent $npm_config_task ${npm_config_base:-main} ga",
+    "agent:task:start": "bash scripts/worktree/start-growth-task.sh",
+    "agent:merge": "bash scripts/worktree/merge-agent.sh",
+    "agent:auto-promote": "bash scripts/worktree/auto-promote.sh",
     "agent:list": "bash scripts/worktree/list-agents.sh",
     "agent:remove": "bash scripts/worktree/remove-agent.sh",
-    "agent:remove:branch": "bash scripts/worktree/remove-agent.sh $npm_config_agent $npm_config_task --delete-branch"
+    "agent:remove:branch": "bash scripts/worktree/remove-agent.sh",
+    "loop:run": "bash scripts/loop/codex-loop.sh",
+    "loop:run:once": "bash scripts/loop/codex-loop.sh --max-iterations 1",
+    "loop:run:auto-promote": "bash scripts/loop/codex-loop.sh --auto-promote",
+    "loop:bg:start": "bash scripts/loop/start-bg.sh",
+    "loop:bg:start:auto-promote": "bash scripts/loop/start-bg.sh --auto-promote",
+    "loop:bg:stop": "bash scripts/loop/stop-bg.sh",
+    "loop:bg:status": "bash scripts/loop/status-bg.sh",
+    "loop:daemon:install": "bash scripts/loop/install-launchd.sh",
+    "loop:daemon:uninstall": "bash scripts/loop/uninstall-launchd.sh",
+    "loop:daemon:status": "bash scripts/loop/status-launchd.sh"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.38.0",
@@ -20,6 +38,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@playwright/test": "1.56.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
