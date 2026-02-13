@@ -1,8 +1,11 @@
 import ConverterWidget from "@/features/converter/components/converter-widget";
+import { UNIQUE_TARGET_FORMATS } from "@/features/converter/lib/format-registry";
+
+const SUPPORTED_FORMATS_TEXT = UNIQUE_TARGET_FORMATS.map((format) => format.label).join(", ");
 
 const FEATURES = [
-  {
-    icon: (
+    {
+      icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path
           d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
@@ -75,8 +78,8 @@ const FEATURES = [
         />
       </svg>
     ),
-    title: "7가지 포맷",
-    desc: "PNG, JPG, WebP, GIF, BMP, AVIF, ICO 간 자유로운 변환.",
+    title: `${UNIQUE_TARGET_FORMATS.length}가지 포맷`,
+    desc: `${SUPPORTED_FORMATS_TEXT} 간 자유로운 변환.`,
   },
 ];
 
@@ -104,13 +107,21 @@ export default function Home() {
           </h1>
 
           <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed">
-            PNG, JPG, WebP, GIF, BMP, AVIF, ICO
-            <br className="sm:hidden" /> 간 변환을 브라우저에서 바로.
+            {SUPPORTED_FORMATS_TEXT}
+            <br className="sm:hidden" /> 변환을 브라우저에서 바로.
           </p>
+
+          <a
+            href="#converter-widget"
+            className="inline-flex mt-8 items-center justify-center rounded-xl bg-[var(--primary-500)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-400)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-400)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-100)]"
+          >
+            무료 변환 시작하기
+          </a>
         </section>
 
         {/* Converter */}
         <section
+          id="converter-widget"
           className="glass p-6 sm:p-8 mb-20 animate-fade-up"
           style={{ animationDelay: "0.2s" }}
         >

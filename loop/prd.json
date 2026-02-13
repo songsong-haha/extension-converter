@@ -1,0 +1,36 @@
+{
+  "project": "extension-converter",
+  "branchName": "agent/growth/conversion-growth",
+  "description": "Continuous micro-improvements for conversion and quality",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Tighten hero CTA copy",
+      "description": "Improve first-screen message to increase upload starts.",
+      "acceptanceCriteria": [
+        "Hero section has one clear primary CTA",
+        "Copy reflects supported formats from format registry",
+        "pnpm lint passes",
+        "pnpm build passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Track drop-off before conversion starts",
+      "description": "Add analytics event where users select file but do not start conversion.",
+      "acceptanceCriteria": [
+        "Event is emitted once per session",
+        "Event includes selected source format",
+        "pnpm lint passes",
+        "pnpm build passes",
+        "pnpm test:e2e passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

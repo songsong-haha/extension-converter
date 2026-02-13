@@ -1,0 +1,12 @@
+# Loop Progress Log
+
+## Codebase Patterns
+- Carry forward only reusable patterns, not raw logs.
+
+---
+Started: 2026-02-13T14:43:38Z
+
+- time (UTC): 2026-02-13T14:45:52Z
+- item id: US-001
+- changed files: src/app/page.tsx, loop/prd.json, loop/progress.txt
+- reusable learnings: Build hero format copy from the format registry to prevent stale marketing text; use a single above-the-fold anchor CTA targeting the converter section for clearer acquisition intent.
