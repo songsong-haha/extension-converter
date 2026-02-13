@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# worktree / multi-agent runtime state
+/.worktrees/
+/.agents/*.json
