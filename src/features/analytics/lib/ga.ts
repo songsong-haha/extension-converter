@@ -1,4 +1,5 @@
 export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const EVENT_SCHEMA_VERSION = "v1";
 
 export type AnalyticsEventName =
   | "file_selected"
@@ -40,7 +41,13 @@ export function trackEvent(name: AnalyticsEventName, params: EventParams = {}): 
     return;
   }
 
+  const uiLocale = document.documentElement.lang || "ko";
+  const themeMode = document.documentElement.dataset.theme || "dark";
+
   window.gtag("event", name, {
+    event_schema_version: EVENT_SCHEMA_VERSION,
+    ui_locale: uiLocale,
+    theme_mode: themeMode,
     ...params,
     send_to: GA_MEASUREMENT_ID,
   });

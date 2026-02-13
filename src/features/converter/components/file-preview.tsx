@@ -4,12 +4,14 @@ import React from "react";
 import { formatFileSize } from "../lib/converter-engine";
 import { getFileExtension } from "../lib/format-registry";
 import type { ConversionResult } from "../types";
+import { CONVERTER_TEXT, DEFAULT_LOCALE, type Locale } from "@/features/i18n/lib/messages";
 
 interface FilePreviewProps {
     file: File;
     previewUrl: string;
     conversionResult?: ConversionResult;
     onRemove: () => void;
+    locale?: Locale;
 }
 
 export default function FilePreview({
@@ -17,8 +19,10 @@ export default function FilePreview({
     previewUrl,
     conversionResult,
     onRemove,
+    locale = DEFAULT_LOCALE,
 }: FilePreviewProps) {
     const ext = getFileExtension(file.name).toUpperCase();
+    const text = CONVERTER_TEXT[locale];
 
     return (
         <div className="glass-card p-4 flex items-center gap-4 group">
@@ -53,7 +57,7 @@ export default function FilePreview({
             <button
                 onClick={onRemove}
                 className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-[var(--surface-300)] cursor-pointer"
-                aria-label="Remove file"
+                aria-label={text.removeFile}
             >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path

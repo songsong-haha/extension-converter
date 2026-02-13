@@ -1,21 +1,24 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/conversion-failure-observability",
-  "description": "Auto-seeded from backlog: 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인",
+  "branchName": "agent/growth/i18n-ga-darkmode-priority",
+  "description": "Priority override: 다국어(ko/en) + GA 로그 안정화 + 다크모드 지원 최우선 구현",
   "userStories": [
     {
       "id": "US-001",
-      "title": "실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인",
-      "description": "Implement backlog ticket `conversion-failure-observability` with measurable impact on conversion_failed_to_retry_success rate.",
+      "title": "다국어(ko/en) 전면 적용 + GA 이벤트 로그 스키마/전송 안정화 + 다크모드 지원",
+      "description": "Implement backlog ticket `i18n-ga-darkmode-priority` as top-priority agenda.",
       "acceptanceCriteria": [
-        "Backlog ticket `conversion-failure-observability` is implemented.",
+        "Backlog ticket `i18n-ga-darkmode-priority` is implemented.",
+        "Core conversion funnel UI copy supports ko/en toggle or locale routing.",
+        "GA events for conversion funnel include stable schema (event name + required params) and are emitted on key states.",
+        "Dark mode is available in core conversion screens and key text/background contrast is accessible.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "seeded_from_backlog=true; metric=conversion_failed_to_retry_success rate; owner=ceo+growth+qa+analytics+designer"
+      "notes": "seeded_from_backlog=false; priority_override=true; metric=non-ko conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }

@@ -3,26 +3,29 @@
 import React from "react";
 import { UNIQUE_TARGET_FORMATS } from "../lib/format-registry";
 import type { FormatInfo } from "../lib/format-registry";
+import { CONVERTER_TEXT, DEFAULT_LOCALE, type Locale } from "@/features/i18n/lib/messages";
 
 interface FormatSelectorProps {
     sourceFormat?: string;
     onSelect: (format: FormatInfo) => void;
     selected?: string;
+    locale?: Locale;
 }
 
-function getFormatTip(sourceFormat?: string): string {
+function getFormatTip(sourceFormat: string | undefined, locale: Locale): string {
+    const tips = CONVERTER_TEXT[locale].formatTips;
     switch ((sourceFormat || "").toLowerCase()) {
         case "png":
-            return "팁: 투명 배경 유지가 필요하면 PNG, 용량을 줄이려면 WebP를 선택하세요.";
+            return tips.png;
         case "jpg":
         case "jpeg":
-            return "팁: 사진 선명도 우선이면 JPG, 더 작은 파일이 필요하면 WebP를 선택하세요.";
+            return tips.jpg;
         case "gif":
-            return "팁: GIF를 정지 이미지로 바꿀 때는 PNG, 웹 업로드 용량 최적화는 WebP가 유리합니다.";
+            return tips.gif;
         case "ico":
-            return "팁: 웹 사이트 파비콘으로 쓸 파일이면 ICO를 유지하고, 일반 이미지 용도면 PNG를 권장합니다.";
+            return tips.ico;
         default:
-            return "팁: 투명 배경은 PNG, 웹 업로드 용량 최적화는 WebP, 파비콘 제작은 ICO를 권장합니다.";
+            return tips.default;
     }
 }
 
@@ -30,18 +33,20 @@ export default function FormatSelector({
     sourceFormat,
     onSelect,
     selected,
+    locale = DEFAULT_LOCALE,
 }: FormatSelectorProps) {
     const availableFormats = UNIQUE_TARGET_FORMATS.filter(
         (f) => f.extension !== sourceFormat
     );
+    const text = CONVERTER_TEXT[locale];
 
     return (
         <div className="w-full">
             <p className="text-sm text-[var(--text-secondary)] mb-3 font-medium">
-                변환할 포맷을 선택하세요
+                {text.selectTargetFormat}
             </p>
             <p className="mb-3 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-200)] px-3 py-2 text-xs text-[var(--text-secondary)]">
-                {getFormatTip(sourceFormat)}
+                {getFormatTip(sourceFormat, locale)}
             </p>
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
                 {availableFormats.map((format) => {
