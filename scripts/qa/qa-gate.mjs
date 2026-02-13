@@ -2,7 +2,10 @@
 import { spawnSync } from "node:child_process";
 
 const mandatory = [
-  ["npm", ["run", "lint"]],
+  [
+    "npm",
+    ["run", "lint", "--", "--ignore-pattern", ".worktrees/**", "--ignore-pattern", "**/.next/**"],
+  ],
   ["npm", ["run", "build"]],
   ["npx", ["-y", "playwright@1.56.0", "install", "--with-deps", "chromium"]],
   ["npm", ["run", "test:e2e"]],

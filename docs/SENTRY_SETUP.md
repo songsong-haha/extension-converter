@@ -5,7 +5,7 @@ This repository uses a multi-agent worktree workflow. Apply and review Sentry ch
 ## 1) Create agent worktree
 
 ```bash
-pnpm agent:create sentry setup main
+npm run agent:create -- sentry setup main
 cd .worktrees/sentry-setup
 ```
 
@@ -19,7 +19,7 @@ cd .worktrees/sentry-setup
 ## 2) Install Sentry SDK
 
 ```bash
-pnpm add -w @sentry/nextjs
+npm install @sentry/nextjs
 ```
 
 ## 3) Required env vars
@@ -66,7 +66,7 @@ export default withSentryConfig(nextConfig, {
 1. Run app:
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 2. Trigger a test error (example in any client component):

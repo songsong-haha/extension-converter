@@ -9,8 +9,11 @@ Use `.github/workflows/growth-loop.yml` to run the loop every 6 hours.
 
 ## Team Rule (QA Mandatory)
 Every task must include:
+- `ceo` agent branch: scope/priority guard
 - `growth` agent branch: implementation
 - `qa` agent branch: verification
+- `analytics` agent branch: metric/telemetry guard
+- `designer` agent branch: UX/copy guard
 
 Start a task:
 
@@ -18,7 +21,7 @@ Start a task:
 npm run agent:task:start -- <task-slug> [base-branch]
 ```
 
-This always creates two worktrees (`growth` and `qa`) for the same task.
+This creates mandatory core-team worktrees (`ceo`, `growth`, `qa`, `analytics`, `designer`) for the same task.
 
 ## Merge Rule (Test Pass Required)
 Never merge directly.
@@ -50,8 +53,8 @@ Without it, heuristic QA report is still generated.
 
 ## Suggested Micro-Loop
 1. Pick one unchecked task from `docs/GROWTH_BACKLOG.md`.
-2. Create growth+qa worktrees for that task.
+2. Create mandatory core-team worktrees for that task.
 3. Implement only one small change and add/update tests.
-4. QA agent validates locally and in Playwright.
+4. QA validates locally and in Playwright, analytics/designer/ceo verify quality bar.
 5. Merge only through QA gate.
 6. Mark task done and move to next one.
