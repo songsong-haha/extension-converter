@@ -259,4 +259,26 @@ test.describe("homepage conversion funnel", () => {
     });
     expect(hasFaqSchema).toBe(true);
   });
+
+  test("toggles theme mode and persists the selected preference", async ({ page }) => {
+    await page.goto("/?lang=en");
+    await page.waitForFunction(
+      () =>
+        document.documentElement.dataset.theme === "light" ||
+        document.documentElement.dataset.theme === "dark"
+    );
+
+    const initialTheme = await page.evaluate(() => document.documentElement.dataset.theme);
+    expect(initialTheme === "light" || initialTheme === "dark").toBe(true);
+
+    await page.getByTestId("theme-toggle").click();
+
+    const nextTheme = await page.evaluate(() => document.documentElement.dataset.theme);
+    expect(nextTheme).not.toBe(initialTheme);
+
+    const storedTheme = await page.evaluate(() =>
+      window.localStorage.getItem("extension_converter_theme")
+    );
+    expect(storedTheme).toBe(nextTheme);
+  });
 });

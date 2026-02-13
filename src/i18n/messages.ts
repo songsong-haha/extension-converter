@@ -39,6 +39,9 @@ export interface HomeMessages {
   languageLabel: string;
   languageKo: string;
   languageEn: string;
+  themeLabel: string;
+  lightModeLabel: string;
+  darkModeLabel: string;
 }
 
 export interface SeoMessages {
@@ -108,6 +111,9 @@ export const HOME_MESSAGES: Record<Locale, HomeMessages> = {
     languageLabel: "언어",
     languageKo: "한국어",
     languageEn: "영어",
+    themeLabel: "테마",
+    lightModeLabel: "라이트 모드",
+    darkModeLabel: "다크 모드",
   },
   en: {
     badge: "100% free · no server uploads",
@@ -142,6 +148,9 @@ export const HOME_MESSAGES: Record<Locale, HomeMessages> = {
     languageLabel: "Language",
     languageKo: "Korean",
     languageEn: "English",
+    themeLabel: "Theme",
+    lightModeLabel: "Light mode",
+    darkModeLabel: "Dark mode",
   },
 };
 

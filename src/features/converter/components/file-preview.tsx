@@ -31,7 +31,7 @@ export default function FilePreview({
                     alt={file.name}
                     className="w-full h-full object-cover"
                 />
-                <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-sm text-[10px] font-bold text-white px-1.5 py-0.5 rounded">
+                <div className="absolute top-1 left-1 bg-[var(--overlay-strong)] backdrop-blur-sm text-[10px] font-bold text-white px-1.5 py-0.5 rounded">
                     {ext}
                 </div>
             </div>

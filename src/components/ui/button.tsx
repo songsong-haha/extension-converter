@@ -24,7 +24,7 @@ const variantStyles: Record<ButtonVariant, string> = {
         "bg-[var(--glass-bg)] backdrop-blur-xl",
         "border border-[var(--glass-border)]",
         "text-[var(--text-primary)]",
-        "hover:bg-[var(--glass-hover)] hover:border-[rgba(255,255,255,0.12)]",
+        "hover:bg-[var(--glass-hover)] hover:border-[var(--glass-border-strong)]",
         "active:scale-[0.97]",
     ].join(" "),
     ghost: [
