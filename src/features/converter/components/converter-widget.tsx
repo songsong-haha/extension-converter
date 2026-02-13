@@ -319,6 +319,11 @@ export default function ConverterWidget() {
                     )}
 
                     {/* Actions */}
+                    {status === "done" && result && (
+                        <p className="text-sm text-[var(--text-secondary)]">
+                            안심하세요. 파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.
+                        </p>
+                    )}
                     <div className="flex gap-3">
                         {status === "done" && result ? (
                             <>
