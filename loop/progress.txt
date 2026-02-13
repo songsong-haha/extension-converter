@@ -4,49 +4,11 @@
 - Carry forward only reusable patterns, not raw logs.
 
 ---
-Started: 2026-02-13T14:43:38Z
-
-- time (UTC): 2026-02-13T14:45:52Z
-- item id: US-001
-- changed files: src/app/page.tsx, loop/prd.json, loop/progress.txt
-- reusable learnings: Build hero format copy from the format registry to prevent stale marketing text; use a single above-the-fold anchor CTA targeting the converter section for clearer acquisition intent.
-- time (UTC): 2026-02-13T14:58:48Z
-- item id: US-001
-- changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/prd.json
-- reusable learnings: Keep hero/e2e copy assertions in sync; source visible format lists from format-registry-derived constants to avoid hardcoded drift.
-
-- time (UTC): 2026-02-13T15:07:29Z
+Started: 2026-02-13T15:41:51Z
+2026-02-13T15:43:28Z | item=US-002
+- changed files: src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
+- reusable learnings: For session-level abandonment analytics, avoid firing in effect cleanup tied to state changes; fire on page lifecycle signals and reset per-file conversion-start state to prevent false drop-off suppression.
+- time (UTC): 2026-02-13T16:11:57Z
 - item id: US-002
-- changed files: src/features/analytics/lib/ga.ts, src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
-- reusable learnings: For pre-conversion drop-off analytics, pair an in-memory guard with sessionStorage and fire on visibility/pagehide to avoid duplicate events while still capturing abandonment.
-
-- time (UTC): 2026-02-13T15:10:44Z
-- item id: US-001
-- changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/progress.txt
-- reusable learnings: Keep hero promise copy broad enough for UX polish but back it with registry-derived support text so messaging stays accurate as formats evolve.
-- time (UTC): 2026-02-13T15:14:39Z
-- item id: US-001
-- changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/progress.txt
-- reusable learnings: When tightening hero messaging, keep one unambiguous primary CTA and update E2E headline matchers in the same change to prevent copy-related regressions.
-
-- time (UTC): 2026-02-13T15:16:37Z
-- item id: US-001
-- changed files: src/app/page.tsx, loop/progress.txt
-- reusable learnings: Keep the hero CTA action-first and short, while deriving support-copy format claims from registry-backed constants so marketing text stays accurate automatically.
-- time (UTC): 2026-02-13T15:19:01Z
-- item id: US-001
-- changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
-- reusable learnings: Keep hero acquisition copy and E2E assertions aligned in the same patch, and generate support claims from format-registry constants to avoid stale CTA messaging.
-
-- time (UTC): 2026-02-13T15:21:37Z
-- item id: US-002
-- changed files: loop/prd.json, loop/progress.txt
-- reusable learnings: Run lint/build/e2e sequentially in this repo during loop validation; running them in parallel can create transient failures around shared test-results and build artifacts.
-- time (UTC): 2026-02-13T15:28:53Z
-- item id: US-001
-- changed files: src/app/page.tsx, loop/progress.txt
-- reusable learnings: Keep hero CTA text imperative and specific to the first action, while deriving support claims from registry-backed format constants to avoid stale conversion promises.
-- time (UTC): 2026-02-13T15:37:39Z
-- item id: US-001
-- changed files: src/app/page.tsx, loop/progress.txt
-- reusable learnings: Generate hero support claims directly from format-registry-backed constants so CTA copy stays accurate as supported formats evolve.
+- changed files: src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
+- reusable learnings: Guard sessionStorage access for pre-conversion drop-off analytics so private-mode/storage failures do not break one-per-session event capture; normalize source-format payload casing for consistent analytics dimensions.
