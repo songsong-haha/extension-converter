@@ -1,6 +1,24 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("homepage conversion funnel", () => {
+  test("shows trust proof copy after conversion completes", async ({ page }) => {
+    await page.goto("/");
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "tiny.gif",
+      mimeType: "image/gif",
+      buffer: Buffer.from(
+        "R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==",
+        "base64"
+      ),
+    });
+
+    await page.getByRole("button", { name: /^PNG/i }).click();
+    await page.getByRole("button", { name: /GIF\s*→\s*PNG 변환/ }).click();
+
+    await expect(page.getByText("안심하세요. 파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.")).toBeVisible();
+  });
+
   test("renders key acquisition messages", async ({ page }) => {
     await page.goto("/");
 

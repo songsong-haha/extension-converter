@@ -12,3 +12,8 @@ Started: 2026-02-13T15:41:51Z
 - item id: US-002
 - changed files: src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
 - reusable learnings: Guard sessionStorage access for pre-conversion drop-off analytics so private-mode/storage failures do not break one-per-session event capture; normalize source-format payload casing for consistent analytics dimensions.
+
+- time (UTC): 2026-02-13T16:45:38Z
+- item id: US-001
+- changed files: src/features/converter/components/converter-widget.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
+- reusable learnings: For image-conversion e2e, use a known-valid in-memory tiny GIF payload to avoid canvas decode flakiness; assert trust copy only after successful conversion status.
