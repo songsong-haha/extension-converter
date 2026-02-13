@@ -14,11 +14,7 @@
         "pnpm build passes"
       ],
       "priority": 1,
-<<<<<<< Updated upstream
       "passes": true,
-=======
-      "passes": false,
->>>>>>> Stashed changes
       "notes": ""
     },
     {
