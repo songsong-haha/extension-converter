@@ -4,9 +4,16 @@
 - Carry forward only reusable patterns, not raw logs.
 
 ---
-Started: 2026-02-13T19:36:02Z
+Started: 2026-02-13T19:41:44Z
 
-- time (UTC): 2026-02-13T19:40:16Z
-- item: US-001
-- changed files: docs/GROWTH_BACKLOG.md,loop/prd.json,loop/progress.txt,src/features/analytics/components/web-vitals-tracker.tsx,src/features/analytics/lib/ga.ts,src/features/converter/components/converter-widget.tsx,src/features/converter/components/file-preview.tsx,tests/e2e/home.spec.ts,
-- reusable learnings: Track preview optimization outcomes (including skip reasons) in addition to success-only events; attach budget profile context (mobile/desktop) to web-vitals events so performance regressions can be segmented without extra joins.
+- time (UTC): 2026-02-13T19:44:08Z
+- item id: US-001
+- changed files:
+  - docs/GROWTH_BACKLOG.md
+  - loop/prd.json
+  - loop/progress.txt
+  - src/features/converter/components/converter-widget.tsx
+  - tests/e2e/home.spec.ts
+- reusable learnings:
+  - For post-conversion monetization, defer ad rendering until after the primary completion action (download) to reduce UX interference.
+  - Keep ad impression tracking tied to actual render conditions to avoid premature analytics events.
