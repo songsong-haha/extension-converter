@@ -14,7 +14,7 @@
         "npm run test:e2e passes"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "seeded_from_backlog=true; metric=upload_to_conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]

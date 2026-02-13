@@ -131,7 +131,7 @@ test.describe("homepage conversion funnel", () => {
   });
 
   test("shows failure guide with retry and alternative formats on conversion error", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?lang=ko");
 
     await page.locator('input[type="file"]').setInputFiles({
       name: "broken.png",
