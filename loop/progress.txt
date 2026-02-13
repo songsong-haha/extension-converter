@@ -32,3 +32,8 @@ Started: 2026-02-13T15:41:51Z
 - item id: US-001
 - changed files: src/features/converter/components/format-selector.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
 - reusable learnings: Source-format-aware inline guidance near option chips can improve first decision speed; lock it with an upload-to-selector e2e assertion so copy regressions are caught early.
+
+- time (UTC): 2026-02-13T17:23:40Z
+- item id: US-001
+- changed files: src/features/converter/components/converter-widget.tsx, src/features/analytics/lib/ga.ts, scripts/qa/track-growth-loop.mjs, docs/GA_AGENT_WORKFLOW.md, loop/prd.json, loop/progress.txt
+- reusable learnings: Classify conversion failures at catch-time and emit a dedicated retry lifecycle (`conversion_retry_started`/`conversion_retry_result`) so `conversion_failed_to_retry_success` can be computed reliably in the reporting pipeline.

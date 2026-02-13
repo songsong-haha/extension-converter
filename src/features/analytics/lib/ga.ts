@@ -7,6 +7,8 @@ export type AnalyticsEventName =
   | "conversion_started"
   | "conversion_completed"
   | "conversion_failed"
+  | "conversion_retry_started"
+  | "conversion_retry_result"
   | "file_downloaded";
 
 type EventParams = Record<string, string | number | boolean | undefined>;
