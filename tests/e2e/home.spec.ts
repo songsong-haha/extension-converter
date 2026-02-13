@@ -149,6 +149,7 @@ test.describe("homepage conversion funnel", () => {
     await expect(page.getByText("파일은 서버로 업로드되지 않았습니다.")).toBeVisible();
     await expect(page.getByRole("button", { name: "같은 설정으로 다시 시도" })).toBeVisible();
     await expect(page.getByText("다른 포맷으로 시도")).toBeVisible();
+    await expect(page.getByText("추천 포맷: WEBP")).toBeVisible();
     await expect(page.getByRole("button", { name: "webp", exact: true })).toBeVisible();
   });
 
@@ -192,6 +193,7 @@ test.describe("homepage conversion funnel", () => {
     await expect(page.getByText("Your file was not uploaded to any server.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Retry with same settings" })).toBeVisible();
     await expect(page.getByText("Try another format")).toBeVisible();
+    await expect(page.getByText("Recommended format: WEBP")).toBeVisible();
     await expect(page.getByRole("button", { name: "webp", exact: true })).toBeVisible();
   });
 

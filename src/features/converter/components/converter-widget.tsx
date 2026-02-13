@@ -73,10 +73,26 @@ function getFailureGuide(category: string, messages: ConverterMessages): string 
     );
 }
 
-function getRecoveryFormats(sourceFormat?: string, targetFormat?: string): string[] {
+function getRecoveryFormats(
+    sourceFormat?: string,
+    targetFormat?: string,
+    failureCategory?: string
+): string[] {
     const source = (sourceFormat || "").toLowerCase();
     const currentTarget = (targetFormat || "").toLowerCase();
-    const preferred = ["webp", "png", "jpg", "avif", "bmp", "gif", "ico"];
+    const byFailure: Record<string, string[]> = {
+        unsupported_target_format: ["png", "jpg", "webp", "bmp", "avif"],
+        canvas_context_unavailable: ["jpg", "webp", "png", "bmp", "avif"],
+        memory_limit_exceeded: ["jpg", "webp", "png", "bmp", "avif"],
+        image_decode_failed: ["png", "jpg", "webp", "bmp", "avif"],
+        conversion_aborted: ["webp", "png", "jpg", "avif", "bmp"],
+        conversion_runtime_error: ["webp", "png", "jpg", "avif", "bmp"],
+        unknown: ["webp", "png", "jpg", "avif", "bmp"],
+    };
+    const preferred =
+        byFailure[(failureCategory || "").toLowerCase()] ??
+        byFailure.unknown ??
+        ["webp", "png", "jpg", "avif", "bmp"];
 
     return preferred
         .filter((format) => format !== source && format !== currentTarget)
@@ -524,9 +540,10 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
 
     const sourceExt = file ? getFileExtension(file.name) : undefined;
     const recoveryFormats = useMemo(
-        () => getRecoveryFormats(sourceExt, targetFormat),
-        [sourceExt, targetFormat]
+        () => getRecoveryFormats(sourceExt, targetFormat, failureCategory),
+        [failureCategory, sourceExt, targetFormat]
     );
+    const recommendedRecoveryFormat = recoveryFormats[0];
     const shouldShowPostConversionAd = status === "done" && Boolean(result);
 
     useEffect(() => {
@@ -667,6 +684,11 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                                     <p className="mb-2 text-xs font-medium uppercase tracking-wide text-red-200/80">
                                         {messages.recoveryFormatsHeading}
                                     </p>
+                                    {recommendedRecoveryFormat && (
+                                        <p className="mb-2 text-xs text-red-200/90">
+                                            {messages.recoveryRecommendedFormat(recommendedRecoveryFormat)}
+                                        </p>
+                                    )}
                                     <div className="flex flex-wrap gap-2">
                                         {recoveryFormats.map((format) => (
                                             <button
@@ -683,6 +705,9 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                                                         source_format: sourceExt || "unknown",
                                                         target_format: format,
                                                         selection_context: "error_recovery",
+                                                        failure_category: failureCategory || "unknown",
+                                                        is_recommended_recovery:
+                                                            format === recommendedRecoveryFormat,
                                                     });
                                                 }}
                                             >

@@ -1,21 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/format-selection-guidance-experiment-phase-7",
-  "description": "Auto-seeded from backlog: 포맷 선택 가이드 인라인 UX + 실험 플래그 + 이벤트 계측 (Phase 7)",
+  "branchName": "agent/growth/trust-error-ux-flow-phase-8",
+  "description": "Auto-seeded from backlog: 신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 (Phase 8)",
   "userStories": [
     {
       "id": "US-001",
-      "title": "포맷 선택 가이드 인라인 UX + 실험 플래그 + 이벤트 계측 (Phase 7)",
-      "description": "Implement backlog ticket `format-selection-guidance-experiment-phase-7` with measurable impact on format_selected rate.",
+      "title": "신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 (Phase 8)",
+      "description": "Implement backlog ticket `trust-error-ux-flow-phase-8` with measurable impact on upload_to_conversion_completed rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `format-selection-guidance-experiment-phase-7` is implemented.",
+        "Backlog ticket `trust-error-ux-flow-phase-8` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "seeded_from_backlog=true; metric=format_selected rate; owner=ceo+growth+qa+analytics+designer"
+      "notes": "seeded_from_backlog=true; metric=upload_to_conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }
