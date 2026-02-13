@@ -19,3 +19,8 @@ Started: 2026-02-13T14:43:38Z
 - item id: US-002
 - changed files: src/features/analytics/lib/ga.ts, src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
 - reusable learnings: For pre-conversion drop-off analytics, pair an in-memory guard with sessionStorage and fire on visibility/pagehide to avoid duplicate events while still capturing abandonment.
+
+- time (UTC): 2026-02-13T15:10:44Z
+- item id: US-001
+- changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/progress.txt
+- reusable learnings: Keep hero promise copy broad enough for UX polish but back it with registry-derived support text so messaging stays accurate as formats evolve.
