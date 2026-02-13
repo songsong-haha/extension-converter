@@ -6,6 +6,8 @@ export type AnalyticsEventName =
   | "pre_conversion_dropoff"
   | "conversion_started"
   | "conversion_completed"
+  | "post_conversion_ad_impression"
+  | "post_conversion_ad_click"
   | "conversion_failed"
   | "conversion_retry_started"
   | "conversion_retry_result"

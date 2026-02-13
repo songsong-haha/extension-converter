@@ -17,6 +17,7 @@ test.describe("homepage conversion funnel", () => {
     await page.getByRole("button", { name: /GIF\s*→\s*PNG 변환/ }).click();
 
     await expect(page.getByText("안심하세요. 파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.")).toBeVisible();
+    await expect(page.getByTestId("post-conversion-ad-slot")).toBeVisible();
   });
 
   test("renders key acquisition messages", async ({ page }) => {
@@ -128,6 +129,7 @@ test.describe("homepage conversion funnel", () => {
     await expect(
       page.getByText("파일은 브라우저 안에서만 처리되며 서버로 업로드되지 않습니다.")
     ).toBeVisible();
+    await expect(page.getByTestId("post-conversion-ad-slot")).toHaveCount(0);
   });
 
   test("shows failure guide with retry and alternative formats on conversion error", async ({ page }) => {
