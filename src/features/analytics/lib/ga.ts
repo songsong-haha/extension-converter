@@ -15,6 +15,7 @@ export type AnalyticsEventName =
   | "conversion_retry_result"
   | "file_downloaded"
   | "preview_image_optimized"
+  | "preview_image_optimization_evaluated"
   | "web_vital_measured"
   | "performance_budget_exceeded";
 

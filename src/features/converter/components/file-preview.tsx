@@ -29,6 +29,10 @@ export default function FilePreview({
                 <img
                     src={previewUrl}
                     alt={file.name}
+                    width={64}
+                    height={64}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                 />
                 <div className="absolute top-1 left-1 bg-[var(--overlay-strong)] backdrop-blur-sm text-[10px] font-bold text-white px-1.5 py-0.5 rounded">
