@@ -33,3 +33,7 @@ Started: 2026-02-13T14:43:38Z
 - item id: US-001
 - changed files: src/app/page.tsx, loop/progress.txt
 - reusable learnings: Keep the hero CTA action-first and short, while deriving support-copy format claims from registry-backed constants so marketing text stays accurate automatically.
+- time (UTC): 2026-02-13T15:19:01Z
+- item id: US-001
+- changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/prd.json, loop/progress.txt
+- reusable learnings: Keep hero acquisition copy and E2E assertions aligned in the same patch, and generate support claims from format-registry constants to avoid stale CTA messaging.
