@@ -85,6 +85,7 @@ npm run growth:track
 ```
 
 See `docs/CEO_GROWTH_LOOP.md` and `docs/GROWTH_BACKLOG.md`.
+For continuous auto-promote operation, see `docs/LOOP_AUTOPROMOTE_RUNBOOK.md`.
 
 ## Ralph-style Infinite Loop Setup
 

@@ -216,7 +216,8 @@ main() {
             exit 1
           }
         else
-          echo "[loop] auto-promote skipped. prd branch is not agent/growth/*: $current_branch"
+          echo "[loop] auto-promote requires prd branch format agent/growth/<task>. current: $current_branch" >&2
+          exit 1
         fi
       fi
       exit 0
