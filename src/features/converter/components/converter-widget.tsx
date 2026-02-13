@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import FormatSelector from "./format-selector";
 import FilePreview from "./file-preview";
 import ConversionProgress from "./conversion-progress";
@@ -12,6 +12,7 @@ import type { ConversionStatus, ConversionResult } from "../types";
 import { trackEvent } from "@/features/analytics/lib/ga";
 
 export default function ConverterWidget() {
+    const PRE_CONVERSION_DROPOFF_SESSION_KEY = "pre_conversion_dropoff_tracked";
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [targetFormat, setTargetFormat] = useState<string>("");
@@ -20,7 +21,28 @@ export default function ConverterWidget() {
     const [result, setResult] = useState<ConversionResult | null>(null);
     const [error, setError] = useState<string>("");
     const [isDragging, setIsDragging] = useState(false);
+    const hasStartedConversionRef = useRef(false);
+    const hasTrackedDropOffRef = useRef(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const trackPreConversionDropOff = useCallback(
+        (sourceFormat: string) => {
+            if (typeof window === "undefined" || hasTrackedDropOffRef.current) {
+                return;
+            }
+            const alreadyTracked = window.sessionStorage.getItem(PRE_CONVERSION_DROPOFF_SESSION_KEY) === "1";
+            if (alreadyTracked) {
+                hasTrackedDropOffRef.current = true;
+                return;
+            }
+            trackEvent("pre_conversion_dropoff", {
+                source_format: sourceFormat || "unknown",
+            });
+            window.sessionStorage.setItem(PRE_CONVERSION_DROPOFF_SESSION_KEY, "1");
+            hasTrackedDropOffRef.current = true;
+        },
+        [PRE_CONVERSION_DROPOFF_SESSION_KEY]
+    );
 
     const handleFile = useCallback((f: File) => {
         const extension = getFileExtension(f.name);
@@ -78,6 +100,7 @@ export default function ConverterWidget() {
 
         try {
             const sourceFormat = getFileExtension(file.name) || "unknown";
+            hasStartedConversionRef.current = true;
             trackEvent("conversion_started", {
                 source_format: sourceFormat,
                 target_format: targetFormat,
@@ -136,6 +159,34 @@ export default function ConverterWidget() {
         setResult(null);
         setError("");
     }, []);
+
+    useEffect(() => {
+        if (!file) {
+            return;
+        }
+
+        const sourceFormat = getFileExtension(file.name) || "unknown";
+        const maybeTrackDropOff = () => {
+            if (hasStartedConversionRef.current) {
+                return;
+            }
+            trackPreConversionDropOff(sourceFormat);
+        };
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "hidden") {
+                maybeTrackDropOff();
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        window.addEventListener("pagehide", maybeTrackDropOff);
+
+        return () => {
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+            window.removeEventListener("pagehide", maybeTrackDropOff);
+            maybeTrackDropOff();
+        };
+    }, [file, trackPreConversionDropOff]);
 
     const sourceExt = file ? getFileExtension(file.name) : undefined;
 

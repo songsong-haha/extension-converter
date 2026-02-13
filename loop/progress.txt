@@ -15,3 +15,7 @@ Started: 2026-02-13T14:43:38Z
 - changed files: src/app/page.tsx, tests/e2e/home.spec.ts, loop/prd.json
 - reusable learnings: Keep hero/e2e copy assertions in sync; source visible format lists from format-registry-derived constants to avoid hardcoded drift.
 
+- time (UTC): 2026-02-13T15:07:29Z
+- item id: US-002
+- changed files: src/features/analytics/lib/ga.ts, src/features/converter/components/converter-widget.tsx, loop/prd.json, loop/progress.txt
+- reusable learnings: For pre-conversion drop-off analytics, pair an in-memory guard with sessionStorage and fire on visibility/pagehide to avoid duplicate events while still capturing abandonment.

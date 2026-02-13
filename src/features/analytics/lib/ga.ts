@@ -3,6 +3,7 @@ export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 export type AnalyticsEventName =
   | "file_selected"
   | "format_selected"
+  | "pre_conversion_dropoff"
   | "conversion_started"
   | "conversion_completed"
   | "conversion_failed"
