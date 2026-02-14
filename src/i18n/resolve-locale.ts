@@ -1,59 +1,46 @@
-import { DEFAULT_LOCALE, type Locale, isSupportedLocale } from "./messages";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type Locale } from "./constants";
 
-interface ResolveLocaleOptions {
-  langParam?: string | string[];
-  persistedLocale?: string | null;
+export function isLocale(value: string | null | undefined): value is Locale {
+  if (!value) {
+    return false;
+  }
+
+  return (SUPPORTED_LOCALES as readonly string[]).includes(value);
+}
+
+export function normalizeLocale(value: string | null | undefined): Locale | null {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.toLowerCase().trim();
+  if (isLocale(normalized)) {
+    return normalized;
+  }
+
+  const base = normalized.split("-")[0];
+  return isLocale(base) ? base : null;
+}
+
+export function resolveLocale(input: {
+  headerLocale?: string | null;
+  cookieLocale?: string | null;
   acceptLanguage?: string | null;
-}
-
-function normalizeLocaleCandidate(value: string): string {
-  return value.trim().toLowerCase().split("-")[0];
-}
-
-function parseAcceptLanguage(acceptLanguage: string): string[] {
-  return acceptLanguage
-    .split(",")
-    .map((part) => {
-      const [rawTag, ...params] = part.trim().split(";");
-      const qParam = params.find((param) => param.trim().startsWith("q="));
-      const quality = qParam ? Number(qParam.split("=")[1]) : 1;
-      return {
-        tag: normalizeLocaleCandidate(rawTag),
-        quality: Number.isFinite(quality) ? quality : 0,
-      };
-    })
-    .filter((entry) => entry.tag)
-    .sort((a, b) => b.quality - a.quality)
-    .map((entry) => entry.tag);
-}
-
-export function resolveLocale({
-  langParam,
-  persistedLocale,
-  acceptLanguage,
-}: ResolveLocaleOptions): Locale {
-  const normalizedLangParam = Array.isArray(langParam) ? langParam[0] : langParam;
-  if (normalizedLangParam) {
-    const fromParam = normalizeLocaleCandidate(normalizedLangParam);
-    if (isSupportedLocale(fromParam)) {
-      return fromParam;
-    }
+}): Locale {
+  const fromHeader = normalizeLocale(input.headerLocale);
+  if (fromHeader) {
+    return fromHeader;
   }
 
-  if (persistedLocale) {
-    const fromPersistedLocale = normalizeLocaleCandidate(persistedLocale);
-    if (isSupportedLocale(fromPersistedLocale)) {
-      return fromPersistedLocale;
-    }
+  const fromCookie = normalizeLocale(input.cookieLocale);
+  if (fromCookie) {
+    return fromCookie;
   }
 
-  if (acceptLanguage) {
-    const candidates = parseAcceptLanguage(acceptLanguage);
-    for (const candidate of candidates) {
-      if (isSupportedLocale(candidate)) {
-        return candidate;
-      }
-    }
+  const primaryAccepted = input.acceptLanguage?.split(",")[0] ?? null;
+  const fromAcceptLanguage = normalizeLocale(primaryAccepted);
+  if (fromAcceptLanguage) {
+    return fromAcceptLanguage;
   }
 
   return DEFAULT_LOCALE;

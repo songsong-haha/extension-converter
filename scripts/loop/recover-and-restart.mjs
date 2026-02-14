@@ -1,22 +1,28 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { repoRootOrFail, run } from "../worktree/lib.mjs";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const REPO_ROOT = repoRootOrFail();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REPO_ROOT = path.resolve(__dirname, "../..");
 const LOOP_DIR = path.join(REPO_ROOT, "loop");
 
-function execOk(cmd, args, cwd = REPO_ROOT) {
-  const result = run(cmd, args, { cwd, stdio: "inherit" });
-  return result.status === 0;
+function run(cmd, args, stdio = "inherit") {
+  return spawnSync(cmd, args, { cwd: REPO_ROOT, encoding: "utf8", stdio });
 }
 
-function execIgnore(cmd, args, cwd = REPO_ROOT) {
-  run(cmd, args, { cwd, stdio: "ignore" });
+function execOk(cmd, args) {
+  return run(cmd, args).status === 0;
+}
+
+function execIgnore(cmd, args) {
+  run(cmd, args, "ignore");
 }
 
 function listWorktreePaths() {
-  const listed = run("git", ["worktree", "list", "--porcelain"], { cwd: REPO_ROOT, stdio: "pipe" });
+  const listed = run("git", ["worktree", "list", "--porcelain"], "pipe");
   if (listed.status !== 0) return [];
   return (listed.stdout || "")
     .split(/\r?\n/)
@@ -51,10 +57,7 @@ function cleanupWorktrees() {
 }
 
 function cleanupTemporaryBranches() {
-  const listed = run("git", ["branch", "--list", "__merge_target__", "merge-int/*", "merge-target/*"], {
-    cwd: REPO_ROOT,
-    stdio: "pipe",
-  });
+  const listed = run("git", ["branch", "--list", "__merge_target__", "merge-int/*", "merge-target/*"], "pipe");
   if (listed.status !== 0) return;
   const branches = (listed.stdout || "")
     .split(/\r?\n/)
@@ -75,6 +78,7 @@ function cleanupPidFiles() {
     path.join(LOOP_DIR, "loop-bg.pid"),
     path.join(LOOP_DIR, "monitor.pid"),
     path.join(LOOP_DIR, "runner.pid"),
+    path.join(LOOP_DIR, "runner.meta.json"),
     path.join(LOOP_DIR, ".runner.lock", "pid"),
   ];
   for (const file of files) fs.rmSync(file, { force: true });

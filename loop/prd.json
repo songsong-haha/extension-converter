@@ -1,21 +1,21 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/format-selection-guidance-experiment-phase-14",
-  "description": "Auto-seeded from backlog: 포맷 선택 가이드 인라인 UX + 실험 플래그 + 이벤트 계측 (Phase 14)",
+  "branchName": "agent/growth/theme-system-and-dark-mode-phase-47",
+  "description": "Auto-seeded from backlog: 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 47)",
   "userStories": [
     {
       "id": "US-001",
-      "title": "포맷 선택 가이드 인라인 UX + 실험 플래그 + 이벤트 계측 (Phase 14)",
-      "description": "Implement backlog ticket `format-selection-guidance-experiment-phase-14` with measurable impact on format_selected rate.",
+      "title": "테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 47)",
+      "description": "Implement backlog ticket `theme-system-and-dark-mode-phase-47` with measurable impact on dark_mode_session conversion_completed rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `format-selection-guidance-experiment-phase-14` is implemented.",
+        "Backlog ticket `theme-system-and-dark-mode-phase-47` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "seeded_from_backlog=true; metric=format_selected rate; owner=ceo+growth+qa+analytics+designer"
+      "passes": false,
+      "notes": "seeded_from_backlog=true; metric=dark_mode_session conversion_completed rate; owner=ceo+growth+qa+analytics+designer"
     }
   ]
 }

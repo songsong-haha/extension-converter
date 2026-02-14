@@ -9,8 +9,6 @@ Each ticket should require at least 10 minutes of pure implementation work (excl
 - [x] `mobile-cta-visibility` | 모바일 1스크린 내 CTA 가시성 개선 | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer
 - [x] `format-tip-inline` | 포맷 선택 가이드 툴팁 추가 | metric: format_selected rate | owner: ceo+growth+qa+analytics+designer
 
-
-
 - [x] `trust-error-ux-flow` | 신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 | metric: upload_to_conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P0: trust and error UX
 - [x] `full-i18n-rollout-ko-en` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
 - [x] `theme-system-and-dark-mode` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
@@ -49,12 +47,78 @@ Each ticket should require at least 10 minutes of pure implementation work (excl
 
 - [x] `format-selection-guidance-experiment-phase-14` | 포맷 선택 가이드 인라인 UX + 실험 플래그 + 이벤트 계측 (Phase 14) | metric: format_selected rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-25m | source: project-report P1: selection friction
 
-- [ ] `trust-error-ux-flow-phase-15` | 신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 (Phase 15) | metric: upload_to_conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P0: trust and error UX
+- [x] `trust-error-ux-flow-phase-15` | 신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터 (Phase 15) | metric: upload_to_conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P0: trust and error UX
 
-- [ ] `full-i18n-rollout-ko-en-phase-16` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 16) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+- [x] `full-i18n-rollout-ko-en-phase-16` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 16) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
 
-- [ ] `theme-system-and-dark-mode-phase-17` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 17) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+- [x] `theme-system-and-dark-mode-phase-17` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 17) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
 
-- [ ] `performance-budget-and-image-optimization-phase-18` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 18) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
+- [x] `performance-budget-and-image-optimization-phase-18` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 18) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
 
-- [ ] `ad-placement-post-conversion-phase-19` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 19) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+- [x] `ad-placement-post-conversion-phase-19` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 19) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+
+- [x] `conversion-failure-observability-phase-20` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 20) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
+
+- [x] `full-i18n-rollout-ko-en-phase-21` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 21) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+
+- [x] `theme-system-and-dark-mode-phase-22` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 22) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+
+- [x] `performance-budget-and-image-optimization-phase-23` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 23) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
+
+- [x] `ad-placement-post-conversion-phase-24` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 24) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+
+- [x] `conversion-failure-observability-phase-25` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 25) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
+
+- [x] `full-i18n-rollout-ko-en-phase-26` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 26) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+
+- [x] `theme-system-and-dark-mode-phase-27` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 27) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+
+- [x] `performance-budget-and-image-optimization-phase-28` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 28) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
+
+- [x] `ad-placement-post-conversion-phase-29` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 29) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+
+- [x] `conversion-failure-observability-phase-30` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 30) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
+
+- [x] `full-i18n-rollout-ko-en-phase-31` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 31) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+
+- [x] `theme-system-and-dark-mode-phase-32` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 32) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+
+- [x] `performance-budget-and-image-optimization-phase-33` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 33) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
+
+- [x] `ad-placement-post-conversion-phase-34` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 34) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+
+- [x] `conversion-failure-observability-phase-35` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 35) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
+
+- [x] `full-i18n-rollout-ko-en-phase-36` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 36) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+
+- [x] `theme-system-and-dark-mode-phase-37` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 37) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+
+- [x] `performance-budget-and-image-optimization-phase-38` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 38) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
+
+- [x] `ad-placement-post-conversion-phase-39` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 39) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+
+- [x] `conversion-failure-observability-phase-40` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 40) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
+
+- [x] `full-i18n-rollout-ko-en-phase-41` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 41) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+
+- [x] `theme-system-and-dark-mode-phase-42` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 42) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+
+- [x] `performance-budget-and-image-optimization-phase-43` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 43) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
+
+- [x] `ad-placement-post-conversion-phase-44` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 44) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+
+- [x] `conversion-failure-observability-phase-45` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 45) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
+
+- [x] `full-i18n-rollout-ko-en-phase-46` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 46) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+
+- [x] `theme-system-and-dark-mode-phase-47` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 47) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+
+- [ ] `performance-budget-and-image-optimization-phase-48` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 48) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
+
+- [ ] `ad-placement-post-conversion-phase-49` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 49) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+
+- [ ] `conversion-failure-observability-phase-50` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 50) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
+
+- [ ] `full-i18n-rollout-ko-en-phase-51` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 51) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+
+- [ ] `theme-system-and-dark-mode-phase-52` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 52) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
