@@ -47,14 +47,15 @@ next-env.d.ts
 /.agents/*.md
 
 # loop runtime artifacts (generated, not source)
+/loop/.promote.lock/
 /loop/.runner.lock/
 /loop/archive/
-/loop/runner.log
-/loop/runner.error.log
-/loop/runner.pid
+/loop/*.pid
+/loop/*.meta.json
+/loop/*meta*.json
+/loop/*.log
+/loop/*-state.json
+/loop/auto-promote-state.json
+/loop/promotion-controller.json
+/loop/loop-cycle-deep-research.mc
 /loop/heartbeat.json
-/loop/runner.meta.json
-/loop/supervisor-state.json
-/loop/.last-branch
-/loop/prd.json
-/loop/progress.txt
