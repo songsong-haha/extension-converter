@@ -147,12 +147,22 @@ Each ticket should require at least 10 minutes of pure implementation work (excl
 
 - [x] `ad-placement-post-conversion-phase-64` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 64) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
 
-- [ ] `conversion-failure-observability-phase-65` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 65) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
+- [x] `conversion-failure-observability-phase-65` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 65) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
 
-- [ ] `full-i18n-rollout-ko-en-phase-66` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 66) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+- [x] `full-i18n-rollout-ko-en-phase-66` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 66) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
 
-- [ ] `theme-system-and-dark-mode-phase-67` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 67) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+- [x] `theme-system-and-dark-mode-phase-67` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 67) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
 
-- [ ] `performance-budget-and-image-optimization-phase-68` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 68) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
+- [x] `performance-budget-and-image-optimization-phase-68` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 68) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
 
-- [ ] `ad-placement-post-conversion-phase-69` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 69) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+- [x] `ad-placement-post-conversion-phase-69` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 69) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing
+
+- [ ] `conversion-failure-observability-phase-70` | 실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인 (Phase 70) | metric: conversion_failed_to_retry_success rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P0/P1: observability and recovery
+
+- [ ] `full-i18n-rollout-ko-en-phase-71` | KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환 (Phase 71) | metric: non-ko conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 25-50m | source: project-report P1: i18n and accessibility
+
+- [ ] `theme-system-and-dark-mode-phase-72` | 테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용 (Phase 72) | metric: dark_mode_session conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-40m | source: project-report P1: theme and dark mode
+
+- [ ] `performance-budget-and-image-optimization-phase-73` | LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결 (Phase 73) | metric: mobile bounce rate | owner: ceo+growth+qa+analytics+designer | estimate: 20-35m | source: project-report P1: performance and UX quality
+
+- [ ] `ad-placement-post-conversion-phase-74` | 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 74) | metric: conversion_completed rate | owner: ceo+growth+qa+analytics+designer | estimate: 15-30m | source: project-report P0: ad UX sequencing

@@ -1,14 +1,14 @@
 {
   "project": "extension-converter",
-  "branchName": "agent/growth/ad-placement-post-conversion-phase-64",
-  "description": "Auto-seeded from backlog: 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 64)",
+  "branchName": "agent/growth/ad-placement-post-conversion-phase-69",
+  "description": "Auto-seeded from backlog: 광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 69)",
   "userStories": [
     {
       "id": "US-001",
-      "title": "광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 64)",
-      "description": "Implement backlog ticket `ad-placement-post-conversion-phase-64` with measurable impact on conversion_completed rate.",
+      "title": "광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화 (Phase 69)",
+      "description": "Implement backlog ticket `ad-placement-post-conversion-phase-69` with measurable impact on conversion_completed rate.",
       "acceptanceCriteria": [
-        "Backlog ticket `ad-placement-post-conversion-phase-64` is implemented.",
+        "Backlog ticket `ad-placement-post-conversion-phase-69` is implemented.",
         "npm run lint passes",
         "npm run build passes",
         "npm run test:e2e passes"
