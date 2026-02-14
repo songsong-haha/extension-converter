@@ -319,6 +319,7 @@ export interface ConverterMessages {
   postConversionAdTitle: string;
   postConversionAdDescription: string;
   postConversionAdCtaLabel: string;
+  postConversionAdDismissLabel: string;
   postConversionAdHref: string;
 }
 
@@ -476,6 +477,7 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
     postConversionAdTitle: "다음 작업도 빠르게 이어가세요",
     postConversionAdDescription: "변환이 끝났습니다. 관련 도구를 확인해 보세요.",
     postConversionAdCtaLabel: "도구 보기",
+    postConversionAdDismissLabel: "추천 숨기기",
     postConversionAdHref: "https://example.com",
   },
   en: {
@@ -541,6 +543,7 @@ export const CONVERTER_MESSAGES: Record<Locale, ConverterMessages> = {
     postConversionAdDescription:
       "Your conversion is done. Explore another tool for the next step.",
     postConversionAdCtaLabel: "Explore tools",
+    postConversionAdDismissLabel: "Hide recommendation",
     postConversionAdHref: "https://example.com",
   },
 };

@@ -267,6 +267,8 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
     const [progress, setProgress] = useState(0);
     const [result, setResult] = useState<ConversionResult | null>(null);
     const [hasDownloadedResult, setHasDownloadedResult] = useState(false);
+    const [isPostConversionAdReady, setIsPostConversionAdReady] = useState(false);
+    const [isPostConversionAdDismissed, setIsPostConversionAdDismissed] = useState(false);
     const [error, setError] = useState<string>("");
     const [failureCategory, setFailureCategory] = useState<string>("");
     const [isDragging, setIsDragging] = useState(false);
@@ -398,6 +400,8 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         updatePreviewUrl(preview.url);
         setResult(null);
         setHasDownloadedResult(false);
+        setIsPostConversionAdReady(false);
+        setIsPostConversionAdDismissed(false);
         setError("");
         setStatus("idle");
         setProgress(0);
@@ -480,6 +484,8 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             setProgress(100);
             setResult(result);
             setHasDownloadedResult(false);
+            setIsPostConversionAdReady(false);
+            setIsPostConversionAdDismissed(false);
             setStatus("done");
             trackLocaleEvent("conversion_completed", {
                 source_format: sourceFormat,
@@ -542,6 +548,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
             output_format: result.format,
             output_size_bytes: result.convertedSize,
         });
+        setIsPostConversionAdDismissed(false);
         setHasDownloadedResult(true);
     }, [result, trackLocaleEvent]);
 
@@ -553,6 +560,8 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         setProgress(0);
         setResult(null);
         setHasDownloadedResult(false);
+        setIsPostConversionAdReady(false);
+        setIsPostConversionAdDismissed(false);
         setError("");
         setFailureCategory("");
         hasStartedConversionRef.current = false;
@@ -621,7 +630,26 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
         [failureCategory, sourceExt, targetFormat]
     );
     const recommendedRecoveryFormat = recoveryFormats[0];
-    const shouldShowPostConversionAd = status === "done" && Boolean(result) && hasDownloadedResult;
+    const shouldShowPostConversionAd =
+        status === "done" &&
+        Boolean(result) &&
+        hasDownloadedResult &&
+        isPostConversionAdReady &&
+        !isPostConversionAdDismissed;
+
+    useEffect(() => {
+        if (!hasDownloadedResult || status !== "done" || isPostConversionAdReady) {
+            return;
+        }
+
+        const timer = window.setTimeout(() => {
+            setIsPostConversionAdReady(true);
+        }, 800);
+
+        return () => {
+            window.clearTimeout(timer);
+        };
+    }, [hasDownloadedResult, isPostConversionAdReady, status]);
 
     useEffect(() => {
         if (!shouldShowPostConversionAd || postConversionAdImpressionTrackedRef.current || !result) {
@@ -879,6 +907,20 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                             >
                                 {messages.postConversionAdCtaLabel}
                             </a>
+                            <button
+                                type="button"
+                                className="mt-3 block text-xs text-[var(--text-muted)] underline-offset-2 transition hover:text-[var(--text-secondary)] hover:underline"
+                                onClick={() => {
+                                    setIsPostConversionAdDismissed(true);
+                                    trackLocaleEvent("post_conversion_ad_dismissed", {
+                                        source_format: sourceExt || "unknown",
+                                        target_format: result?.format || "unknown",
+                                        placement: "converter_post_conversion",
+                                    });
+                                }}
+                            >
+                                {messages.postConversionAdDismissLabel}
+                            </button>
                         </aside>
                     )}
                 </>

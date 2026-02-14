@@ -22,6 +22,28 @@ test.describe("homepage conversion funnel", () => {
     await expect(page.getByTestId("post-conversion-ad-slot")).toBeVisible();
   });
 
+  test("allows dismissing post-conversion ad after download", async ({ page }) => {
+    await page.goto("/?lang=ko");
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "tiny.gif",
+      mimeType: "image/gif",
+      buffer: Buffer.from(
+        "R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==",
+        "base64"
+      ),
+    });
+
+    await page.getByRole("button", { name: /^PNG/i }).click();
+    await page.getByRole("button", { name: /GIF\s*→\s*PNG 변환/ }).click();
+    await page.getByRole("button", { name: /다운로드/ }).click();
+
+    const postConversionAd = page.getByTestId("post-conversion-ad-slot");
+    await expect(postConversionAd).toBeVisible();
+    await page.getByRole("button", { name: "추천 숨기기" }).click();
+    await expect(postConversionAd).toHaveCount(0);
+  });
+
   test("renders key acquisition messages", async ({ page }) => {
     await page.goto("/?lang=ko");
 
