@@ -158,7 +158,7 @@ test.describe("homepage conversion funnel", () => {
     await expect(page.getByText("변환에 실패했어요.")).toBeVisible();
     await expect(page.getByText("파일은 서버로 업로드되지 않았습니다.")).toBeVisible();
     await expect(page.getByRole("button", { name: "같은 설정으로 다시 시도" })).toBeVisible();
-    await expect(page.getByText("다른 포맷으로 시도")).toBeVisible();
+    await expect(page.getByText("다른 포맷으로 시도", { exact: true })).toBeVisible();
     await expect(page.getByText("추천 포맷: WEBP")).toBeVisible();
     await expect(page.getByRole("button", { name: "webp", exact: true })).toBeVisible();
   });
@@ -298,5 +298,59 @@ test.describe("homepage conversion funnel", () => {
       window.localStorage.getItem("extension_converter_theme")
     );
     expect(storedTheme).toBe(nextTheme);
+  });
+
+  test("applies theme token colors to conversion and result panels", async ({ page }) => {
+    await page.goto("/?lang=en");
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "tiny.gif",
+      mimeType: "image/gif",
+      buffer: Buffer.from(
+        "R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==",
+        "base64"
+      ),
+    });
+
+    await page.getByRole("button", { name: /^PNG/i }).click();
+    await page.getByRole("button", { name: /Convert GIF → PNG/ }).click();
+    await page.getByRole("button", { name: /Download/ }).click();
+    await expect(page.getByTestId("post-conversion-ad-slot")).toBeVisible();
+
+    await expect(page.getByTestId("processing-trust-message")).toHaveClass(/theme-surface-panel/);
+    await expect(page.getByTestId("post-conversion-ad-slot")).toHaveClass(/theme-surface-panel/);
+
+    const beforeToggle = await page.evaluate(() => {
+      const panel = document.querySelector('[data-testid="processing-trust-message"]');
+      const ad = document.querySelector('[data-testid="post-conversion-ad-slot"]');
+      return {
+        body: getComputedStyle(document.body).backgroundColor,
+        surfacePanelVar: getComputedStyle(document.documentElement)
+          .getPropertyValue("--surface-panel")
+          .trim(),
+        panelClass: panel?.className ?? "",
+        adClass: ad?.className ?? "",
+      };
+    });
+
+    await page.getByTestId("theme-toggle").click();
+    await page.waitForFunction(() => {
+      const panel = document.querySelector('[data-testid="processing-trust-message"]');
+      return panel ? Boolean(getComputedStyle(panel).backgroundColor) : false;
+    });
+
+    const afterToggle = await page.evaluate(() => {
+      return {
+        body: getComputedStyle(document.body).backgroundColor,
+        surfacePanelVar: getComputedStyle(document.documentElement)
+          .getPropertyValue("--surface-panel")
+          .trim(),
+      };
+    });
+
+    expect(afterToggle.body).not.toBe(beforeToggle.body);
+    expect(afterToggle.surfacePanelVar).not.toBe(beforeToggle.surfacePanelVar);
+    expect(beforeToggle.panelClass).toContain("theme-surface-panel");
+    expect(beforeToggle.adClass).toContain("theme-surface-panel");
   });
 });

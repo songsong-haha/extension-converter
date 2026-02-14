@@ -41,6 +41,7 @@
     "loop:daemon:uninstall": "node scripts/loop/uninstall-launchd.mjs",
     "loop:daemon:status": "node scripts/loop/status-launchd.mjs",
     "loop:doctor": "node scripts/loop/doctor.mjs",
+    "loop:admin": "node scripts/loop/admin-server.mjs",
     "artifact:check": "npm pack --dry-run >/dev/null"
   },
   "dependencies": {

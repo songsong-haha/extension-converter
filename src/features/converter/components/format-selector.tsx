@@ -103,7 +103,7 @@ export default function FormatSelector({
                                         onGuidanceQuickSelect?.(format);
                                         onSelect(format);
                                     }}
-                                    className="rounded-lg border border-[var(--primary-400)] bg-[rgba(124,58,237,0.16)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[rgba(124,58,237,0.24)]"
+                                    className="rounded-lg border border-[var(--primary-400)] bg-[var(--surface-soft-strong)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-interactive-hover)]"
                                 >
                                     {messages.formatGuidanceQuickPickLabel}:{" "}
                                     {format.label.toUpperCase()}
@@ -132,9 +132,9 @@ export default function FormatSelector({
                                 "cursor-pointer select-none",
                                 "border",
                                 isSelected
-                                    ? "border-[var(--primary-400)] bg-[rgba(124,58,237,0.15)] shadow-[0_0_20px_rgba(124,58,237,0.2)]"
+                                    ? "border-[var(--primary-400)] theme-surface-soft-strong shadow-[0_0_20px_rgba(124,58,237,0.2)]"
                                     : isGuidanceRecommended
-                                      ? "border-[var(--primary-400)]/70 bg-[rgba(124,58,237,0.1)] hover:bg-[rgba(124,58,237,0.18)]"
+                                      ? "border-[var(--primary-400)]/70 theme-surface-soft hover:bg-[var(--surface-soft-strong)]"
                                     : "border-[var(--glass-border)] bg-[var(--glass-bg)] hover:bg-[var(--glass-hover)] hover:border-[var(--glass-border-strong)]",
                                 "active:scale-95",
                             ].join(" ")}
@@ -149,7 +149,7 @@ export default function FormatSelector({
                                 .{format.extension}
                             </span>
                             {isGuidanceRecommended && !isSelected && (
-                                <span className="rounded-full border border-[var(--primary-400)]/70 bg-[rgba(124,58,237,0.1)] px-1.5 py-0.5 text-[9px] font-semibold text-[var(--text-secondary)]">
+                                <span className="rounded-full border border-[var(--primary-400)]/70 bg-[var(--surface-soft)] px-1.5 py-0.5 text-[9px] font-semibold text-[var(--text-secondary)]">
                                     {messages.formatGuidanceQuickPickLabel}
                                 </span>
                             )}
