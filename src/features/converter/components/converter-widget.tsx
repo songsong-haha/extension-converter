@@ -749,7 +749,10 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                         }}
                     />
 
-                    <div className="rounded-xl border border-[var(--glass-border)] bg-[var(--surface-200)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+                    <div
+                        className="rounded-xl border border-[var(--glass-border)] theme-surface-panel px-4 py-3 text-sm text-[var(--text-secondary)]"
+                        data-testid="processing-trust-message"
+                    >
                         {messages.processingTrustMessage}
                     </div>
 
@@ -808,7 +811,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
 
                     {/* Actions */}
                     {status === "done" && result && (
-                        <p className="text-sm text-[var(--text-secondary)]">
+                        <p className="text-sm text-[var(--text-secondary)]" data-testid="result-trust-message">
                             {messages.trustMessage}
                         </p>
                     )}
@@ -849,7 +852,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                     </div>
                     {shouldShowPostConversionAd && (
                         <aside
-                            className="rounded-xl border border-[var(--glass-border)] bg-[var(--surface-200)]/70 px-4 py-4"
+                            className="rounded-xl border border-[var(--glass-border)] theme-surface-panel px-4 py-4"
                             data-testid="post-conversion-ad-slot"
                         >
                             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
@@ -862,7 +865,7 @@ export default function ConverterWidget({ locale }: ConverterWidgetProps) {
                                 {messages.postConversionAdDescription}
                             </p>
                             <a
-                                className="mt-3 inline-flex items-center rounded-lg border border-[var(--primary-400)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-300)]"
+                                className="theme-surface-interactive mt-3 inline-flex items-center rounded-lg border border-[var(--primary-400)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition"
                                 href={messages.postConversionAdHref}
                                 target="_blank"
                                 rel="sponsored noopener noreferrer"

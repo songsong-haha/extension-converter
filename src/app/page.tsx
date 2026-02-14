@@ -37,8 +37,9 @@ async function resolveRequestLocale(searchParams: HomeProps["searchParams"]): Pr
   const resolvedSearchParams = await getSearchParams(searchParams);
   const requestHeaders = await headers();
   return resolveLocale({
-    langParam: resolvedSearchParams.lang,
-    persistedLocale: requestHeaders.get(LOCALE_HEADER_NAME),
+    headerLocale:
+      typeof resolvedSearchParams.lang === "string" ? resolvedSearchParams.lang : null,
+    cookieLocale: requestHeaders.get(LOCALE_HEADER_NAME),
     acceptLanguage: requestHeaders.get("accept-language"),
   });
 }
@@ -241,7 +242,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
           <a
             href="#converter-widget"
-            className="inline-flex mt-8 items-center justify-center rounded-xl bg-[var(--primary-500)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-400)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-400)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-100)]"
+            className="inline-flex mt-8 items-center justify-center rounded-xl bg-[var(--primary-500)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary-400)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-100)]"
           >
             {messages.primaryCtaLabel}
           </a>

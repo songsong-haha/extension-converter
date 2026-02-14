@@ -5,3 +5,8 @@
 
 ---
 Started: 2026-02-14T04:37:51Z
+
+- time (UTC): 2026-02-14T04:56:07Z
+- item id: US-001
+- changed files: loop/prd.json, src/app/global-error.tsx, src/app/globals.css, src/app/layout.tsx, src/app/page.tsx, src/components/language-toggle.tsx, src/features/converter/components/converter-widget.tsx, src/features/converter/components/format-selector.tsx, src/i18n/messages.ts, tests/e2e/home.spec.ts
+- reusable learnings: Keep theme-driven surfaces semantic (`--surface-panel`, `--surface-soft`) and assert token application in e2e by checking CSS variable shifts after toggle; maintain compatibility exports in i18n modules when call sites still consume legacy constants.

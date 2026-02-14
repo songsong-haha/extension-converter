@@ -22,7 +22,7 @@ function detectClientLocale(): Locale {
   }
 
   return resolveLocale({
-    langParam: typeof document !== "undefined" ? document.documentElement.lang : undefined,
+    headerLocale: typeof document !== "undefined" ? document.documentElement.lang : undefined,
     acceptLanguage: typeof navigator !== "undefined" ? navigator.language : null,
   });
 }

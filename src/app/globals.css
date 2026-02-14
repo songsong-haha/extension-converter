@@ -39,6 +39,13 @@
   --glass-hover: rgba(255, 255, 255, 0.88);
   --glass-border-strong: rgba(71, 85, 146, 0.32);
   --overlay-strong: rgba(15, 23, 42, 0.62);
+  --surface-panel: rgba(255, 255, 255, 0.7);
+  --surface-panel-strong: rgba(255, 255, 255, 0.82);
+  --surface-soft: rgba(124, 58, 237, 0.08);
+  --surface-soft-strong: rgba(124, 58, 237, 0.16);
+  --surface-interactive: rgba(124, 58, 237, 0.12);
+  --surface-interactive-hover: rgba(124, 58, 237, 0.2);
+  --focus-ring: rgba(124, 58, 237, 0.44);
   --danger-bg: rgba(239, 68, 68, 0.1);
   --danger-border: rgba(239, 68, 68, 0.24);
   --danger-text-primary: #7f1d1d;
@@ -82,6 +89,13 @@
   --glass-hover: rgba(255, 255, 255, 0.08);
   --glass-border-strong: rgba(255, 255, 255, 0.12);
   --overlay-strong: rgba(2, 6, 23, 0.72);
+  --surface-panel: rgba(15, 23, 42, 0.56);
+  --surface-panel-strong: rgba(15, 23, 42, 0.72);
+  --surface-soft: rgba(124, 58, 237, 0.16);
+  --surface-soft-strong: rgba(124, 58, 237, 0.22);
+  --surface-interactive: rgba(124, 58, 237, 0.26);
+  --surface-interactive-hover: rgba(124, 58, 237, 0.34);
+  --focus-ring: rgba(139, 92, 246, 0.62);
   --danger-bg: rgba(248, 113, 113, 0.16);
   --danger-border: rgba(252, 165, 165, 0.28);
   --danger-text-primary: #fee2e2;
@@ -117,6 +131,13 @@
     --glass-hover: rgba(255, 255, 255, 0.08);
     --glass-border-strong: rgba(255, 255, 255, 0.12);
     --overlay-strong: rgba(2, 6, 23, 0.72);
+    --surface-panel: rgba(15, 23, 42, 0.56);
+    --surface-panel-strong: rgba(15, 23, 42, 0.72);
+    --surface-soft: rgba(124, 58, 237, 0.16);
+    --surface-soft-strong: rgba(124, 58, 237, 0.22);
+    --surface-interactive: rgba(124, 58, 237, 0.26);
+    --surface-interactive-hover: rgba(124, 58, 237, 0.34);
+    --focus-ring: rgba(139, 92, 246, 0.62);
     --danger-bg: rgba(248, 113, 113, 0.16);
     --danger-border: rgba(252, 165, 165, 0.28);
     --danger-text-primary: #fee2e2;
@@ -178,7 +199,7 @@ body {
 
 /* ===== Glass Morphism ===== */
 .glass {
-  background: var(--glass-bg);
+  background: var(--surface-panel);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
@@ -186,7 +207,7 @@ body {
 }
 
 .glass-card {
-  background: var(--glass-bg);
+  background: var(--surface-panel);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
@@ -195,7 +216,7 @@ body {
 }
 
 .glass-card:hover {
-  background: var(--glass-hover);
+  background: var(--surface-panel-strong);
   border-color: var(--glass-border-strong);
   transform: translateY(-2px);
   box-shadow: var(--shadow-glow);
@@ -302,6 +323,26 @@ body {
 .dropzone.active {
   border-style: solid;
   animation: pulse-soft 1s var(--ease-smooth) infinite;
+}
+
+.theme-surface-panel {
+  background: var(--surface-panel);
+}
+
+.theme-surface-soft {
+  background: var(--surface-soft);
+}
+
+.theme-surface-soft-strong {
+  background: var(--surface-soft-strong);
+}
+
+.theme-surface-interactive {
+  background: var(--surface-interactive);
+}
+
+.theme-surface-interactive:hover {
+  background: var(--surface-interactive-hover);
 }
 
 /* ===== Progress Bar ===== */

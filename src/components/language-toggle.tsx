@@ -13,6 +13,14 @@ const OPTIONS: ReadonlyArray<{ locale: Locale; label: string }> = [
   { locale: "en", label: "English" },
 ];
 
+function setLocaleCookie(nextLocale: Locale): void {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  document.cookie = `${LOCALE_COOKIE_NAME}=${nextLocale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+}
+
 export default function LanguageToggle({ locale }: LanguageToggleProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -22,7 +30,7 @@ export default function LanguageToggle({ locale }: LanguageToggleProps) {
       return;
     }
 
-    document.cookie = `${LOCALE_COOKIE_NAME}=${nextLocale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+    setLocaleCookie(nextLocale);
     startTransition(() => {
       router.refresh();
     });

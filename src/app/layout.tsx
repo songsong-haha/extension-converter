@@ -21,7 +21,7 @@ export default async function RootLayout({
 }>) {
   const requestHeaders = await headers();
   const locale = resolveLocale({
-    persistedLocale: requestHeaders.get(LOCALE_HEADER_NAME),
+    headerLocale: requestHeaders.get(LOCALE_HEADER_NAME),
     acceptLanguage: requestHeaders.get("accept-language"),
   });
 
