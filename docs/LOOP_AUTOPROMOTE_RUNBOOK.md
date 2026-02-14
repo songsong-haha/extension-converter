@@ -80,6 +80,11 @@ open 상태에서는 auto-promote를 호출하지 않고 즉시 중단하여 같
 - 임시 worktree는 `git worktree remove --force`로 정리
 - promote 동시 실행은 `loop/.promote.lock`으로 차단
 
+## Self-Heal Policy
+
+- supervisor의 self-heal 코드수정은 기본 비활성입니다.
+- 필요 시에만 `LOOP_SELF_HEAL_ENABLED=1`로 명시적으로 활성화하세요.
+
 ## Notes
 
 - `branchName`은 반드시 `agent/growth/<task-slug>` 형식이어야 합니다.

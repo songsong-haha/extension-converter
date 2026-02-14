@@ -452,8 +452,8 @@ async function maybeAutoPromote(opts) {
 
   if (breaker.state === "open" && Number.isFinite(quarantineUntilMs) && nowMs < quarantineUntilMs) {
     const retryAt = new Date(quarantineUntilMs).toISOString();
-    log("loop", "error", `auto-promote circuit is OPEN for task=${taskSlug} until ${retryAt}; quarantined`);
-    return EXIT_FATAL;
+    log("loop", "warn", `auto-promote circuit is OPEN for task=${taskSlug} until ${retryAt}; skipping promote`);
+    return EXIT_OK;
   }
 
   if (breaker.state === "open" && Number.isFinite(quarantineUntilMs) && nowMs >= quarantineUntilMs) {
@@ -520,6 +520,10 @@ async function maybeAutoPromote(opts) {
       lastErrorSignature: signature,
       lastTask: taskSlug,
     });
+    if (failureClass === "policy-terminal") {
+      log("loop", "warn", `auto-promote failed (${failureClass}, exit=${code}); breaker opened until ${until}; continuing loop`);
+      return EXIT_OK;
+    }
     log("loop", "error", `auto-promote failed (${failureClass}, exit=${code}); breaker opened until ${until}`);
     return EXIT_FATAL;
   }

@@ -211,6 +211,7 @@ Circuit-breaker env:
 - `LOOP_PROMOTE_BREAKER_THRESHOLD` (default `3`)
 - `LOOP_PROMOTE_BREAKER_OPEN_SECONDS` (default `1800`)
 - `LOOP_SUPERVISOR_MAX_RETRYABLE_FAILURES` (default `8`)
+- `LOOP_SELF_HEAL_ENABLED` (default disabled, set `1` to enable autonomous code edits)
 
 ## Codex Compact Memory
 

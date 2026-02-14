@@ -26,6 +26,7 @@ const MAX_RETRYABLE_FAILURES = Number(process.env.LOOP_SUPERVISOR_MAX_RETRYABLE_
 const SESSION_ID = process.env.LOOP_SESSION_ID || `${nowUtc().replace(/[:.]/g, "")}-${process.pid}`;
 const SELF_HEAL_FAILURE_THRESHOLD = Number(process.env.LOOP_SELF_HEAL_FAILURE_THRESHOLD || 3);
 const SELF_HEAL_COOLDOWN_SECONDS = Number(process.env.LOOP_SELF_HEAL_COOLDOWN_SECONDS || 30);
+const SELF_HEAL_ENABLED = process.env.LOOP_SELF_HEAL_ENABLED === "1";
 
 const EXIT_OK = 0;
 const EXIT_COMPLETE = 10;
@@ -201,9 +202,11 @@ async function main() {
       const nowMs = Date.now();
       const selfHealAllowedByThreshold = failureStreak >= SELF_HEAL_FAILURE_THRESHOLD;
       const selfHealAllowedByCooldown = nowMs - lastSelfHealAtMs >= SELF_HEAL_COOLDOWN_SECONDS * 1000;
-      if (selfHealAllowedByThreshold && selfHealAllowedByCooldown) {
+      if (SELF_HEAL_ENABLED && selfHealAllowedByThreshold && selfHealAllowedByCooldown) {
         await runCodexSelfHeal(`retryable-failure-threshold-${failureStreak}`, failureStreak);
         lastSelfHealAtMs = Date.now();
+      } else if (!SELF_HEAL_ENABLED && selfHealAllowedByThreshold) {
+        slog("warn", "self-heal is disabled (set LOOP_SELF_HEAL_ENABLED=1 to enable)");
       }
 
       await sleep(delay * 1000);
@@ -213,11 +216,13 @@ async function main() {
 
       const nowMs = Date.now();
       const selfHealAllowedByCooldown = nowMs - lastSelfHealAtMs >= SELF_HEAL_COOLDOWN_SECONDS * 1000;
-      if (selfHealAllowedByCooldown) {
+      if (SELF_HEAL_ENABLED && selfHealAllowedByCooldown) {
         await runCodexSelfHeal("fatal-child-exit", failureStreak);
         lastSelfHealAtMs = Date.now();
-      } else {
+      } else if (SELF_HEAL_ENABLED) {
         slog("warn", "self-heal skipped due to cooldown");
+      } else {
+        slog("warn", "self-heal is disabled (set LOOP_SELF_HEAL_ENABLED=1 to enable)");
       }
       slog("error", "stopping supervisor due to fatal classification");
       process.exit(EXIT_FATAL);
