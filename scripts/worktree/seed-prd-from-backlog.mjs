@@ -1,88 +1,67 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 
-const BACKLOG_PATH = process.env.LOOP_BACKLOG_PATH || "docs/GROWTH_BACKLOG.md";
-const PRD_PATH = process.env.LOOP_PRD_PATH || "loop/prd.json";
-const PROJECT_NAME = process.env.LOOP_PROJECT_NAME || "extension-converter";
-
-function readJson(path) {
-  return JSON.parse(fs.readFileSync(path, "utf8"));
+function readPathFromEnv(envKey, fallback) {
+  const value = process.env[envKey];
+  if (typeof value === "string" && value.trim()) return value.trim();
+  return fallback;
 }
 
-function writeJson(path, value) {
-  fs.writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+const BACKLOG_PATH = readPathFromEnv("LOOP_BACKLOG_PATH", "docs/GROWTH_BACKLOG.md");
+const PRD_PATH = readPathFromEnv("LOOP_PRD_PATH", "loop/prd.json");
+
+function readPrd() {
+  if (!fs.existsSync(PRD_PATH)) {
+    return { project: "extension-converter", userStories: [] };
+  }
+  return JSON.parse(fs.readFileSync(PRD_PATH, "utf8"));
 }
 
 function hasPendingStory(prd) {
   if (!Array.isArray(prd?.userStories)) return false;
-  return prd.userStories.some((story) => story && story.passes === false);
+  return prd.userStories.some((story) => story && story.passes !== true);
 }
 
-function parseOpenTicket(line) {
-  const trimmed = line.trim();
-  if (!trimmed.startsWith("- [ ]")) return null;
-  const parts = trimmed.split("|").map((x) => x.trim());
-  if (parts.length < 3) return null;
+function parseOpenBacklogLine(line) {
+  const match = line.match(/^- \[ \] `([^`]+)` \| (.+)$/);
+  if (!match) return null;
 
-  const slugMatch = parts[0].match(/^- \[ \] `([^`]+)`$/);
-  if (!slugMatch) return null;
-  const title = parts[1];
-  const metricPart = parts.find((p) => p.startsWith("metric: "));
-  const ownerPart = parts.find((p) => p.startsWith("owner: "));
-  if (!metricPart) return null;
+  const slug = match[1];
+  const parts = match[2].split("|").map((part) => part.trim());
+  const title = parts[0] || slug;
+  let metric = "";
+  let owner = "";
+
+  for (let i = 1; i < parts.length; i += 1) {
+    const kv = parts[i].match(/^([^:]+):\s*(.+)$/);
+    if (!kv) continue;
+    const key = kv[1].trim().toLowerCase();
+    const value = kv[2].trim();
+    if (key === "metric") metric = value;
+    if (key === "owner") owner = value;
+  }
+
+  return { slug, title, metric, owner };
+}
+
+function buildSeededPrd(previousPrd, ticket) {
+  const metricText = ticket.metric || "target metric";
+  const notes = [
+    "seeded_from_backlog=true",
+    ticket.metric ? `metric=${ticket.metric}` : "",
+    ticket.owner ? `owner=${ticket.owner}` : "",
+  ].filter(Boolean).join("; ");
 
   return {
-    slug: slugMatch[1].trim(),
-    title,
-    metric: metricPart.replace(/^metric:\s*/, "").trim(),
-    owner: (ownerPart || "").replace(/^owner:\s*/, "").trim(),
-  };
-}
-
-function main() {
-  if (!fs.existsSync(BACKLOG_PATH)) {
-    console.log(`[prd-seed] backlog not found: ${BACKLOG_PATH}`);
-    process.exit(0);
-  }
-  if (!fs.existsSync(PRD_PATH)) {
-    console.log(`[prd-seed] prd not found: ${PRD_PATH}`);
-    process.exit(0);
-  }
-
-  const prd = readJson(PRD_PATH);
-  if (hasPendingStory(prd)) {
-    console.log("[prd-seed] pending story exists; no reseed");
-    process.exit(0);
-  }
-
-  const backlogText = fs.readFileSync(BACKLOG_PATH, "utf8");
-  const lines = backlogText.split("\n");
-
-  let openIndex = -1;
-  let ticket = null;
-  for (let i = 0; i < lines.length; i += 1) {
-    const parsed = parseOpenTicket(lines[i]);
-    if (parsed) {
-      openIndex = i;
-      ticket = parsed;
-      break;
-    }
-  }
-
-  if (!ticket) {
-    console.log("[prd-seed] no open backlog ticket found; no reseed");
-    process.exit(0);
-  }
-
-  const nextPrd = {
-    project: prd.project || PROJECT_NAME,
+    ...previousPrd,
+    project: typeof previousPrd?.project === "string" && previousPrd.project ? previousPrd.project : "extension-converter",
     branchName: `agent/growth/${ticket.slug}`,
     description: `Auto-seeded from backlog: ${ticket.title}`,
     userStories: [
       {
         id: "US-001",
         title: ticket.title,
-        description: `Implement backlog ticket \`${ticket.slug}\` with measurable impact on ${ticket.metric}.`,
+        description: `Implement backlog ticket \`${ticket.slug}\` with measurable impact on ${metricText}.`,
         acceptanceCriteria: [
           `Backlog ticket \`${ticket.slug}\` is implemented.`,
           "npm run lint passes",
@@ -91,18 +70,57 @@ function main() {
         ],
         priority: 1,
         passes: false,
-        notes: `seeded_from_backlog=true; metric=${ticket.metric}; owner=${ticket.owner || "unknown"}`,
+        notes,
       },
     ],
   };
+}
 
+function main() {
+  let prd;
+  try {
+    prd = readPrd();
+  } catch (error) {
+    console.error(`[prd-seed] failed to read PRD: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+  }
+
+  if (hasPendingStory(prd)) {
+    console.log("[prd-seed] pending story exists; no reseed");
+    process.exit(0);
+  }
+
+  if (!fs.existsSync(BACKLOG_PATH)) {
+    console.log("[prd-seed] backlog missing; no reseed");
+    process.exit(0);
+  }
+
+  const backlogText = fs.readFileSync(BACKLOG_PATH, "utf8");
+  const lines = backlogText.split("\n");
+  const openIndex = lines.findIndex((line) => line.startsWith("- [ ] `"));
+  if (openIndex === -1) {
+    console.log("[prd-seed] no open backlog item; no reseed");
+    process.exit(0);
+  }
+
+  const ticket = parseOpenBacklogLine(lines[openIndex]);
+  if (!ticket) {
+    console.error(`[prd-seed] malformed backlog line: ${lines[openIndex]}`);
+    process.exit(1);
+  }
+
+  const nextPrd = buildSeededPrd(prd, ticket);
   lines[openIndex] = lines[openIndex].replace("- [ ]", "- [x]");
-  fs.writeFileSync(BACKLOG_PATH, `${lines.join("\n")}\n`, "utf8");
-  writeJson(PRD_PATH, nextPrd);
 
-  console.log(
-    `[prd-seed] seeded PRD from backlog ticket: ${ticket.slug} | branch=agent/growth/${ticket.slug}`
-  );
+  try {
+    fs.writeFileSync(PRD_PATH, `${JSON.stringify(nextPrd, null, 2)}\n`, "utf8");
+    fs.writeFileSync(BACKLOG_PATH, `${lines.join("\n").replace(/\s*$/, "")}\n`, "utf8");
+  } catch (error) {
+    console.error(`[prd-seed] failed to write outputs: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+  }
+
+  console.log(`[prd-seed] seeded PRD from backlog ticket: ${ticket.slug}`);
 }
 
 main();

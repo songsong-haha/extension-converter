@@ -2,10 +2,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import {
-  sleep,
   nowUtc,
   log,
   readJsonSafe,
@@ -28,83 +27,81 @@ const ARCHIVE_DIR = path.join(LOOP_DIR, "archive");
 const LAST_BRANCH_FILE = path.join(LOOP_DIR, ".last-branch");
 const BACKLOG_ENSURE_SCRIPT = path.join(REPO_ROOT, "scripts/worktree/ensure-backlog-item.mjs");
 const PRD_SEED_SCRIPT = path.join(REPO_ROOT, "scripts/worktree/seed-prd-from-backlog.mjs");
-const TASK_RESET_SCRIPT = path.join(REPO_ROOT, "scripts/worktree/reset-task-branches.mjs");
+const AUTO_PROMOTE_SCRIPT = path.join(REPO_ROOT, "scripts/worktree/auto-promote.mjs");
+const POLICY_FILE = path.join(LOOP_DIR, "policy.json");
 const HEARTBEAT_FILE = path.join(LOOP_DIR, "heartbeat.json");
 const LOCK_DIR = path.join(LOOP_DIR, ".runner.lock");
 const LOCK_PID_FILE = path.join(LOCK_DIR, "pid");
+const PROMOTION_CONTROLLER_FILE = path.join(LOOP_DIR, "promotion-controller.json");
 const HEARTBEAT_INTERVAL_SECONDS = Number(process.env.LOOP_HEARTBEAT_INTERVAL_SECONDS || 10);
 const CODEX_STALL_TIMEOUT_SECONDS = Number(process.env.LOOP_CODEX_STALL_TIMEOUT_SECONDS || 1800);
 const CODEX_KILL_GRACE_MS = Number(process.env.LOOP_CODEX_KILL_GRACE_MS || 5000);
-const RESET_AFTER_AUTOPROMOTE_FAILURES = Number(process.env.LOOP_RESET_AFTER_AUTOPROMOTE_FAILURES || 3);
+const PROMOTION_BREAKER_THRESHOLD = Number(process.env.LOOP_PROMOTE_BREAKER_THRESHOLD || 3);
+const PROMOTION_BREAKER_OPEN_SECONDS = Number(process.env.LOOP_PROMOTE_BREAKER_OPEN_SECONDS || 1800);
+const SESSION_ID = process.env.LOOP_SESSION_ID || `loop-${nowUtc().replace(/[:.]/g, "")}-${process.pid}`;
 
 const EXIT_OK = 0;
 const EXIT_COMPLETE = 10;
 const EXIT_RETRYABLE_FAILURE = 20;
 const EXIT_FATAL = 30;
 
+function relRepo(p) {
+  return path.relative(REPO_ROOT, p) || ".";
+}
+
+function isTrackedByGit(absPath) {
+  const relPath = relRepo(absPath);
+  const result = spawnSync("git", ["ls-files", "--error-unmatch", relPath], {
+    cwd: REPO_ROOT,
+    stdio: "ignore",
+  });
+  return result.status === 0;
+}
+
 function usage() {
   console.log(`Usage:
   node scripts/loop/codex-loop.mjs [options]
 
 Options:
-  --max-iterations <n>       0 means infinite (default: 0)
-  --sleep-seconds <n>        seconds between iterations (default: 3)
   --model <name>             codex model override (optional)
   --completion-token <t>     loop stops if output includes this token
   --auto-promote             if PRD branch is agent/growth/<task>, run auto-promote flow
-  --failure-backoff-base <n> base seconds for failure backoff (default: 5)
-  --failure-backoff-max <n>  max seconds for failure backoff (default: 60)
-  --fatal-stop <0|1>         if 1, stop on first retryable failure (default: 0)
+  --max-iterations <n>       accepted for compatibility (ignored)
+  --sleep-seconds <n>        accepted for compatibility (ignored)
+  --failure-backoff-base <n> accepted for compatibility (ignored)
+  --failure-backoff-max <n>  accepted for compatibility (ignored)
+  --fatal-stop <0|1>         accepted for compatibility (ignored)
   -h, --help                 show help`);
 }
 
 function parseArgs(argv) {
   const opts = {
-    maxIterations: 0,
-    sleepSeconds: 3,
     model: process.env.CODEX_MODEL || "",
     completionToken: process.env.LOOP_COMPLETION_TOKEN || "<promise>COMPLETE</promise>",
     autoPromote: false,
-    failureBackoffBase: 5,
-    failureBackoffMax: 60,
-    fatalStop: 0,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === "--max-iterations") opts.maxIterations = Number(argv[++i]);
-    else if (arg === "--sleep-seconds") opts.sleepSeconds = Number(argv[++i]);
-    else if (arg === "--model") opts.model = String(argv[++i] || "");
+    if (arg === "--model") opts.model = String(argv[++i] || "");
     else if (arg === "--completion-token") opts.completionToken = String(argv[++i] || "");
     else if (arg === "--auto-promote") opts.autoPromote = true;
-    else if (arg === "--failure-backoff-base") opts.failureBackoffBase = Number(argv[++i]);
-    else if (arg === "--failure-backoff-max") opts.failureBackoffMax = Number(argv[++i]);
-    else if (arg === "--fatal-stop") opts.fatalStop = Number(argv[++i]);
-    else if (arg === "-h" || arg === "--help") {
+    else if (
+      arg === "--max-iterations" ||
+      arg === "--sleep-seconds" ||
+      arg === "--failure-backoff-base" ||
+      arg === "--failure-backoff-max" ||
+      arg === "--fatal-stop"
+    ) {
+      i += 1;
+    } else if (arg === "-h" || arg === "--help") {
       usage();
       process.exit(EXIT_OK);
     } else {
       log("loop", "error", `unknown option: ${arg}`);
       usage();
-      process.exit(1);
+      process.exit(EXIT_FATAL);
     }
-  }
-
-  const ints = [
-    ["maxIterations", opts.maxIterations],
-    ["sleepSeconds", opts.sleepSeconds],
-    ["failureBackoffBase", opts.failureBackoffBase],
-    ["failureBackoffMax", opts.failureBackoffMax],
-  ];
-  for (const [name, value] of ints) {
-    if (!Number.isInteger(value) || value < 0) {
-      log("loop", "error", `${name} must be a non-negative integer`);
-      process.exit(1);
-    }
-  }
-  if (opts.fatalStop !== 0 && opts.fatalStop !== 1) {
-    log("loop", "error", "fatalStop must be 0 or 1");
-    process.exit(1);
   }
 
   return opts;
@@ -144,15 +141,16 @@ function releaseLock() {
   }
 }
 
-function writeHeartbeat(status, iteration, failures, detail) {
+function writeHeartbeat(status, detail, phase, extra = {}) {
   writeJson(HEARTBEAT_FILE, {
     runner: "codex-loop",
+    session: SESSION_ID,
     pid: process.pid,
     status,
-    iteration,
-    consecutiveFailures: failures,
+    phase,
     detail,
     updatedAt: nowUtc(),
+    ...extra,
   });
 }
 
@@ -185,15 +183,18 @@ function ensureLoopFiles() {
   return true;
 }
 
+function validatePrdShape() {
+  const parsed = readJsonSafe(PRD_FILE, null);
+  if (!parsed || typeof parsed !== "object") {
+    log("loop", "error", `invalid or malformed PRD JSON: ${PRD_FILE}`);
+    return false;
+  }
+  return true;
+}
+
 function getPrdBranchName() {
   const prd = readJsonSafe(PRD_FILE, {});
   return typeof prd?.branchName === "string" ? prd.branchName : "";
-}
-
-function getCurrentTaskSlug() {
-  const branch = getPrdBranchName();
-  const match = branch.match(/^agent\/growth\/(.+)$/);
-  return match ? match[1] : "";
 }
 
 function markPrdStoriesPassed() {
@@ -222,28 +223,6 @@ function markPrdStoriesPassed() {
   log("loop", "info", "marked PRD stories as passed after completion");
 }
 
-function markPrdStoriesPendingAfterReset() {
-  const prd = readJsonSafe(PRD_FILE, {});
-  if (!Array.isArray(prd?.userStories) || prd.userStories.length === 0) return;
-
-  const updatedStories = prd.userStories.map((story) => {
-    if (!story || typeof story !== "object") return story;
-    return {
-      ...story,
-      passes: false,
-      notes: story.notes
-        ? `${story.notes}; reset_from_main_at=${nowUtc()}`
-        : `reset_from_main_at=${nowUtc()}`,
-    };
-  });
-
-  writeJson(PRD_FILE, {
-    ...prd,
-    userStories: updatedStories,
-  });
-  log("loop", "info", "marked PRD stories as pending after task reset");
-}
-
 function archiveIfBranchChanged() {
   const currentBranch = getPrdBranchName();
   const lastBranch = readText(LAST_BRANCH_FILE, "");
@@ -266,34 +245,6 @@ function archiveIfBranchChanged() {
   if (currentBranch) writeText(LAST_BRANCH_FILE, currentBranch);
 }
 
-async function ensureBacklogItem() {
-  if (!fs.existsSync(BACKLOG_ENSURE_SCRIPT)) {
-    log("loop", "error", `missing backlog ensure script: ${BACKLOG_ENSURE_SCRIPT}`);
-    return false;
-  }
-
-  const { code } = await runProcess("node", [BACKLOG_ENSURE_SCRIPT], { stdio: "inherit" });
-  if (code !== 0) {
-    log("loop", "error", "backlog ensure failed");
-    return false;
-  }
-  return true;
-}
-
-async function ensurePrdSeededFromBacklog() {
-  if (!fs.existsSync(PRD_SEED_SCRIPT)) {
-    log("loop", "error", `missing prd seed script: ${PRD_SEED_SCRIPT}`);
-    return false;
-  }
-
-  const { code } = await runProcess("node", [PRD_SEED_SCRIPT], { stdio: "inherit" });
-  if (code !== 0) {
-    log("loop", "error", "prd seed step failed");
-    return false;
-  }
-  return true;
-}
-
 function runProcess(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, options);
@@ -302,16 +253,54 @@ function runProcess(command, args, options = {}) {
   });
 }
 
-async function runIteration(iteration, opts, failureStreak) {
+function runProcessWithOutput(command, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      ...options,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (d) => {
+      stdout += String(d);
+      process.stdout.write(d);
+    });
+    child.stderr.on("data", (d) => {
+      stderr += String(d);
+      process.stderr.write(d);
+    });
+
+    child.on("error", reject);
+    child.on("close", (code, signal) => resolve({ code: code ?? 1, signal, stdout, stderr }));
+  });
+}
+
+async function ensureBacklogItem() {
+  if (!fs.existsSync(BACKLOG_ENSURE_SCRIPT)) {
+    log("loop", "error", `missing backlog ensure script: ${BACKLOG_ENSURE_SCRIPT}`);
+    return EXIT_FATAL;
+  }
+
+  const { code } = await runProcess("node", [BACKLOG_ENSURE_SCRIPT], { stdio: "inherit" });
+  return code === 0 ? EXIT_OK : EXIT_FATAL;
+}
+
+async function ensurePrdSeededFromBacklog() {
+  if (!fs.existsSync(PRD_SEED_SCRIPT)) {
+    log("loop", "error", `missing prd seed script: ${PRD_SEED_SCRIPT}`);
+    return EXIT_FATAL;
+  }
+
+  const { code } = await runProcess("node", [PRD_SEED_SCRIPT], { stdio: "inherit" });
+  return code === 0 ? EXIT_OK : EXIT_FATAL;
+}
+
+async function runCodexIteration(opts) {
   const prompt = readText(PROMPT_FILE, "");
   const args = ["exec", "--dangerously-bypass-approvals-and-sandbox", "-C", REPO_ROOT];
   if (opts.model) args.push("--model", opts.model);
   args.push(prompt);
-
-  console.log("\n===============================================================");
-  if (opts.maxIterations === 0) console.log(`  Loop Iteration ${iteration} (infinite)`);
-  else console.log(`  Loop Iteration ${iteration} of ${opts.maxIterations}`);
-  console.log("===============================================================");
 
   const outputFile = path.join(os.tmpdir(), `codex-loop-${process.pid}-${Date.now()}.log`);
   const out = fs.openSync(outputFile, "w");
@@ -320,26 +309,29 @@ async function runIteration(iteration, opts, failureStreak) {
   let lastOutputAt = Date.now();
   let killedForStall = false;
   let stallKillTimer = null;
+
   const heartbeatTimer = setInterval(() => {
-    writeHeartbeat("running", iteration, failureStreak, "codex-running");
-    if (CODEX_STALL_TIMEOUT_SECONDS > 0) {
-      const idleMs = Date.now() - lastOutputAt;
-      if (idleMs > CODEX_STALL_TIMEOUT_SECONDS * 1000 && !killedForStall) {
-        killedForStall = true;
-        log("loop", "error", `codex appears stalled (no output for ${Math.floor(idleMs / 1000)}s), terminating`);
+    writeHeartbeat("running", "codex-running", "run-codex", {
+      lastOutputAt: new Date(lastOutputAt).toISOString(),
+    });
+
+    if (CODEX_STALL_TIMEOUT_SECONDS <= 0) return;
+    const idleMs = Date.now() - lastOutputAt;
+    if (idleMs > CODEX_STALL_TIMEOUT_SECONDS * 1000 && !killedForStall) {
+      killedForStall = true;
+      log("loop", "error", `codex appears stalled (no output for ${Math.floor(idleMs / 1000)}s), terminating`);
+      try {
+        child.kill("SIGTERM");
+      } catch {
+        // no-op
+      }
+      stallKillTimer = setTimeout(() => {
         try {
-          child.kill("SIGTERM");
+          child.kill("SIGKILL");
         } catch {
           // no-op
         }
-        stallKillTimer = setTimeout(() => {
-          try {
-            child.kill("SIGKILL");
-          } catch {
-            // no-op
-          }
-        }, CODEX_KILL_GRACE_MS);
-      }
+      }, CODEX_KILL_GRACE_MS);
     }
   }, Math.max(1, HEARTBEAT_INTERVAL_SECONDS) * 1000);
 
@@ -348,6 +340,7 @@ async function runIteration(iteration, opts, failureStreak) {
     process.stdout.write(d);
     fs.writeSync(out, d);
   });
+
   child.stderr.on("data", (d) => {
     lastOutputAt = Date.now();
     process.stderr.write(d);
@@ -358,14 +351,15 @@ async function runIteration(iteration, opts, failureStreak) {
     child.on("error", reject);
     child.on("close", (code) => resolve({ code: code ?? 1 }));
   });
+
   clearInterval(heartbeatTimer);
   if (stallKillTimer) clearTimeout(stallKillTimer);
   fs.closeSync(out);
 
-  const tail = readText(outputFile, "").split(/\r?\n/).slice(-120);
+  const tailText = readText(outputFile, "").split(/\r?\n/).slice(-120).join("\n");
   fs.rmSync(outputFile, { force: true });
 
-  if (opts.completionToken && tail.includes(opts.completionToken)) {
+  if (opts.completionToken && tailText.includes(opts.completionToken)) {
     log("loop", "info", "completion token found");
     return EXIT_COMPLETE;
   }
@@ -383,62 +377,169 @@ async function runIteration(iteration, opts, failureStreak) {
   return EXIT_OK;
 }
 
-function computeFailureBackoff(failures, opts) {
-  let delay = opts.failureBackoffBase;
-  for (let i = 1; i < failures; i += 1) {
-    delay *= 2;
-    if (delay >= opts.failureBackoffMax) {
-      delay = opts.failureBackoffMax;
-      break;
+function readPromotionController() {
+  return readJsonSafe(PROMOTION_CONTROLLER_FILE, {
+    state: "closed",
+    consecutiveFailures: 0,
+    openedAt: "",
+    quarantineUntil: "",
+    lastFailureClass: "",
+    lastErrorSignature: "",
+    lastTask: "",
+    updatedAt: "",
+  });
+}
+
+function writePromotionController(nextState) {
+  writeJson(PROMOTION_CONTROLLER_FILE, {
+    ...readPromotionController(),
+    ...nextState,
+    updatedAt: nowUtc(),
+  });
+}
+
+function computeErrorSignature(text) {
+  const normalized = String(text || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 400);
+  return normalized || "unknown";
+}
+
+function classifyAutoPromoteFailure(exitCode, combinedOutput) {
+  const out = String(combinedOutput || "");
+  if (/ERR_MODULE_NOT_FOUND|MODULE_NOT_FOUND|Cannot find module/i.test(out)) return "config-fatal";
+  if (/missing auto-promote script|missing required file|missing .* script/i.test(out)) return "config-fatal";
+  if (/fatal: required branch not found|fatal: target branch not found/i.test(out)) return "policy-terminal";
+  if (/fatal: worktree must be clean before merge|fatal: qa gate failed|fatal: merge failed/i.test(out)) return "policy-terminal";
+  if (exitCode === EXIT_FATAL) return "policy-terminal";
+  if (exitCode === EXIT_RETRYABLE_FAILURE) return "retryable";
+  return "unknown";
+}
+
+function preflightAutoPromoteFiles() {
+  const requiredFiles = [AUTO_PROMOTE_SCRIPT, POLICY_FILE];
+  for (const file of requiredFiles) {
+    if (!fs.existsSync(file)) {
+      return {
+        ok: false,
+        reason: `missing required file: ${relRepo(file)}`,
+      };
+    }
+    if (!isTrackedByGit(file)) {
+      return {
+        ok: false,
+        reason: `runtime file must be git-tracked: ${relRepo(file)}`,
+      };
     }
   }
-  return Math.min(delay, opts.failureBackoffMax);
+  return { ok: true, reason: "" };
 }
 
 async function maybeAutoPromote(opts) {
   if (!opts.autoPromote) return EXIT_OK;
+
   const currentBranch = getPrdBranchName();
   const match = currentBranch.match(/^agent\/growth\/(.+)$/);
   if (!match) {
     log("loop", "error", `auto-promote requires branch format agent/growth/<task>. current: ${currentBranch}`);
-    return EXIT_RETRYABLE_FAILURE;
+    return EXIT_FATAL;
   }
-
   const taskSlug = match[1];
+  const breaker = readPromotionController();
+  const nowMs = Date.now();
+  const quarantineUntilMs = breaker.quarantineUntil ? Date.parse(breaker.quarantineUntil) : NaN;
+
+  if (breaker.state === "open" && Number.isFinite(quarantineUntilMs) && nowMs < quarantineUntilMs) {
+    const retryAt = new Date(quarantineUntilMs).toISOString();
+    log("loop", "error", `auto-promote circuit is OPEN for task=${taskSlug} until ${retryAt}; quarantined`);
+    return EXIT_FATAL;
+  }
+
+  if (breaker.state === "open" && Number.isFinite(quarantineUntilMs) && nowMs >= quarantineUntilMs) {
+    writePromotionController({
+      state: "half-open",
+      openedAt: "",
+      quarantineUntil: "",
+      lastTask: taskSlug,
+    });
+  }
+
+  const preflight = preflightAutoPromoteFiles();
+  if (!preflight.ok) {
+    const signature = computeErrorSignature(preflight.reason);
+    const until = new Date(Date.now() + Math.max(1, PROMOTION_BREAKER_OPEN_SECONDS) * 1000).toISOString();
+    writePromotionController({
+      state: "open",
+      consecutiveFailures: Math.max(1, Number(breaker.consecutiveFailures || 0)),
+      openedAt: nowUtc(),
+      quarantineUntil: until,
+      lastFailureClass: "config-fatal",
+      lastErrorSignature: signature,
+      lastTask: taskSlug,
+    });
+    log("loop", "error", `auto-promote preflight failed: ${preflight.reason}; breaker opened until ${until}`);
+    return EXIT_FATAL;
+  }
+
   log("loop", "info", `auto-promote enabled. task=${taskSlug}`);
-  const script = path.join(REPO_ROOT, "scripts/worktree/auto-promote.mjs");
-  const { code } = await runProcess("node", [script, "growth", taskSlug, "main"], { cwd: REPO_ROOT, stdio: "inherit" });
-  if (code !== 0) {
-    log("loop", "error", "auto-promote failed");
-    return EXIT_RETRYABLE_FAILURE;
-  }
-  return EXIT_OK;
-}
+  const { code, stdout, stderr } = await runProcessWithOutput("node", [AUTO_PROMOTE_SCRIPT, "growth", taskSlug, "main"], {
+    cwd: REPO_ROOT,
+  });
+  const combinedOutput = `${stdout || ""}\n${stderr || ""}`;
+  const failureClass = classifyAutoPromoteFailure(code, combinedOutput);
 
-async function resetTaskBranchesForRetry(taskSlug) {
-  if (!taskSlug) return false;
-  if (!fs.existsSync(TASK_RESET_SCRIPT)) {
-    log("loop", "error", `missing task reset script: ${TASK_RESET_SCRIPT}`);
-    return false;
-  }
-
-  log("loop", "warn", `auto-promote failed repeatedly; resetting task branches for retry: ${taskSlug}`);
-  const { code } = await runProcess("node", [TASK_RESET_SCRIPT, taskSlug], { cwd: REPO_ROOT, stdio: "inherit" });
-  if (code !== 0) {
-    log("loop", "error", `task branch reset failed for ${taskSlug}`);
-    return false;
+  if (code === EXIT_OK) {
+    writePromotionController({
+      state: "closed",
+      consecutiveFailures: 0,
+      openedAt: "",
+      quarantineUntil: "",
+      lastFailureClass: "",
+      lastErrorSignature: "",
+      lastTask: taskSlug,
+    });
+    return EXIT_OK;
   }
 
-  markPrdStoriesPendingAfterReset();
-  log("loop", "info", `task branch reset completed for ${taskSlug}`);
-  return true;
+  const nextFailures = Number(breaker.consecutiveFailures || 0) + 1;
+  const signature = computeErrorSignature(combinedOutput);
+  const shouldOpen =
+    failureClass === "config-fatal" ||
+    failureClass === "policy-terminal" ||
+    nextFailures >= Math.max(1, PROMOTION_BREAKER_THRESHOLD);
+
+  if (shouldOpen) {
+    const until = new Date(Date.now() + Math.max(1, PROMOTION_BREAKER_OPEN_SECONDS) * 1000).toISOString();
+    writePromotionController({
+      state: "open",
+      consecutiveFailures: nextFailures,
+      openedAt: nowUtc(),
+      quarantineUntil: until,
+      lastFailureClass: failureClass,
+      lastErrorSignature: signature,
+      lastTask: taskSlug,
+    });
+    log("loop", "error", `auto-promote failed (${failureClass}, exit=${code}); breaker opened until ${until}`);
+    return EXIT_FATAL;
+  }
+
+  writePromotionController({
+    state: "closed",
+    consecutiveFailures: nextFailures,
+    lastFailureClass: failureClass,
+    lastErrorSignature: signature,
+    lastTask: taskSlug,
+  });
+  log("loop", "error", `auto-promote failed (${failureClass}, exit=${code}); retry allowed`);
+  return EXIT_RETRYABLE_FAILURE;
 }
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
 
   if (!acquireLock()) {
-    writeHeartbeat("fatal", 0, 0, "lock-unavailable");
+    writeHeartbeat("fatal", "lock-unavailable", "boot");
     process.exit(EXIT_FATAL);
   }
 
@@ -446,85 +547,55 @@ async function main() {
   process.on("SIGINT", () => process.exit(130));
   process.on("SIGTERM", () => process.exit(143));
 
-  writeHeartbeat("starting", 0, 0, "boot");
+  writeHeartbeat("starting", "boot", "boot");
 
   if (!ensureLoopFiles()) {
-    writeHeartbeat("fatal", 0, 0, "ensure-loop-files-failed");
+    writeHeartbeat("fatal", "ensure-loop-files-failed", "boot");
+    process.exit(EXIT_FATAL);
+  }
+  if (!validatePrdShape()) {
+    writeHeartbeat("fatal", "invalid-prd-json", "boot");
     process.exit(EXIT_FATAL);
   }
 
   archiveIfBranchChanged();
 
-  let i = 1;
-  let failureStreak = 0;
-
-  while (true) {
-    writeHeartbeat("running", i, failureStreak, "ensure-backlog");
-    if (!(await ensureBacklogItem())) {
-      writeHeartbeat("fatal", i, failureStreak, "backlog-ensure-failed");
-      process.exit(EXIT_FATAL);
-    }
-    if (!(await ensurePrdSeededFromBacklog())) {
-      writeHeartbeat("fatal", i, failureStreak, "prd-seed-failed");
-      process.exit(EXIT_FATAL);
-    }
-
-    const result = await runIteration(i, opts, failureStreak);
-
-    if (result === EXIT_COMPLETE) {
-      writeHeartbeat("complete", i, failureStreak, "completion-token");
-      const promoteResult = await maybeAutoPromote(opts);
-      if (promoteResult === EXIT_RETRYABLE_FAILURE) {
-        failureStreak += 1;
-        writeHeartbeat("retrying", i, failureStreak, "auto-promote-failed");
-        if (
-          Number.isInteger(RESET_AFTER_AUTOPROMOTE_FAILURES) &&
-          RESET_AFTER_AUTOPROMOTE_FAILURES > 0 &&
-          failureStreak >= RESET_AFTER_AUTOPROMOTE_FAILURES
-        ) {
-          const taskSlug = getCurrentTaskSlug();
-          const resetOk = await resetTaskBranchesForRetry(taskSlug);
-          if (resetOk) {
-            failureStreak = 0;
-            writeHeartbeat("running", i, failureStreak, "task-reset-complete");
-            await sleep(Math.max(1, opts.sleepSeconds) * 1000);
-            continue;
-          }
-        }
-        const delay = computeFailureBackoff(failureStreak, opts);
-        log("loop", "warn", `auto-promote failure streak=${failureStreak}; sleeping ${delay}s`);
-        await sleep(delay * 1000);
-        continue;
-      }
-      markPrdStoriesPassed();
-      process.exit(EXIT_COMPLETE);
-    }
-
-    if (result === EXIT_RETRYABLE_FAILURE) {
-      failureStreak += 1;
-      writeHeartbeat("retrying", i, failureStreak, "codex-exit-nonzero");
-      if (opts.fatalStop === 1) {
-        log("loop", "error", "fatal-stop enabled; halting after retryable failure");
-        writeHeartbeat("fatal", i, failureStreak, "fatal-stop-enabled");
-        process.exit(EXIT_FATAL);
-      }
-      const delay = computeFailureBackoff(failureStreak, opts);
-      log("loop", "warn", `retryable failure streak=${failureStreak}; sleeping ${delay}s`);
-      await sleep(delay * 1000);
-      continue;
-    }
-
-    if (opts.maxIterations > 0 && i >= opts.maxIterations) {
-      writeHeartbeat("idle", i, failureStreak, "max-iterations-reached");
-      log("loop", "info", `reached max iterations: ${opts.maxIterations}`);
-      process.exit(EXIT_OK);
-    }
-
-    failureStreak = 0;
-    writeHeartbeat("running", i, failureStreak, "sleep");
-    i += 1;
-    await sleep(opts.sleepSeconds * 1000);
+  writeHeartbeat("running", "ensure-backlog", "ensure-backlog");
+  const backlogResult = await ensureBacklogItem();
+  if (backlogResult !== EXIT_OK) {
+    writeHeartbeat("fatal", "backlog-ensure-failed", "ensure-backlog");
+    process.exit(backlogResult);
   }
+
+  writeHeartbeat("running", "seed-prd", "seed-prd");
+  const seedResult = await ensurePrdSeededFromBacklog();
+  if (seedResult !== EXIT_OK) {
+    writeHeartbeat("fatal", "prd-seed-failed", "seed-prd");
+    process.exit(seedResult);
+  }
+
+  writeHeartbeat("running", "run-codex", "run-codex");
+  const result = await runCodexIteration(opts);
+
+  if (result === EXIT_COMPLETE) {
+    writeHeartbeat("complete", "completion-token", "promote");
+    const promoteResult = await maybeAutoPromote(opts);
+    if (promoteResult !== EXIT_OK) {
+      writeHeartbeat(promoteResult === EXIT_FATAL ? "fatal" : "retrying", "auto-promote-failed", "promote");
+      process.exit(promoteResult);
+    }
+    markPrdStoriesPassed();
+    writeHeartbeat("complete", "complete", "done");
+    process.exit(EXIT_COMPLETE);
+  }
+
+  if (result === EXIT_RETRYABLE_FAILURE) {
+    writeHeartbeat("retrying", "codex-exit-nonzero", "run-codex");
+    process.exit(EXIT_RETRYABLE_FAILURE);
+  }
+
+  writeHeartbeat("idle", "iteration-ok", "done");
+  process.exit(EXIT_OK);
 }
 
 main().catch((error) => {

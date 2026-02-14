@@ -21,6 +21,8 @@ const LOG_KEEP_BYTES = Number(process.env.LOOP_LOG_KEEP_BYTES || 2 * 1024 * 1024
 const BASE_DELAY_SECONDS = Number(process.env.LOOP_SUPERVISOR_DELAY_BASE || 3);
 const MAX_DELAY_SECONDS = Number(process.env.LOOP_SUPERVISOR_DELAY_MAX || 30);
 const COMPLETE_DELAY_SECONDS = Number(process.env.LOOP_SUPERVISOR_COMPLETE_DELAY || 10);
+const BACKOFF_JITTER_RATIO = Number(process.env.LOOP_SUPERVISOR_JITTER_RATIO || 0.2);
+const MAX_RETRYABLE_FAILURES = Number(process.env.LOOP_SUPERVISOR_MAX_RETRYABLE_FAILURES || 8);
 const SESSION_ID = process.env.LOOP_SESSION_ID || `${nowUtc().replace(/[:.]/g, "")}-${process.pid}`;
 const SELF_HEAL_FAILURE_THRESHOLD = Number(process.env.LOOP_SELF_HEAL_FAILURE_THRESHOLD || 3);
 const SELF_HEAL_COOLDOWN_SECONDS = Number(process.env.LOOP_SELF_HEAL_COOLDOWN_SECONDS || 30);
@@ -56,7 +58,12 @@ function computeBackoff(streak) {
       break;
     }
   }
-  return Math.min(delay, MAX_DELAY_SECONDS);
+  const capped = Math.min(delay, MAX_DELAY_SECONDS);
+  const ratio = Number.isFinite(BACKOFF_JITTER_RATIO) ? Math.max(0, BACKOFF_JITTER_RATIO) : 0;
+  if (ratio === 0) return capped;
+  const jitterSpan = Math.max(1, Math.floor(capped * ratio));
+  const jitter = Math.floor(Math.random() * (jitterSpan * 2 + 1)) - jitterSpan;
+  return Math.max(1, Math.min(MAX_DELAY_SECONDS, capped + jitter));
 }
 
 function tailFile(filePath, lineCount = 80) {
@@ -182,6 +189,11 @@ async function main() {
       await sleep(COMPLETE_DELAY_SECONDS * 1000);
     } else if (childExit === EXIT_RETRYABLE_FAILURE) {
       failureStreak += 1;
+      if (MAX_RETRYABLE_FAILURES > 0 && failureStreak > MAX_RETRYABLE_FAILURES) {
+        writeState("fatal", failureStreak, 0, "retry-budget-exhausted");
+        slog("error", `retry budget exhausted at streak=${failureStreak}; stopping supervisor`);
+        process.exit(EXIT_FATAL);
+      }
       const delay = computeBackoff(failureStreak);
       writeState("retrying", failureStreak, delay, "retryable-failure");
       slog("warn", `retryable failure streak=${failureStreak}; restart in ${delay}s`);
@@ -207,10 +219,15 @@ async function main() {
       } else {
         slog("warn", "self-heal skipped due to cooldown");
       }
-
-      await sleep(BASE_DELAY_SECONDS * 1000);
+      slog("error", "stopping supervisor due to fatal classification");
+      process.exit(EXIT_FATAL);
     } else {
       failureStreak += 1;
+      if (MAX_RETRYABLE_FAILURES > 0 && failureStreak > MAX_RETRYABLE_FAILURES) {
+        writeState("fatal", failureStreak, 0, "unknown-exit-retry-budget-exhausted");
+        slog("error", `retry budget exhausted on unknown exits at streak=${failureStreak}; stopping supervisor`);
+        process.exit(EXIT_FATAL);
+      }
       const delay = computeBackoff(failureStreak);
       writeState("retrying", failureStreak, delay, `unknown-exit-${childExit}`);
       slog("warn", `unknown child exit=${childExit}; restart in ${delay}s`);

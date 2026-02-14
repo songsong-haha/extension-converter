@@ -55,13 +55,34 @@ npm run loop:bg:stop
 - remote core-team branch 삭제 시도 (실패해도 non-blocking)
 - 이후 supervisor가 backlog 상태를 확인하고 다음 사이클을 자동 시작합니다.
 
+체크포인트 상태는 `loop/auto-promote-state.json`에 기록되며, 재시도 시 이미 완료된 단계는 건너뜁니다.
+정책은 `loop/policy.json`에서 관리합니다.
+루프 외곽 제어 상태는 `loop/promotion-controller.json`에 기록됩니다.
+
+## Failure Taxonomy / Circuit Breaker
+
+- `config-fatal`: runtime 파일 누락/미추적(`MODULE_NOT_FOUND`, `missing required file`)은 즉시 격리(open)됩니다.
+- `policy-terminal`: branch/gate/merge 정책 실패는 즉시 fatal로 중단됩니다.
+- `retryable`: 일시적 push 실패만 제한적으로 재시도합니다.
+
+회로 차단기(circuit breaker) 파라미터:
+
+- `LOOP_PROMOTE_BREAKER_THRESHOLD` (기본 `3`)
+- `LOOP_PROMOTE_BREAKER_OPEN_SECONDS` (기본 `1800`)
+
+open 상태에서는 auto-promote를 호출하지 않고 즉시 중단하여 같은 completion 토큰 재처리를 방지합니다.
+
+## Worktree Hygiene
+
+`auto-promote`는 머지 전용 임시 worktree(`loop/tmp-worktrees/*`)를 사용합니다.
+
+- 시작/종료 시 `git worktree prune`
+- 임시 worktree는 `git worktree remove --force`로 정리
+- promote 동시 실행은 `loop/.promote.lock`으로 차단
+
 ## Notes
 
 - `branchName`은 반드시 `agent/growth/<task-slug>` 형식이어야 합니다.
-- `loop:bg:start:auto-promote` 실행 시 형식이 다르면 루프는 실패하고 중단됩니다.
+- `loop:bg:start:auto-promote` 실행 시 형식이 다르면 루프는 fatal(config)로 분류되어 중단됩니다.
 - macOS에서 `~/Documents` 경로는 `launchd` 권한 문제가 생길 수 있으므로 `loop:bg:*` 사용을 권장합니다.
-- 내부 자동화 스크립트는 모두 Node.js 기준입니다:
-  - `scripts/worktree/start-growth-task.mjs`
-  - `scripts/worktree/start-growth-teams.mjs`
-  - `scripts/worktree/merge-agent.mjs`
-  - `scripts/worktree/auto-promote.mjs`
+- `npm run loop:doctor`는 runtime 필수 파일의 `존재 + git tracked` 계약을 검사합니다.

@@ -109,7 +109,7 @@ Run one iteration:
 pnpm loop:run:once
 ```
 
-Run forever:
+Run supervisor loop (canonical runtime with retry/backoff):
 
 ```bash
 pnpm loop:run
@@ -121,13 +121,7 @@ Run forever + auto promote on completion:
 pnpm loop:run:auto-promote
 ```
 
-Run in background:
-
-```bash
-nohup pnpm loop:run > loop/runner.log 2>&1 &
-```
-
-Background control scripts:
+Background control scripts (supervisor in detached mode):
 
 ```bash
 npm run loop:bg:start
@@ -159,6 +153,20 @@ This performs:
 - remove local core-team worktrees + local branches
 - try remote branch deletion (non-blocking)
 
+Run runtime diagnostics:
+
+```bash
+npm run loop:doctor
+```
+
+The doctor command enforces tracked-only runtime contract for critical loop files.
+
+Packaging manifest check:
+
+```bash
+npm run artifact:check
+```
+
 macOS auto-restart with `launchd`:
 
 ```bash
@@ -183,11 +191,26 @@ In that case, use `loop:bg:*` commands or move the repo to a non-protected path 
 
 Main files:
 
-- `scripts/loop/codex-loop.mjs`: infinite loop runner
-- `scripts/worktree/*.mjs`: worktree + merge/auto-promote automation
+- `scripts/loop/codex-loop.mjs`: single-iteration loop engine (completion detection + exit codes)
+- `scripts/loop/supervisor.mjs`: canonical retry/backoff supervisor with jitter
+- `scripts/worktree/auto-promote.mjs`: idempotent auto-promote workflow (checkpointed)
+- `loop/policy.json`: promotion/branch policy as code
+- `loop/promotion-controller.json`: circuit-breaker state for promote quarantine/open/half-open
 - `loop/prompt.md`: per-iteration agent instructions
 - `loop/prd.json`: active plan (created from example)
 - `loop/progress.txt`: cumulative iteration log
+
+Auto-promote failure classes:
+
+- `config-fatal`: missing/untracked runtime files, module load failures
+- `policy-terminal`: branch policy mismatch, QA gate failure, merge failure
+- `retryable`: transient push failures
+
+Circuit-breaker env:
+
+- `LOOP_PROMOTE_BREAKER_THRESHOLD` (default `3`)
+- `LOOP_PROMOTE_BREAKER_OPEN_SECONDS` (default `1800`)
+- `LOOP_SUPERVISOR_MAX_RETRYABLE_FAILURES` (default `8`)
 
 ## Codex Compact Memory
 

@@ -1,150 +1,122 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 
-const BACKLOG_PATH = process.env.LOOP_BACKLOG_PATH || "docs/GROWTH_BACKLOG.md";
-const REPORT_PATH = process.env.LOOP_REPORT_PATH || "project-report.md";
-const CORE_OWNER = "ceo+growth+qa+analytics+designer";
-const MIN_OPEN_TICKETS = Number(process.env.LOOP_MIN_OPEN_TICKETS || 5);
+const BACKLOG_PATH = "docs/GROWTH_BACKLOG.md";
+const MIN_OPEN_TICKETS = 5;
+const OWNER = "ceo+growth+qa+analytics+designer";
 
-const CANDIDATES = [
+const TEMPLATES = [
   {
-    slug: "trust-error-ux-flow",
-    title: "신뢰 메시지+실패 가이드+재시도/대체포맷 UX 통합 리팩터",
-    metric: "upload_to_conversion_completed rate",
-    estimate: "20-40m",
-    source: "project-report P0: trust and error UX",
-  },
-  {
-    slug: "full-i18n-rollout-ko-en",
+    baseSlug: "full-i18n-rollout-ko-en",
     title: "KO/EN 전역 i18n 인프라 + 핵심 화면 카피/FAQ 일괄 전환",
     metric: "non-ko conversion_completed rate",
     estimate: "25-50m",
     source: "project-report P1: i18n and accessibility",
   },
   {
-    slug: "theme-system-and-dark-mode",
+    baseSlug: "theme-system-and-dark-mode",
     title: "테마 토큰 재정의 + 다크모드 토글 + 랜딩/변환/결과 화면 적용",
     metric: "dark_mode_session conversion_completed rate",
     estimate: "20-40m",
     source: "project-report P1: theme and dark mode",
   },
   {
-    slug: "performance-budget-and-image-optimization",
+    baseSlug: "performance-budget-and-image-optimization",
     title: "LCP/CLS 성능 예산 + 이미지 최적화 + 측정 이벤트 연결",
     metric: "mobile bounce rate",
     estimate: "20-35m",
     source: "project-report P1: performance and UX quality",
   },
   {
-    slug: "ad-placement-post-conversion",
+    baseSlug: "ad-placement-post-conversion",
     title: "광고 노출 위치를 변환 이후 단계로 재배치 + 간섭 최소화",
     metric: "conversion_completed rate",
     estimate: "15-30m",
     source: "project-report P0: ad UX sequencing",
   },
   {
-    slug: "conversion-failure-observability",
+    baseSlug: "conversion-failure-observability",
     title: "실패 원인 분류/재시도 결과 추적 이벤트 + 리포트 파이프라인",
     metric: "conversion_failed_to_retry_success rate",
     estimate: "20-35m",
     source: "project-report P0/P1: observability and recovery",
   },
-  {
-    slug: "format-selection-guidance-experiment",
-    title: "포맷 선택 가이드 인라인 UX + 실험 플래그 + 이벤트 계측",
-    metric: "format_selected rate",
-    estimate: "15-25m",
-    source: "project-report P1: selection friction",
-  },
 ];
 
-function fail(message) {
-  console.error(`[backlog-ensure] ${message}`);
-  process.exit(1);
+function ensureBacklogFile() {
+  if (fs.existsSync(BACKLOG_PATH)) {
+    return;
+  }
+
+  const initial = [
+    "# Growth Micro-Task Backlog",
+    "",
+    "When open backlog is below 5, auto-topup adds tickets from `project-report.md` until it reaches 5.",
+    "Each ticket should require at least 10 minutes of pure implementation work (excluding tests/lint/build).",
+    "",
+  ].join("\n");
+
+  fs.mkdirSync("docs", { recursive: true });
+  fs.writeFileSync(BACKLOG_PATH, initial, "utf8");
 }
 
-function parseExistingSlugs(backlogText) {
-  const slugs = new Set();
-  const matches = backlogText.matchAll(/`([^`]+)`/g);
+function getNextPhaseNumber(content) {
+  const matches = [...content.matchAll(/-phase-(\d+)/g)];
+  if (matches.length === 0) {
+    return 1;
+  }
+
+  let max = 0;
   for (const match of matches) {
-    if (match[1]) slugs.add(match[1].trim());
-  }
-  return slugs;
-}
-
-function countOpenTickets(lines) {
-  return lines.filter((line) => line.trim().startsWith("- [ ]")).length;
-}
-
-function pickNextCandidates(backlogText, count) {
-  const existingSlugs = parseExistingSlugs(backlogText);
-  const selected = [];
-  for (const candidate of CANDIDATES) {
-    if (!existingSlugs.has(candidate.slug)) selected.push(candidate);
-    if (selected.length >= count) break;
-  }
-
-  if (selected.length >= count) return selected;
-
-  const needed = count - selected.length;
-  const base = CANDIDATES.length || 1;
-  let index = 1;
-  while (selected.length < count) {
-    const template = CANDIDATES[(index - 1) % base] || {
-      slug: "growth-maintenance",
-      title: "전환 퍼널 개선 유지보수",
-      metric: "conversion_completed rate",
-      estimate: "15-30m",
-      source: "project-report recurring agenda",
-    };
-    const slug = `${template.slug}-phase-${index}`;
-    if (!existingSlugs.has(slug)) {
-      selected.push({
-        ...template,
-        slug,
-        title: `${template.title} (Phase ${index})`,
-      });
-      existingSlugs.add(slug);
+    const value = Number.parseInt(match[1], 10);
+    if (Number.isFinite(value) && value > max) {
+      max = value;
     }
-    index += 1;
-    if (index > needed + 1000) break;
   }
-
-  return selected;
+  return max + 1;
 }
 
 function main() {
-  if (!fs.existsSync(BACKLOG_PATH)) fail(`missing backlog file: ${BACKLOG_PATH}`);
-  if (!fs.existsSync(REPORT_PATH)) fail(`missing planning source: ${REPORT_PATH}`);
-  if (!Number.isInteger(MIN_OPEN_TICKETS) || MIN_OPEN_TICKETS <= 0) {
-    fail(`invalid LOOP_MIN_OPEN_TICKETS: ${MIN_OPEN_TICKETS}`);
-  }
+  ensureBacklogFile();
 
-  const report = fs.readFileSync(REPORT_PATH, "utf8");
-  if (!report.includes("MVP")) fail("project-report.md does not look valid");
+  const content = fs.readFileSync(BACKLOG_PATH, "utf8");
+  const lines = content.split("\n");
+  const openLines = lines.filter((line) => line.trim().startsWith("- [ ] `"));
+  const openCount = openLines.length;
 
-  const backlogText = fs.readFileSync(BACKLOG_PATH, "utf8");
-  const lines = backlogText.split("\n");
-  const openCount = countOpenTickets(lines);
   if (openCount >= MIN_OPEN_TICKETS) {
     console.log(`[backlog-ensure] open tickets sufficient (${openCount}/${MIN_OPEN_TICKETS}), no action`);
     return;
   }
 
-  const required = MIN_OPEN_TICKETS - openCount;
-  const nextBatch = pickNextCandidates(backlogText, required);
-  if (nextBatch.length === 0) fail("no candidate ticket to add");
-
-  const newLines = nextBatch.map(
-    (next) =>
-      `- [ ] \`${next.slug}\` | ${next.title} | metric: ${next.metric} | owner: ${CORE_OWNER} | estimate: ${next.estimate} | source: ${next.source}`
+  const needed = MIN_OPEN_TICKETS - openCount;
+  const existingSlugs = new Set(
+    [...content.matchAll(/- \[[ x]\] `([^`]+)`/g)].map((match) => match[1]),
   );
-  const sep = backlogText.endsWith("\n") ? "" : "\n";
-  fs.writeFileSync(BACKLOG_PATH, `${backlogText}${sep}${newLines.join("\n")}\n`, "utf8");
+
+  const additions = [];
+  let phase = getNextPhaseNumber(content);
+
+  while (additions.length < needed) {
+    const template = TEMPLATES[(phase - 1) % TEMPLATES.length];
+    const slug = `${template.baseSlug}-phase-${phase}`;
+
+    if (existingSlugs.has(slug)) {
+      phase += 1;
+      continue;
+    }
+
+    const line = `- [ ] \`${slug}\` | ${template.title} (Phase ${phase}) | metric: ${template.metric} | owner: ${OWNER} | estimate: ${template.estimate} | source: ${template.source}`;
+    additions.push({ slug, line });
+    existingSlugs.add(slug);
+    phase += 1;
+  }
+
+  const nextContent = `${content.replace(/\s*$/, "")}\n\n${additions.map((item) => item.line).join("\n")}\n`;
+  fs.writeFileSync(BACKLOG_PATH, nextContent, "utf8");
+
   console.log(
-    `[backlog-ensure] open tickets ${openCount}/${MIN_OPEN_TICKETS}; added ${newLines.length} ticket(s): ${nextBatch
-      .map((x) => x.slug)
-      .join(", ")}`
+    `[backlog-ensure] open tickets ${openCount}/${MIN_OPEN_TICKETS}; added ${additions.length} ticket(s): ${additions.map((item) => item.slug).join(", ")}`,
   );
 }
 

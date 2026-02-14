@@ -1,0 +1,9 @@
+{
+  "targetBranch": "main",
+  "enforceTargetBranch": true,
+  "requiredAdditionalAgents": [
+    "qa"
+  ],
+  "pushSourceBranches": true,
+  "deleteRemoteBranches": true
+}
