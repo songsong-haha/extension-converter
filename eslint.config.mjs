@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Local multi-worktree checkouts for parallel agents:
     ".worktrees/**",
+    "loop/tmp-worktrees/**",
   ]),
 ]);
 

@@ -209,9 +209,17 @@ Auto-promote failure classes:
 Circuit-breaker env:
 
 - `LOOP_PROMOTE_BREAKER_THRESHOLD` (default `3`)
-- `LOOP_PROMOTE_BREAKER_OPEN_SECONDS` (default `1800`)
+- `LOOP_PROMOTE_BREAKER_OPEN_SECONDS` (default `300`)
+- `LOOP_PROMOTE_POLICY_RETRY_MAX` (default `2`, only for `policy-terminal`)
+- `LOOP_PROMOTE_POLICY_RETRY_DELAY_SECONDS` (default `30`)
 - `LOOP_SUPERVISOR_MAX_RETRYABLE_FAILURES` (default `8`)
 - `LOOP_SELF_HEAL_ENABLED` (default disabled, set `1` to enable autonomous code edits)
+
+Local admin server:
+
+- `npm run loop:admin`
+- `http://127.0.0.1:4317`
+- optional auth: set `LOOP_ADMIN_TOKEN`, then send `Authorization: Bearer <token>`
 
 ## Codex Compact Memory
 

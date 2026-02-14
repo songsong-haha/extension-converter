@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 
 const REPO_ROOT = process.cwd();
 const LOOP_DIR = path.join(REPO_ROOT, "loop");
@@ -35,6 +35,13 @@ function createMockCodex(scriptBody) {
   return { dir, bin };
 }
 
+function writeLoopPrdBranch(branchName) {
+  const prdPath = path.join(LOOP_DIR, "prd.json");
+  const prd = JSON.parse(fs.readFileSync(prdPath, "utf8"));
+  prd.branchName = branchName;
+  fs.writeFileSync(prdPath, `${JSON.stringify(prd, null, 2)}\n`, "utf8");
+}
+
 beforeEach(() => {
   stopBg();
 });
@@ -61,6 +68,7 @@ test("package loop scripts reference existing paths", () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "package.json"), "utf8"));
   const scripts = pkg?.scripts || {};
   for (const [name, command] of Object.entries(scripts)) {
+    if (!name.startsWith("loop:")) continue;
     const match = String(command).match(/(?:^|\s)(?:node|bash)\s+(scripts\/[^\s]+)/);
     if (!match) continue;
     const scriptPath = path.join(REPO_ROOT, match[1]);
@@ -160,4 +168,104 @@ test("codex-loop kills stalled codex exec and treats it as retryable", () => {
   );
   assert.equal(result.status, 20);
   assert.match(result.stdout + result.stderr, /codex appears stalled|stalled codex process was killed/);
+});
+
+test("qa-gate lint command ignores loop/tmp-worktrees path", () => {
+  const gateScript = fs.readFileSync(path.join(REPO_ROOT, "scripts/qa/qa-gate.mjs"), "utf8");
+  assert.match(gateScript, /loop\/tmp-worktrees\/\*\*/);
+});
+
+test("codex-loop policy-terminal retries then opens breaker and exits fatal", () => {
+  const mock = createMockCodex("echo '<promise>COMPLETE</promise>'\nexit 0");
+  const autoPromotePath = path.join(REPO_ROOT, "scripts/worktree/auto-promote.mjs");
+  const prdPath = path.join(LOOP_DIR, "prd.json");
+  const promotionPath = path.join(LOOP_DIR, "promotion-controller.json");
+
+  const originalAutoPromote = fs.readFileSync(autoPromotePath, "utf8");
+  const originalPrd = fs.readFileSync(prdPath, "utf8");
+
+  fs.writeFileSync(
+    autoPromotePath,
+    [
+      "#!/usr/bin/env node",
+      "console.error('[auto-promote] fatal: qa gate failed');",
+      "process.exit(30);",
+      "",
+    ].join("\n"),
+    { mode: 0o755 },
+  );
+  writeLoopPrdBranch("agent/growth/policy-retry-test");
+  fs.rmSync(promotionPath, { force: true });
+
+  const env = {
+    ...process.env,
+    PATH: `${mock.dir}:${process.env.PATH}`,
+    LOOP_PROMOTE_POLICY_RETRY_MAX: "2",
+    LOOP_PROMOTE_POLICY_RETRY_DELAY_SECONDS: "1",
+    LOOP_PROMOTE_BREAKER_OPEN_SECONDS: "5",
+  };
+
+  try {
+    const result = run("node", ["scripts/loop/codex-loop.mjs", "--auto-promote", "--sleep-seconds", "0"], { env });
+    assert.equal(result.status, 30);
+    assert.match(result.stdout + result.stderr, /retry 1\/2 in 1s/);
+    assert.match(result.stdout + result.stderr, /retry 2\/2 in 1s/);
+    assert.match(result.stdout + result.stderr, /breaker opened/);
+
+    const breaker = JSON.parse(fs.readFileSync(promotionPath, "utf8"));
+    assert.equal(breaker.state, "open");
+    assert.equal(breaker.lastFailureClass, "policy-terminal");
+    assert.equal(breaker.policyRetryCount, 2);
+  } finally {
+    fs.writeFileSync(autoPromotePath, originalAutoPromote, "utf8");
+    fs.writeFileSync(prdPath, originalPrd, "utf8");
+  }
+});
+
+test("admin retry-promote returns missing-task-slug when prd branch is invalid", async () => {
+  const prdPath = path.join(LOOP_DIR, "prd.json");
+  const promotionPath = path.join(LOOP_DIR, "promotion-controller.json");
+  const originalPrd = fs.readFileSync(prdPath, "utf8");
+  const originalPromotion = fs.existsSync(promotionPath) ? fs.readFileSync(promotionPath, "utf8") : "";
+  const hadPromotion = fs.existsSync(promotionPath);
+  const port = 4399;
+
+  writeLoopPrdBranch("main");
+  fs.rmSync(promotionPath, { force: true });
+
+  const child = spawn("node", ["scripts/loop/admin-server.mjs"], {
+    cwd: REPO_ROOT,
+    env: { ...process.env, LOOP_ADMIN_PORT: String(port) },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("admin server start timeout")), 4000);
+      child.stdout.on("data", (chunk) => {
+        if (String(chunk).includes("listening on")) {
+          clearTimeout(timer);
+          resolve();
+        }
+      });
+      child.on("exit", () => {
+        clearTimeout(timer);
+        reject(new Error("admin server exited early"));
+      });
+    });
+
+    const response = await fetch(`http://127.0.0.1:${port}/api/actions/retry-promote`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{}",
+    });
+    assert.equal(response.status, 400);
+    const body = await response.json();
+    assert.equal(body.error, "missing-task-slug");
+  } finally {
+    child.kill("SIGTERM");
+    fs.writeFileSync(prdPath, originalPrd, "utf8");
+    if (hadPromotion) fs.writeFileSync(promotionPath, originalPromotion, "utf8");
+    else fs.rmSync(promotionPath, { force: true });
+  }
 });

@@ -37,7 +37,9 @@ const HEARTBEAT_INTERVAL_SECONDS = Number(process.env.LOOP_HEARTBEAT_INTERVAL_SE
 const CODEX_STALL_TIMEOUT_SECONDS = Number(process.env.LOOP_CODEX_STALL_TIMEOUT_SECONDS || 1800);
 const CODEX_KILL_GRACE_MS = Number(process.env.LOOP_CODEX_KILL_GRACE_MS || 5000);
 const PROMOTION_BREAKER_THRESHOLD = Number(process.env.LOOP_PROMOTE_BREAKER_THRESHOLD || 3);
-const PROMOTION_BREAKER_OPEN_SECONDS = Number(process.env.LOOP_PROMOTE_BREAKER_OPEN_SECONDS || 1800);
+const PROMOTION_BREAKER_OPEN_SECONDS = Number(process.env.LOOP_PROMOTE_BREAKER_OPEN_SECONDS || 300);
+const PROMOTION_POLICY_RETRY_MAX = Number(process.env.LOOP_PROMOTE_POLICY_RETRY_MAX || 2);
+const PROMOTION_POLICY_RETRY_DELAY_SECONDS = Number(process.env.LOOP_PROMOTE_POLICY_RETRY_DELAY_SECONDS || 30);
 const SESSION_ID = process.env.LOOP_SESSION_ID || `loop-${nowUtc().replace(/[:.]/g, "")}-${process.pid}`;
 
 const EXIT_OK = 0;
@@ -386,6 +388,9 @@ function readPromotionController() {
     lastFailureClass: "",
     lastErrorSignature: "",
     lastTask: "",
+    policyRetryCount: 0,
+    lastFailureAt: "",
+    nextRetryAt: "",
     updatedAt: "",
   });
 }
@@ -396,6 +401,10 @@ function writePromotionController(nextState) {
     ...nextState,
     updatedAt: nowUtc(),
   });
+}
+
+async function sleepMs(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function computeErrorSignature(text) {
@@ -436,6 +445,20 @@ function preflightAutoPromoteFiles() {
   return { ok: true, reason: "" };
 }
 
+async function runAutoPromoteOnce(taskSlug) {
+  const { code, stdout, stderr } = await runProcessWithOutput("node", [AUTO_PROMOTE_SCRIPT, "growth", taskSlug, "main"], {
+    cwd: REPO_ROOT,
+  });
+  const combinedOutput = `${stdout || ""}\n${stderr || ""}`;
+  const failureClass = classifyAutoPromoteFailure(code, combinedOutput);
+  const signature = computeErrorSignature(combinedOutput);
+  return {
+    code,
+    failureClass,
+    signature,
+  };
+}
+
 async function maybeAutoPromote(opts) {
   if (!opts.autoPromote) return EXIT_OK;
 
@@ -446,7 +469,7 @@ async function maybeAutoPromote(opts) {
     return EXIT_FATAL;
   }
   const taskSlug = match[1];
-  const breaker = readPromotionController();
+  let breaker = readPromotionController();
   const nowMs = Date.now();
   const quarantineUntilMs = breaker.quarantineUntil ? Date.parse(breaker.quarantineUntil) : NaN;
 
@@ -461,8 +484,11 @@ async function maybeAutoPromote(opts) {
       state: "half-open",
       openedAt: "",
       quarantineUntil: "",
+      policyRetryCount: 0,
+      nextRetryAt: "",
       lastTask: taskSlug,
     });
+    breaker = readPromotionController();
   }
 
   const preflight = preflightAutoPromoteFiles();
@@ -477,66 +503,104 @@ async function maybeAutoPromote(opts) {
       lastFailureClass: "config-fatal",
       lastErrorSignature: signature,
       lastTask: taskSlug,
+      policyRetryCount: 0,
+      lastFailureAt: nowUtc(),
+      nextRetryAt: "",
     });
     log("loop", "error", `auto-promote preflight failed: ${preflight.reason}; breaker opened until ${until}`);
     return EXIT_FATAL;
   }
 
   log("loop", "info", `auto-promote enabled. task=${taskSlug}`);
-  const { code, stdout, stderr } = await runProcessWithOutput("node", [AUTO_PROMOTE_SCRIPT, "growth", taskSlug, "main"], {
-    cwd: REPO_ROOT,
-  });
-  const combinedOutput = `${stdout || ""}\n${stderr || ""}`;
-  const failureClass = classifyAutoPromoteFailure(code, combinedOutput);
+  const maxPolicyRetries = Math.max(0, PROMOTION_POLICY_RETRY_MAX);
+  const policyRetryDelaySeconds = Math.max(1, PROMOTION_POLICY_RETRY_DELAY_SECONDS);
 
-  if (code === EXIT_OK) {
+  for (let attempt = 0; attempt <= maxPolicyRetries; attempt += 1) {
+    const { code, failureClass, signature } = await runAutoPromoteOnce(taskSlug);
+    if (code === EXIT_OK) {
+      writePromotionController({
+        state: "closed",
+        consecutiveFailures: 0,
+        openedAt: "",
+        quarantineUntil: "",
+        lastFailureClass: "",
+        lastErrorSignature: "",
+        lastTask: taskSlug,
+        policyRetryCount: 0,
+        lastFailureAt: "",
+        nextRetryAt: "",
+      });
+      return EXIT_OK;
+    }
+
+    const nextFailures = Number(breaker.consecutiveFailures || 0) + 1;
+    breaker = {
+      ...breaker,
+      consecutiveFailures: nextFailures,
+    };
+
+    if (failureClass === "policy-terminal" && attempt < maxPolicyRetries) {
+      const retryCount = attempt + 1;
+      const nextRetryAtIso = new Date(Date.now() + policyRetryDelaySeconds * 1000).toISOString();
+      writePromotionController({
+        state: "half-open",
+        consecutiveFailures: nextFailures,
+        openedAt: "",
+        quarantineUntil: "",
+        lastFailureClass: failureClass,
+        lastErrorSignature: signature,
+        lastTask: taskSlug,
+        policyRetryCount: retryCount,
+        lastFailureAt: nowUtc(),
+        nextRetryAt: nextRetryAtIso,
+      });
+      log(
+        "loop",
+        "warn",
+        `auto-promote failed (${failureClass}, exit=${code}); retry ${retryCount}/${maxPolicyRetries} in ${policyRetryDelaySeconds}s`,
+      );
+      await sleepMs(policyRetryDelaySeconds * 1000);
+      continue;
+    }
+
+    const shouldOpen =
+      failureClass === "config-fatal" ||
+      failureClass === "policy-terminal" ||
+      nextFailures >= Math.max(1, PROMOTION_BREAKER_THRESHOLD);
+
+    if (shouldOpen) {
+      const until = new Date(Date.now() + Math.max(1, PROMOTION_BREAKER_OPEN_SECONDS) * 1000).toISOString();
+      writePromotionController({
+        state: "open",
+        consecutiveFailures: nextFailures,
+        openedAt: nowUtc(),
+        quarantineUntil: until,
+        lastFailureClass: failureClass,
+        lastErrorSignature: signature,
+        lastTask: taskSlug,
+        policyRetryCount: failureClass === "policy-terminal" ? maxPolicyRetries : 0,
+        lastFailureAt: nowUtc(),
+        nextRetryAt: "",
+      });
+      log("loop", "error", `auto-promote failed (${failureClass}, exit=${code}); breaker opened until ${until}`);
+      return EXIT_FATAL;
+    }
+
     writePromotionController({
       state: "closed",
-      consecutiveFailures: 0,
-      openedAt: "",
-      quarantineUntil: "",
-      lastFailureClass: "",
-      lastErrorSignature: "",
-      lastTask: taskSlug,
-    });
-    return EXIT_OK;
-  }
-
-  const nextFailures = Number(breaker.consecutiveFailures || 0) + 1;
-  const signature = computeErrorSignature(combinedOutput);
-  const shouldOpen =
-    failureClass === "config-fatal" ||
-    failureClass === "policy-terminal" ||
-    nextFailures >= Math.max(1, PROMOTION_BREAKER_THRESHOLD);
-
-  if (shouldOpen) {
-    const until = new Date(Date.now() + Math.max(1, PROMOTION_BREAKER_OPEN_SECONDS) * 1000).toISOString();
-    writePromotionController({
-      state: "open",
       consecutiveFailures: nextFailures,
-      openedAt: nowUtc(),
-      quarantineUntil: until,
       lastFailureClass: failureClass,
       lastErrorSignature: signature,
       lastTask: taskSlug,
+      policyRetryCount: 0,
+      lastFailureAt: nowUtc(),
+      nextRetryAt: "",
     });
-    if (failureClass === "policy-terminal") {
-      log("loop", "warn", `auto-promote failed (${failureClass}, exit=${code}); breaker opened until ${until}; continuing loop`);
-      return EXIT_OK;
-    }
-    log("loop", "error", `auto-promote failed (${failureClass}, exit=${code}); breaker opened until ${until}`);
-    return EXIT_FATAL;
+    log("loop", "error", `auto-promote failed (${failureClass}, exit=${code}); retry allowed`);
+    return EXIT_RETRYABLE_FAILURE;
   }
 
-  writePromotionController({
-    state: "closed",
-    consecutiveFailures: nextFailures,
-    lastFailureClass: failureClass,
-    lastErrorSignature: signature,
-    lastTask: taskSlug,
-  });
-  log("loop", "error", `auto-promote failed (${failureClass}, exit=${code}); retry allowed`);
-  return EXIT_RETRYABLE_FAILURE;
+  return EXIT_FATAL;
 }
 
 async function main() {

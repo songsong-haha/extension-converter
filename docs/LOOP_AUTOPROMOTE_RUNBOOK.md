@@ -62,15 +62,28 @@ npm run loop:bg:stop
 ## Failure Taxonomy / Circuit Breaker
 
 - `config-fatal`: runtime 파일 누락/미추적(`MODULE_NOT_FOUND`, `missing required file`)은 즉시 격리(open)됩니다.
-- `policy-terminal`: branch/gate/merge 정책 실패는 즉시 fatal로 중단됩니다.
+- `policy-terminal`: branch/gate/merge 정책 실패는 기본 `2회`(`30초` 간격) 제한 재시도 후 격리(open) + fatal 중단됩니다.
 - `retryable`: 일시적 push 실패만 제한적으로 재시도합니다.
 
 회로 차단기(circuit breaker) 파라미터:
 
 - `LOOP_PROMOTE_BREAKER_THRESHOLD` (기본 `3`)
-- `LOOP_PROMOTE_BREAKER_OPEN_SECONDS` (기본 `1800`)
+- `LOOP_PROMOTE_BREAKER_OPEN_SECONDS` (기본 `300`)
+- `LOOP_PROMOTE_POLICY_RETRY_MAX` (기본 `2`)
+- `LOOP_PROMOTE_POLICY_RETRY_DELAY_SECONDS` (기본 `30`)
 
 open 상태에서는 auto-promote를 호출하지 않고 즉시 중단하여 같은 completion 토큰 재처리를 방지합니다.
+`promotion-controller.json`에는 `policyRetryCount`, `lastFailureAt`, `nextRetryAt`가 추가로 기록됩니다.
+
+## Local Admin Actions
+
+`npm run loop:admin`으로 로컬 대시보드를 실행하면 아래 복구 액션을 사용할 수 있습니다.
+
+- `Reset Breaker`: 브레이커 상태 초기화
+- `Retry Promote`: breaker reset -> `loop:doctor` -> 단발 auto-promote 실행
+- `Stop Loop`: `loop:bg:stop` 호출
+
+보안이 필요하면 `LOOP_ADMIN_TOKEN`을 설정해 Bearer 토큰 인증을 켭니다.
 
 ## Worktree Hygiene
 
